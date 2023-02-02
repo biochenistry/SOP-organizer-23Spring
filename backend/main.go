@@ -35,7 +35,7 @@ func main() {
 
 	router := chi.NewRouter()
 	router.Use(cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
+		AllowedOrigins:   []string{"http://localhost:3000", "coms-402-sd-11.class.las.iastate.edu"},
 		AllowCredentials: true,
 	}).Handler)
 
