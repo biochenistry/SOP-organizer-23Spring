@@ -7,8 +7,10 @@ import (
 	"net/http"
 	"os"
 
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/data"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/generated"
 	graph "git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/resolvers"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/models"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
@@ -32,54 +34,34 @@ func main() {
 	//router.Use(errors.Middleware())
 	//router.Use(loaders.Middleware)
 
-	// Create services and attach to resolver
-	// categoryService := &data.CategoryService{}
-	// invoiceService := &data.InvoiceService{}
-	// itemService := &data.ItemService{}
-	// locationService := &data.LocationService{}
-	// orderService := &data.OrderService{}
-	// parService := &data.ParService{}
-	// periodService := &data.PeriodService{}
-	// vendorService := &data.VendorService{}
+	// Create services
+	userService := &data.UserService{}
 
-	// services := models.Services{
-	// 	CategoryService: categoryService,
-	// 	InvoiceService:  invoiceService,
-	// 	ItemService:     itemService,
-	// 	LocationService: locationService,
-	// 	OrderService:    orderService,
-	// 	ParService:      parService,
-	// 	PeriodService:   periodService,
-	// 	VendorService:   vendorService,
-	// }
+	services := models.Services{
+		UserService: userService,
+	}
 
-	// categoryService.Services = services
-	// invoiceService.Services = services
-	// itemService.Services = services
-	// locationService.Services = services
-	// orderService.Services = services
-	// parService.Services = services
-	// periodService.Services = services
-	// vendorService.Services = services
+	// Nest services so they can access each other
+	userService.Services = services
 
+	// Attach services to resolvers
 	resolver := &graph.Resolver{
-		// CategoryService: categoryService,
-		// InvoiceService:  invoiceService,
-		// ItemService:     itemService,
-		// LocationService: locationService,
-		// OrderService:    orderService,
-		// ParService:      parService,
-		// PeriodService:   periodService,
-		// VendorService:   vendorService,
+		UserService: userService,
 	}
 
 	config := generated.Config{Resolvers: resolver}
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
-	if os.Getenv("MODE") == "dev" {
-		router.Handle("/playground", playground.Handler("SOP Schema Playground", "/"))
+	if os.Getenv("MODE") == "dev" || true {
+		router.Handle("/playground", playground.Handler("SOP Schema Playground", "/api"))
 	}
-	router.Handle("/", srv)
+	router.Handle("/api", srv)
+
+	// Serve React application
+	router.Handle("/static/*", http.FileServer(http.Dir("./build")))
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./build/index.html")
+	})
 
 	log.Printf("Now listening on port :%s", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))

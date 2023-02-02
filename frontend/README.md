@@ -44,3 +44,9 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Deploy to ISU remote server
+
+Build the application using `npm run build`
+
+Transfer the build directory to the remote server using FileZilla. Make sure it is in the same directory as the Go executable.

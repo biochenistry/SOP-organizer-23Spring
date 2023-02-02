@@ -15,11 +15,8 @@ import (
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 	// TODO - Complete actual implementation
 
-	return &model.User{
-		ID:        "1234",
-		FirstName: "Test",
-		LastName:  "User",
-	}, nil
+	user, err := r.UserService.GetUserById(ctx, "1234")
+	return user, err
 }
 
 // Query returns generated.QueryResolver implementation.
