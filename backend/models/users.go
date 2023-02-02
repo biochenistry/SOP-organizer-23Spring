@@ -8,4 +8,5 @@ import (
 
 type UserService interface {
 	GetUserById(ctx context.Context, id string) (*model.User, error)
+	ChangeUserPassword(ctx context.Context, id string, newPassword string) error
 }

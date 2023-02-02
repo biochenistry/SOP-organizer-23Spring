@@ -8,9 +8,29 @@ import (
 	"context"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/auth"
+	errs "git.las.iastate.edu/SeniorDesignComS/2023spr/sop/errors"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/generated"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/model"
 )
+
+// ChangePassword is the resolver for the changePassword field.
+func (r *mutationResolver) ChangePassword(ctx context.Context, userID string, newPassword string) (bool, error) {
+	authUser := auth.GetUserFromContext(ctx)
+	if authUser == nil {
+		return false, errs.NewUnauthorizedError(ctx, "You must login to change your password.")
+	}
+
+	if authUser.ID != userID && !auth.IsAdmin(authUser) {
+		return false, errs.NewForbiddenError(ctx, "You do not have permission to change other users' passwords.")
+	}
+
+	err := r.UserService.ChangeUserPassword(ctx, userID, newPassword)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
 
 // Me is the resolver for the me field.
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
@@ -27,7 +47,11 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 	return user, nil
 }
 
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

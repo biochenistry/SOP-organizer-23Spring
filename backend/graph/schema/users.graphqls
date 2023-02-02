@@ -2,6 +2,13 @@ extend type Query {
     me: User
 }
 
+extend type Mutation {
+    """
+    Changes the password for the user with the given ID. Admin users can use this to change any user's password. Regular users can only change their own password.
+    """
+    changePassword(userId: ID!, newPassword: String!): Boolean!
+}
+
 type User {
     """
     The ID of the user
