@@ -2,43 +2,96 @@ package db
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"fmt"
 	"log"
+	"net"
 	"os"
+	"time"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
 
 var DB *sql.DB
 
+type ViaSSHDialer struct {
+	client *ssh.Client
+}
+
+func (dialer *ViaSSHDialer) Open(s string) (_ driver.Conn, err error) {
+	return pq.DialOpen(dialer, s)
+}
+
+func (dialer *ViaSSHDialer) Dial(network, address string) (net.Conn, error) {
+	return dialer.client.Dial(network, address)
+}
+
+func (dialer *ViaSSHDialer) DialTimeout(network, address string, timeout time.Duration) (net.Conn, error) {
+	return dialer.client.Dial(network, address)
+}
+
 func InitDB() {
 	if os.Getenv("MODE") == "dev" {
-		// Connect to local development database (user must be running Auth Proxy on local device)
-		// host := "localhost"
-		// port := 3306
-		// user := os.Getenv("DB_USER")
-		// password := ""
-		// dbname := "bs-global-development"
+		sshHost := os.Getenv("SSH_HOST") // SSH Server Hostname/IP
+		sshPort := 22                    // SSH Port
+		sshUser := os.Getenv("SSH_USER") // SSH Username
+		sshPass := os.Getenv("SSH_PASS") // Empty string for no password
+		dbUser := os.Getenv("DB_USER")   // DB username
+		dbPass := os.Getenv("DB_PASS")   // DB Password
+		dbHost := "localhost"            // DB Hostname/IP
+		dbName := "sop_organizer"        // Database name
 
-		// connStr := fmt.Sprintf("host=%s port=%d user=%s "+
-		// 	"password=\"%s\" dbname=%s sslmode=disable",
-		// 	host, port, user, password, dbname)
+		var agentClient agent.Agent
+		conn, err := net.Dial("unix", os.Getenv("SSH_AUTH_SOCK"))
+		if err != nil {
+			log.Panic(err)
+		}
+		agentClient = agent.NewClient(conn)
 
-		// db, err := sql.Open("postgres", connStr)
-		// if err != nil {
-		// 	log.Panic(err)
-		// }
+		// The client configuration with configuration option to use the ssh-agent
+		sshConfig := &ssh.ClientConfig{
+			User:            sshUser,
+			Auth:            []ssh.AuthMethod{},
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		}
 
-		// if err = db.Ping(); err != nil {
-		// 	log.Panic(err)
-		// }
+		// When the agentClient connection succeeded, add them as AuthMethod
+		if agentClient != nil {
+			sshConfig.Auth = append(sshConfig.Auth, ssh.PublicKeysCallback(agentClient.Signers))
+		}
 
-		// db.SetMaxOpenConns(5)
+		// When there's a non empty password add the password AuthMethod
+		if sshPass != "" {
+			sshConfig.Auth = append(sshConfig.Auth, ssh.PasswordCallback(func() (string, error) {
+				return sshPass, nil
+			}))
+		}
 
-		// DB = db
+		// Connect to the SSH Server
+		sshcon, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", sshHost, sshPort), sshConfig)
+		if err != nil {
+			log.Panic(err)
+		}
 
-		// log.Println("Connection to database established")
+		sql.Register("postgres+ssh", &ViaSSHDialer{sshcon})
+
+		db, err := sql.Open("postgres+ssh", fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", dbUser, dbPass, dbHost, dbName))
+		if err != nil {
+			log.Panic(err)
+		}
+
+		if err = db.Ping(); err != nil {
+			log.Panic(err)
+		}
+
+		db.SetMaxOpenConns(5)
+
+		DB = db
+
+		log.Println("Connection to database established")
 	} else {
 		var (
 			dbUser = os.Getenv("DB_USER")
