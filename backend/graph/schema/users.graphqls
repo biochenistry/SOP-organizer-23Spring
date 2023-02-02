@@ -1,0 +1,20 @@
+extend type Query {
+    me: User
+}
+
+type User {
+    """
+    The ID of the user
+    """
+    id: ID!
+
+    """
+    The user's first name
+    """
+    firstName: String!
+
+    """
+    The user's last name
+    """
+    lastName: String!
+}
