@@ -7,16 +7,24 @@ package graph
 import (
 	"context"
 
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/auth"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/generated"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/model"
 )
 
 // Me is the resolver for the me field.
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	// TODO - Complete actual implementation
+	authUser := auth.GetUserFromContext(ctx)
+	if authUser == nil {
+		return nil, nil
+	}
 
-	user, err := r.UserService.GetUserById(ctx, "1234")
-	return user, err
+	user, err := r.UserService.GetUserById(ctx, authUser.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 // Query returns generated.QueryResolver implementation.

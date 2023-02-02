@@ -17,4 +17,19 @@ type User {
     The user's last name
     """
     lastName: String!
+
+    """
+    The user's email address
+    """
+    email: String
+
+    """
+    Indicates whether the user's account has been disabled
+    """
+    isDisabled: Boolean
+
+    """
+    Indicates whether the user is an admin
+    """
+    isAdmin: Boolean
 }

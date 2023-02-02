@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/auth"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/data"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/db"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/errors"
@@ -17,6 +18,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 )
 
 const defaultPort = "8080"
@@ -32,9 +34,13 @@ func main() {
 	db.InitDB()
 
 	router := chi.NewRouter()
-	//router.Use(auth.Middleware())
+	router.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+	}).Handler)
+
+	router.Use(auth.Middleware())
 	router.Use(errors.Middleware())
-	//router.Use(loaders.Middleware)
 
 	// Create services
 	userService := &data.UserService{}
@@ -54,7 +60,7 @@ func main() {
 	config := generated.Config{Resolvers: resolver}
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
-	if os.Getenv("MODE") == "dev" || true {
+	if os.Getenv("MODE") == "dev" {
 		router.Handle("/playground", playground.Handler("SOP Schema Playground", "/api"))
 	}
 	router.Handle("/api", srv)
