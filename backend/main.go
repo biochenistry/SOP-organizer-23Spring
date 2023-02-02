@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"os"
 
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/data"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/data"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/db"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/errors"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/generated"
 	graph "git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/resolvers"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/models"
@@ -27,11 +29,11 @@ func main() {
 	}
 
 	// Create database connection
-	//db.InitDB()
+	db.InitDB()
 
 	router := chi.NewRouter()
 	//router.Use(auth.Middleware())
-	//router.Use(errors.Middleware())
+	router.Use(errors.Middleware())
 	//router.Use(loaders.Middleware)
 
 	// Create services
