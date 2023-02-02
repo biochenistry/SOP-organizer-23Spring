@@ -1,0 +1,42 @@
+extend type Query {
+    me: User
+}
+
+extend type Mutation {
+    """
+    Changes the password for the user with the given ID. Admin users can use this to change any user's password. Regular users can only change their own password.
+    """
+    changePassword(userId: ID!, newPassword: String!): Boolean!
+}
+
+type User {
+    """
+    The ID of the user
+    """
+    id: ID!
+
+    """
+    The user's first name
+    """
+    firstName: String!
+
+    """
+    The user's last name
+    """
+    lastName: String!
+
+    """
+    The user's email address
+    """
+    email: String
+
+    """
+    Indicates whether the user's account has been disabled
+    """
+    isDisabled: Boolean
+
+    """
+    Indicates whether the user is an admin
+    """
+    isAdmin: Boolean
+}
