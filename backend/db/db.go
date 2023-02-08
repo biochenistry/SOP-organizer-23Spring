@@ -43,24 +43,12 @@ func InitDB() {
 		dbHost := "localhost"            // DB Hostname/IP
 		dbName := "sop_organizer"        // Database name
 
-		// var agentClient agent.Agent
-		// conn, err := net.Dial("unix", os.Getenv("SSH_AUTH_SOCK"))
-		// if err != nil {
-		// 	log.Panic(err)
-		// }
-		// agentClient = agent.NewClient(conn)
-
 		// The client configuration with configuration option to use the ssh-agent
 		sshConfig := &ssh.ClientConfig{
 			User:            sshUser,
 			Auth:            []ssh.AuthMethod{},
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		}
-
-		// When the agentClient connection succeeded, add them as AuthMethod
-		// if agentClient != nil {
-		// 	sshConfig.Auth = append(sshConfig.Auth, ssh.PublicKeysCallback(agentClient.Signers))
-		// }
 
 		// When there's a non empty password add the password AuthMethod
 		if sshPass != "" {
