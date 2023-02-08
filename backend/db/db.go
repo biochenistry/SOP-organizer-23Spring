@@ -12,7 +12,6 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/lib/pq"
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/agent"
 )
 
 var DB *sql.DB
@@ -44,12 +43,12 @@ func InitDB() {
 		dbHost := "localhost"            // DB Hostname/IP
 		dbName := "sop_organizer"        // Database name
 
-		var agentClient agent.Agent
-		conn, err := net.Dial("unix", os.Getenv("SSH_AUTH_SOCK"))
-		if err != nil {
-			log.Panic(err)
-		}
-		agentClient = agent.NewClient(conn)
+		// var agentClient agent.Agent
+		// conn, err := net.Dial("unix", os.Getenv("SSH_AUTH_SOCK"))
+		// if err != nil {
+		// 	log.Panic(err)
+		// }
+		// agentClient = agent.NewClient(conn)
 
 		// The client configuration with configuration option to use the ssh-agent
 		sshConfig := &ssh.ClientConfig{
@@ -59,9 +58,9 @@ func InitDB() {
 		}
 
 		// When the agentClient connection succeeded, add them as AuthMethod
-		if agentClient != nil {
-			sshConfig.Auth = append(sshConfig.Auth, ssh.PublicKeysCallback(agentClient.Signers))
-		}
+		// if agentClient != nil {
+		// 	sshConfig.Auth = append(sshConfig.Auth, ssh.PublicKeysCallback(agentClient.Signers))
+		// }
 
 		// When there's a non empty password add the password AuthMethod
 		if sshPass != "" {
