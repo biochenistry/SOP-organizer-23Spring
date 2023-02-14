@@ -31,6 +31,16 @@ func (r *queryResolver) Folders(ctx context.Context) ([]*model.Folder, error) {
 	return folders, nil
 }
 
+// Folder is the resolver for the folder field.
+func (r *queryResolver) Folder(ctx context.Context, id string) (*model.Folder, error) {
+	folder, err := r.FileService.GetFolderById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return folder, nil
+}
+
 // Folder returns generated.FolderResolver implementation.
 func (r *Resolver) Folder() generated.FolderResolver { return &folderResolver{r} }
 

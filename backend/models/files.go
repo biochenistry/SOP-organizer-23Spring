@@ -12,4 +12,7 @@ type FileService interface {
 
 	// Gets a list of all contents in a folder
 	GetFolderContents(ctx context.Context, id string) ([]model.FolderItem, error)
+
+	// Gets a single folder by ID
+	GetFolderById(ctx context.Context, id string) (*model.Folder, error)
 }
