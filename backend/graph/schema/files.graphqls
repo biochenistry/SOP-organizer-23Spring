@@ -3,6 +3,11 @@ extend type Query {
     A list of all folders in the root folder
     """
     folders: [Folder!]!
+
+    """
+    Gets a single folder by ID
+    """
+    folder(id: ID!): Folder
 }
 
 """

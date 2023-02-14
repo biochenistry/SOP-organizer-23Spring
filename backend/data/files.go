@@ -139,3 +139,38 @@ func (s *FileService) GetFolderContents(ctx context.Context, id string) ([]model
 
 	return contents, nil
 }
+
+// Gets a single folder by ID
+func (s *FileService) GetFolderById(ctx context.Context, id string) (*model.Folder, error) {
+	// Make a request to Google Drive API to get all items in the root folder
+	requestURL := fmt.Sprintf("https://www.googleapis.com/drive/v2/files/%s?key=%s", id, os.Getenv("GOOGLE_DRIVE_API_KEY"))
+	res, err := http.Get(requestURL)
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving a folder.", err)
+	}
+
+	// Read the response
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving a folder.", err)
+	}
+
+	// Parse the JSON string response into a struct
+	data := &DriveFolderItem{}
+	err = json.Unmarshal([]byte(resBody), &data)
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving a folder.", err)
+	}
+
+	// Make sure the requested resource is actually a folder
+	if data.Type != "application/vnd.google-apps.folder" {
+		return nil, errors.NewNotFoundError(ctx, "Oops! This folder does not exist.")
+	}
+
+	// Map the response into a model.Folder struct
+	folder := s.NewFolderModel()
+	folder.ID = data.ID
+	folder.Name = data.Name
+
+	return folder, nil
+}
