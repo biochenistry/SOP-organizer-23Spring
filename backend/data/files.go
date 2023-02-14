@@ -198,7 +198,7 @@ func (s *FileService) GetFileById(ctx context.Context, id string) (*model.File, 
 	}
 
 	// Make sure the requested resource is actually a file
-	if !strings.Contains(data.Type, "document") {
+	if !strings.Contains(data.Type, "document") && !strings.Contains(data.Type, "pdf") {
 		return nil, errors.NewNotFoundError(ctx, "Oops! This file does not exist.")
 	}
 
