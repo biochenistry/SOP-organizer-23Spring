@@ -174,3 +174,41 @@ func (s *FileService) GetFolderById(ctx context.Context, id string) (*model.Fold
 
 	return folder, nil
 }
+
+// Gets a single file by ID
+func (s *FileService) GetFileById(ctx context.Context, id string) (*model.File, error) {
+	// Make a request to Google Drive API to get all items in the root folder
+	requestURL := fmt.Sprintf("https://www.googleapis.com/drive/v2/files/%s?key=%s", id, os.Getenv("GOOGLE_DRIVE_API_KEY"))
+	res, err := http.Get(requestURL)
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving a file.", err)
+	}
+
+	// Read the response
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving a file.", err)
+	}
+
+	// Parse the JSON string response into a struct
+	data := &DriveFolderItem{}
+	err = json.Unmarshal([]byte(resBody), &data)
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving a file.", err)
+	}
+
+	// Make sure the requested resource is actually a file
+	if !strings.Contains(data.Type, "document") {
+		return nil, errors.NewNotFoundError(ctx, "Oops! This file does not exist.")
+	}
+
+	// Map the response into a model.Folder struct
+	file := s.NewFileModel()
+	file.ID = data.ID
+	file.Name = data.Name
+	file.Created = data.Created
+	file.LastUpdated = data.LastModified
+	file.LastModifiedBy = data.LastModifiedBy
+
+	return file, nil
+}
