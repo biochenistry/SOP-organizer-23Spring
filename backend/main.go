@@ -43,17 +43,21 @@ func main() {
 	router.Use(errors.Middleware())
 
 	// Create services
+	fileService := &data.FileService{}
 	userService := &data.UserService{}
 
 	services := models.Services{
+		FileService: fileService,
 		UserService: userService,
 	}
 
 	// Nest services so they can access each other
+	fileService.Services = services
 	userService.Services = services
 
 	// Attach services to resolvers
 	resolver := &graph.Resolver{
+		FileService: fileService,
 		UserService: userService,
 	}
 

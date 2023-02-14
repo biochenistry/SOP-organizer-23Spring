@@ -1,0 +1,61 @@
+extend type Query {
+    """
+    A list of all folders in the root folder
+    """
+    folders: [Folder!]!
+}
+
+"""
+A folder contains a group of files and nested folders
+"""
+type Folder {
+    """
+    The ID of the folder (from Google Drive)
+    """
+    id: ID!
+
+    """
+    The name of the folder
+    """
+    name: String!
+
+    """
+    A list of files and nested folders
+    """
+    contents: [FolderItem!]! @goField(forceResolver: true)
+}
+
+"""
+An item in a folder
+"""
+union FolderItem = Folder | File
+
+"""
+An SOP file
+"""
+type File {
+    """
+    The ID of the file (from Google Drive)
+    """
+    id: ID!
+
+    """
+    The name of the file
+    """
+    name: String!
+
+    """
+    The timestamp of when the file was created
+    """
+    created: String!
+
+    """
+    The timestamp of when the file was last updated
+    """
+    lastUpdated: String!
+
+    """
+    The name of the user that last modified the file
+    """
+    lastModifiedBy: String!
+}

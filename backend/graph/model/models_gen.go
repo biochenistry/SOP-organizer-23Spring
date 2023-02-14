@@ -2,6 +2,39 @@
 
 package model
 
+// An item in a folder
+type FolderItem interface {
+	IsFolderItem()
+}
+
+// An SOP file
+type File struct {
+	// The ID of the file (from Google Drive)
+	ID string `json:"id"`
+	// The name of the file
+	Name string `json:"name"`
+	// The timestamp of when the file was created
+	Created string `json:"created"`
+	// The timestamp of when the file was last updated
+	LastUpdated string `json:"lastUpdated"`
+	// The name of the user that last modified the file
+	LastModifiedBy string `json:"lastModifiedBy"`
+}
+
+func (File) IsFolderItem() {}
+
+// A folder contains a group of files and nested folders
+type Folder struct {
+	// The ID of the folder (from Google Drive)
+	ID string `json:"id"`
+	// The name of the folder
+	Name string `json:"name"`
+	// A list of files and nested folders
+	Contents []FolderItem `json:"contents"`
+}
+
+func (Folder) IsFolderItem() {}
+
 type User struct {
 	// The ID of the user
 	ID string `json:"id"`
