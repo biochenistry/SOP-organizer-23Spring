@@ -8,6 +8,11 @@ extend type Query {
     Gets a single folder by ID
     """
     folder(id: ID!): Folder
+
+    """
+    Gets a single file by ID
+    """
+    file(id: ID!): File
 }
 
 """

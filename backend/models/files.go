@@ -15,4 +15,7 @@ type FileService interface {
 
 	// Gets a single folder by ID
 	GetFolderById(ctx context.Context, id string) (*model.Folder, error)
+
+	// Gets a single file by ID
+	GetFileById(ctx context.Context, id string) (*model.File, error)
 }

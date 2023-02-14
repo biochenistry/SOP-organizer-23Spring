@@ -41,6 +41,16 @@ func (r *queryResolver) Folder(ctx context.Context, id string) (*model.Folder, e
 	return folder, nil
 }
 
+// File is the resolver for the file field.
+func (r *queryResolver) File(ctx context.Context, id string) (*model.File, error) {
+	file, err := r.FileService.GetFileById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
+}
+
 // Folder returns generated.FolderResolver implementation.
 func (r *Resolver) Folder() generated.FolderResolver { return &folderResolver{r} }
 
