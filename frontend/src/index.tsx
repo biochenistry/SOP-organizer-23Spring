@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
 
+import './index.css'
+
 let url = '/api';
 if (window.location.href.includes('localhost')) {
   url = 'http://localhost:8080/api';

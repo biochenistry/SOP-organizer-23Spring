@@ -1,3 +1,4 @@
+import Header from './components/Header/Header'
 import { gql, useQuery } from "@apollo/client";
 
 const DEMO_QUERY = gql`
@@ -31,6 +32,7 @@ function App() {
 
   return (
     <div className="App">
+      <Header />
       <div>
         <p>{data?.me?.firstName}</p>
         <p>{data?.me?.lastName}</p>

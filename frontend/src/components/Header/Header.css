@@ -1,0 +1,22 @@
+.header-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 30px 10%;
+    border-bottom: 1px solid #000;
+}
+
+.logo {
+    cursor: pointer;
+    margin-right: auto;
+    font-weight: 700;
+}
+
+nav {
+    /* display: inline-block; */
+    padding: 0px 20px;
+}
+
+nav.nav-items > span {
+    margin: 0px 10px;
+}
