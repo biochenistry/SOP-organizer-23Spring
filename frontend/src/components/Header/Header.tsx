@@ -1,9 +1,11 @@
 import './Header.css'
 
+import Heading, { HeadingSize } from '../Heading/Heading';
+
 function Header() {
     return (
       <div className='header-container'>
-        <h1 className='logo'>SOP Organizer</h1>
+        <Heading text={'SOP Organizer'} classes={['logo']} size={HeadingSize.Large} />
         <nav className='nav-items'>
           <span>Welcome, "Name here"</span>
           <span>icon here</span>
@@ -12,4 +14,4 @@ function Header() {
     );
   }
   
-  export default Header;
+export default Header;
