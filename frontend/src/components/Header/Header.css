@@ -3,7 +3,9 @@
     justify-content: flex-end;
     align-items: center;
     padding: 30px 10%;
-    border-bottom: 1px solid #000;
+    border-bottom: 4px solid var(--isu-yellow);
+    background-color: var(--isu-red);
+    color: #FFF;
 }
 
 .logo {
@@ -13,10 +15,14 @@
 }
 
 nav {
-    /* display: inline-block; */
+    display: inline-block;
     padding: 0px 20px;
 }
 
 nav.nav-items > span {
     margin: 0px 10px;
+}
+
+#user-profile {
+    cursor: pointer;
 }
