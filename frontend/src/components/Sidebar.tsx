@@ -25,13 +25,6 @@ const Sidebar: React.FunctionComponent = () => {
 }
 export default Sidebar
 
-const Navbar = styled.div`
-    display: flex;
-    justify-content: start;
-    align-items: center;
-    height: 3.5rem;
-    background-color: #000080;
-`
 const MenuItems = styled.li`
     list-style: none;
     display: flex;
@@ -45,7 +38,7 @@ const MenuItems = styled.li`
 const SidebarMenu = styled.div<{close: boolean}>`
     width: 100px;
     height: 100vh;
-    background-color: #000080;
+    background-color: #c20505;
     position: fixed;
     top: 0;
     left: ${({ close}) => close ? '0' : '-100%'};
