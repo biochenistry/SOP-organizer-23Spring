@@ -1,5 +1,5 @@
 import { gql, useQuery } from "@apollo/client";
-import test from './test';
+import Test from './Test';
 
 const DEMO_QUERY = gql`
 query DemoQuery {
@@ -36,6 +36,7 @@ function App() {
         <p>{data?.me?.firstName}</p>
         <p>{data?.me?.lastName}</p>
         <p>{data?.me?.email}</p>
+        <Test a="This is it" />
         
       </div>
       <a href='https://docs.google.com/document/d/1lG_U11017W_mKUPQLnA_rg_im3rXzSXiTSbM8i9U2s0/edit' target='_blank' rel='noreferrer'>Edit this document</a>
