@@ -1,5 +1,5 @@
-function Test(props: {a: string}){
-    return <h2>Testing testing {props.a}</h2>
+function Test(props: {a?: string}){
+    return <input></input>
 }
 
 export default Test;
