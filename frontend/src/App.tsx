@@ -4,6 +4,9 @@ import Text from './Text' ;
 import TextField, { TextFieldProps } from './TextField';
 import Form from './Form';
 import useForm from './useForm';
+import './FormStory'
+import { Default } from "./FormStory";
+
 
 const DEMO_QUERY = gql`
 query DemoQuery {
@@ -31,12 +34,24 @@ type User = {
   isAdmin: boolean | null;
 }
 
+
+
+
+
+
+
+
+
+
 function App() {
   const { data } = useQuery<DemoQueryResponse>(DEMO_QUERY);
 
   return (
     <div className="App">
       <div>
+        <div>
+          <Default />
+        </div>
         <p>{data?.me?.firstName}</p>
         <p>{data?.me?.lastName}</p>
         <p>{data?.me?.email}</p>
@@ -52,5 +67,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;
