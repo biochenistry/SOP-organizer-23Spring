@@ -1,17 +1,37 @@
 import './Header.css'
 
-import Heading, { HeadingSize } from '../Heading/Heading';
-import Paragraph from '../Paragraph/Paragraph';
+import { FaUserCircle } from 'react-icons/fa'
+import Heading from '../Heading/Heading';
+import View from '../View/View';
 
-function Header() {
+interface HeaderProps {
+  username?: string;
+}
+
+function Header({ ...props }: HeaderProps) {
+    const displayUserInfo = () => {
+      if (props.username) {
+        return `Welcome, ${props.username}`
+      }
+      return 'Please register or login';
+    }
+
     return (
-      <div className='header-container'>
-        <Heading text={'SOP Organizer'} classes={['logo']} size={HeadingSize.Large} />
+      <View 
+        container
+        className='header-container' 
+        justifyContent='flex-end' 
+        alignItems='center'
+        padding='30px 10%'>
+        <Heading 
+          text='SOP Organizer' 
+          className='logo' 
+          renderAs='h1' />
         <nav className='nav-items'>
-          <span>Welcome, NAME HERE</span>
-          <span id='user-profile'>ICON HERE</span>
+          <span>{displayUserInfo()}</span>
+          <FaUserCircle className='user-profile' size={24} />
         </nav>
-      </div>
+      </View>
     );
   }
   

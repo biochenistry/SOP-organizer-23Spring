@@ -1,39 +1,24 @@
-export enum HeadingSize {
-    /**
-     * 20px; Similar to an h3
-     */
-    Small = 20,
-    /**
-     * 24px; Similar to an h2
-     */
-    Medium = 24,
-    /**
-     * 32px; Similar to an h1
-     */
-    Large = 32
-}
+import React from "react";
 
 interface HeaderProps {
     text: string;
-    classes?: string[];
-    size: HeadingSize
+    color?: string;
+    className?: string;
+    renderAs: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+    display?: 'block' | 'inline-block';
 }
 
-function Heading({ text, classes, size }: HeaderProps) {
-    /**
-     * Builds a class name string using the given array of strings
-     * @param classes custom class names to apply to header
-     * @returns empty if none given, otherwise a class string (e.g. 'test-class test-class-two')
-     */
-    function buildClassString(classes?: string[]): string {
-        if (!classes) return '';
-        return classes
-            .reduce(((currentStr, currentClass) => currentStr + currentClass + ' '), '')
-            .trimEnd();
-    }
+function Heading({ ...props }: HeaderProps) {
+    let heading = React.createElement(props.renderAs, { 
+      className: props.className,
+      style: {
+        display: props.display || 'block',
+        color: props.color || 'inherit'
+      }
+    }, props.text);
 
     return (
-      <h1 className={buildClassString(classes)} style={{ fontSize: size }}>{text}</h1>
+      heading
     );
   }
   

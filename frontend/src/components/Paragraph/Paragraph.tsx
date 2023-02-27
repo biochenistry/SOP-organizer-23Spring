@@ -1,11 +1,20 @@
 interface ParagraphProps {
     text: string;
-    color: string;
+    color?: string;
+    size?: number;
+    align?: 'left' | 'center' | 'right';
 }
 
-function Paragraph({ text }: ParagraphProps) {
+function Paragraph({ ...props }: ParagraphProps) {
     return (
-        <p>{text}</p>
+        <p
+          style={{
+            fontSize: props.size || 16,
+            textAlign: props.align || 'left',
+            color: props.color || 'black',
+        }}>
+            {props.text}
+        </p>
     )
 }
 
