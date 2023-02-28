@@ -1,26 +1,68 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { SidebarData } from './SidebarData'
+import { gql, useQuery } from '@apollo/client'
 
+const GET_ALL_FOLDERS = gql`
+query getAllFolders {
+  folders {
+    id
+    name
+    contents {
+      ...on File {
+        id
+        name
+        created
+        lastUpdated
+        lastModifiedBy
+      }
+    }
+  }
+}
+`;
 
+type GetAllFoldersResponse = {
+  folders: Folder[];
+}
+
+type Folder = {
+  id: string;
+  name: string;
+  contents: File[];
+}
+
+type File = {
+  id: string;
+  name: string;
+  created: string;
+  lastUpdated: string;
+  lastModifiedBy: string;
+}
 
 const Sidebar: React.FunctionComponent = () => {
-    const [close, setClose] = useState(true)
-    const showSidebar = () => setClose(!close)
-    return (
-        <>
-        <SidebarMenu close={close}>
-            {SidebarData.map((item, index) => {
-                return (
-                    <MenuItems key={index}>
-                        <span style={{marginLeft: '16px'}}>{item.title}</span>
+  const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
 
-                    </MenuItems>
-                )
-            })}
-        </SidebarMenu>
-        </>
-    )
+  const [close, setClose] = useState(true)
+  const showSidebar = () => setClose(!close)
+  return (
+    <>
+      <SidebarMenu close={close}>
+        {data?.folders.map((folder) => {
+          return (
+            <p>{folder.name}</p>
+          );
+        })}
+
+        {/* {SidebarData.map((item, index) => {
+          return (
+            <MenuItems key={index}>
+              <span style={{ marginLeft: '16px' }}>{item.title}</span>
+            </MenuItems>
+          )
+        })} */}
+      </SidebarMenu>
+    </>
+  )
 }
 export default Sidebar
 
@@ -34,12 +76,9 @@ const MenuItems = styled.li`
     padding: 1rem 0 1.25rem;
 `
 
-const SidebarMenu = styled.div<{close: boolean}>`
-    width: 100px;
-    height: 100vh;
-    background-color: #c20505;
-    position: fixed;
-    top: 0;
-    left: ${({ close}) => close ? '0' : '-100%'};
+const SidebarMenu = styled.div<{ close: boolean }>`
+    width: 250px;
+    background-color: #ffffff;
+    border-right: 1px solid #D7DAD7;
     transition: .6s;
 `
