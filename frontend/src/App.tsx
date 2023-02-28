@@ -1,5 +1,6 @@
 import Header from './components/Header/Header'
 import { gql, useQuery } from "@apollo/client";
+import Sidebar from './components/Sidebar'
 
 const DEMO_QUERY = gql`
 query DemoQuery {
@@ -31,8 +32,9 @@ function App() {
   const { data } = useQuery<DemoQueryResponse>(DEMO_QUERY);
 
   return (
-    <div className="App">
-      <Header />
+    <>
+      <div className="App">
+        <Sidebar />
         <div>
           <p>{data?.me?.firstName}</p>
           <p>{data?.me?.lastName}</p>
@@ -40,7 +42,8 @@ function App() {
         </div>
         <a href='https://docs.google.com/document/d/1lG_U11017W_mKUPQLnA_rg_im3rXzSXiTSbM8i9U2s0/edit' target='_blank' rel='noreferrer'>Edit this document</a>
         <iframe title='sop-document-embed' src='https://docs.google.com/document/d/1lG_U11017W_mKUPQLnA_rg_im3rXzSXiTSbM8i9U2s0/preview' style={{ width: '1000px', height: '100vh', border: 'none' }} />
-    </div>
+      </div >
+    </>
   );
 }
 
