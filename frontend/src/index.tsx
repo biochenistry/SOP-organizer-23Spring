@@ -4,6 +4,8 @@ import App from './App';
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
 import { AuthStateProvider } from './components/Auth';
 
+import './index.css'
+
 let url = '/api';
 if (window.location.href.includes('localhost')) {
   url = 'http://localhost:8080/api';
