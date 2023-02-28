@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"time"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/model"
 )
@@ -14,5 +15,8 @@ type UserService interface {
 	ValidateLogin(ctx context.Context, email string, password string) (*string, error)
 
 	// Creates a new user session token
-	CreateUserSession(ctx context.Context, userId string) (*string, error)
+	CreateUserSession(ctx context.Context, userId string, expires time.Time) (*string, error)
+
+	// Deletes all of a user's sessions
+	DeleteUserSessions(ctx context.Context, userId string) error
 }

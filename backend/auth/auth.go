@@ -36,7 +36,7 @@ type Request struct {
 	ResponseWriter http.ResponseWriter
 }
 
-func (r *Request) SetAuthToken(token string) {
+func (r *Request) SetAuthToken(token string, expires time.Time) {
 	http.SetCookie(r.ResponseWriter, &http.Cookie{
 		Name:     "sop_auth",
 		Value:    token,
@@ -44,6 +44,19 @@ func (r *Request) SetAuthToken(token string) {
 		Secure:   true,
 		Path:     "/",
 		Expires:  time.Now().Add(time.Hour),
+	})
+}
+
+func (r *Request) ClearAuthToken() {
+	expires, _ := time.Parse("Jan 2, 2006", "Jan 1, 1970")
+
+	http.SetCookie(r.ResponseWriter, &http.Cookie{
+		Name:     "sop_auth",
+		Value:    "",
+		HttpOnly: true,
+		Secure:   true,
+		Path:     "/",
+		Expires:  expires,
 	})
 }
 
