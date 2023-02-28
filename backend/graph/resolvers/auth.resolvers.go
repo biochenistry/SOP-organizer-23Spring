@@ -6,9 +6,10 @@ package graph
 
 import (
 	"context"
+	"time"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/auth"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/errors"
+	errs "git.las.iastate.edu/SeniorDesignComS/2023spr/sop/errors"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/generated"
 )
 
@@ -16,7 +17,7 @@ import (
 func (r *mutationResolver) Login(ctx context.Context, email string, password string) (bool, error) {
 	user := auth.GetUserFromContext(ctx)
 	if user != nil {
-		return false, errors.NewForbiddenError(ctx, "You are already logged in.")
+		return false, errs.NewForbiddenError(ctx, "You are already logged in.")
 	}
 
 	userId, err := r.UserService.ValidateLogin(ctx, email, password)
@@ -24,13 +25,33 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 		return false, err
 	}
 
-	token, err := r.UserService.CreateUserSession(ctx, *userId)
+	expires := time.Now().Add(time.Hour)
+
+	token, err := r.UserService.CreateUserSession(ctx, *userId, expires)
 	if err != nil {
 		return false, err
 	}
 
 	request := auth.GetRequestFromContext(ctx)
-	request.SetAuthToken(*token)
+	request.SetAuthToken(*token, expires)
+
+	return true, nil
+}
+
+// Logout is the resolver for the logout field.
+func (r *mutationResolver) Logout(ctx context.Context) (bool, error) {
+	user := auth.GetUserFromContext(ctx)
+	if user == nil {
+		return true, nil
+	}
+
+	err := r.UserService.DeleteUserSessions(ctx, user.ID)
+	if err != nil {
+		return false, err
+	}
+
+	request := auth.GetRequestFromContext(ctx)
+	request.ClearAuthToken()
 
 	return true, nil
 }

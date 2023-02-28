@@ -3,4 +3,9 @@ extend type Mutation {
     Logs in the user and returns a boolean indicating success. The auth token will be set automatically.
     """
     login(email: String!, password: String!): Boolean!
+
+    """
+    Logouts out the current user and clears their auth token.
+    """
+    logout: Boolean!
 }

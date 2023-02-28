@@ -83,15 +83,24 @@ func (s *UserService) ValidateLogin(ctx context.Context, email string, password 
 	return &id, nil
 }
 
-// Creates a new user session token
-func (s *UserService) CreateUserSession(ctx context.Context, userId string) (*string, error) {
+// Creates a new user session token that expires on the given local time
+func (s *UserService) CreateUserSession(ctx context.Context, userId string, expires time.Time) (*string, error) {
 	token := uuid.NewString()
-	expires := time.Now().Add(time.Hour).UTC()
 
-	_, err := db.DB.Exec("INSERT INTO user_session (session_token, user_id, expires) VALUES ($1, $2, $3);", token, userId, expires)
+	_, err := db.DB.Exec("INSERT INTO user_session (session_token, user_id, expires) VALUES ($1, $2, $3);", token, userId, expires.UTC())
 	if err != nil {
 		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while logging you in.", err)
 	}
 
 	return &token, nil
+}
+
+// Deletes all of a user's sessions
+func (s *UserService) DeleteUserSessions(ctx context.Context, userId string) error {
+	_, err := db.DB.Exec("DELETE FROM user_session WHERE user_id = $1;", userId)
+	if err != nil {
+		return errors.NewInternalError(ctx, "An unexpected error occurred while logging you out.", err)
+	}
+
+	return nil
 }
