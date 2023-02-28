@@ -34,6 +34,7 @@ function App() {
   return (
     <>
       <div className="App">
+        <Header />
         <Sidebar />
         <div>
           <p>{data?.me?.firstName}</p>
