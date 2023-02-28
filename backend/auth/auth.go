@@ -12,6 +12,7 @@ import (
 )
 
 var userCtxKey = &contextKey{"user"}
+var requestCtxKey = &contextKey{"request"}
 
 type contextKey struct {
 	name string
@@ -29,6 +30,21 @@ type AuthUser struct {
 func newUserModel() *AuthUser {
 	user := &AuthUser{}
 	return user
+}
+
+type Request struct {
+	ResponseWriter http.ResponseWriter
+}
+
+func (r *Request) SetAuthToken(token string) {
+	http.SetCookie(r.ResponseWriter, &http.Cookie{
+		Name:     "sop_auth",
+		Value:    token,
+		HttpOnly: true,
+		Secure:   true,
+		Path:     "/",
+		Expires:  time.Now().Add(time.Hour),
+	})
 }
 
 func Middleware() func(http.Handler) http.Handler {
@@ -53,12 +69,24 @@ func Middleware() func(http.Handler) http.Handler {
 				}
 			}
 
+			// Add response writer to context
+			request := &Request{
+				ResponseWriter: w,
+			}
+			ctx := context.WithValue(r.Context(), requestCtxKey, request)
+
 			// Add user to request context
-			ctx := context.WithValue(r.Context(), userCtxKey, user)
+			ctx = context.WithValue(ctx, userCtxKey, user)
 			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+// Sets a user's auth token in the response headers
+func GetRequestFromContext(ctx context.Context) *Request {
+	request, _ := ctx.Value(requestCtxKey).(*Request)
+	return request
 }
 
 // GetUserFromContext finds the user from the context. REQUIRES Middleware to have already run.

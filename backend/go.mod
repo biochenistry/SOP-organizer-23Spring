@@ -4,7 +4,9 @@ go 1.19
 
 require (
 	github.com/99designs/gqlgen v0.17.24
+	github.com/dgryski/trifles v0.0.0-20200323201526-dd97f9abfb48
 	github.com/go-chi/chi v1.5.4
+	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.10.7
