@@ -29,7 +29,9 @@ function Header({ ...props }: HeaderProps) {
           renderAs='h1' />
         <nav className='nav-items'>
           <span>{displayUserInfo()}</span>
-          <FaUserCircle className='user-profile' size={24} />
+          <span>
+            <FaUserCircle className='user-profile' size={24} />
+          </span>
         </nav>
       </View>
     );
