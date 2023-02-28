@@ -32,7 +32,7 @@ function App() {
 
   return (
     <div className="App">
-      <Header username={data?.me?.firstName} />
+      <Header />
         <div>
           <p>{data?.me?.firstName}</p>
           <p>{data?.me?.lastName}</p>

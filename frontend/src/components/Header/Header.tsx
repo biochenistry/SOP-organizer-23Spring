@@ -3,18 +3,18 @@ import './Header.css'
 import { FaUserCircle } from 'react-icons/fa'
 import Heading from '../Heading/Heading';
 import View from '../View/View';
+import { useAuthState } from '../Auth';
 
-interface HeaderProps {
-  username?: string;
-}
+function Header() {
+    const { state } = useAuthState();
 
-function Header({ ...props }: HeaderProps) {
     const displayUserInfo = () => {
-      if (props.username) {
-        return `Welcome, ${props.username}`
+      if (state.user) {
+        return `Welcome, ${state.user.firstName}`
       }
       return 'Please register or login';
     }
+
 
     return (
       <View 
