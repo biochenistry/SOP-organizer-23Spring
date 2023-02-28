@@ -9,7 +9,6 @@ import (
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/auth"
 	errs "git.las.iastate.edu/SeniorDesignComS/2023spr/sop/errors"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/generated"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/model"
 )
 
@@ -46,8 +45,3 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 
 	return user, nil
 }
-
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
-
-type mutationResolver struct{ *Resolver }

@@ -3,11 +3,13 @@ package data
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/db"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/errors"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/model"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/models"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -48,4 +50,48 @@ func (s *UserService) ChangeUserPassword(ctx context.Context, id string, newPass
 	}
 
 	return nil
+}
+
+// Verifies that the provided email and password combination is associated with a user. Returns the ID of the associated user if the login information is correct
+func (s *UserService) ValidateLogin(ctx context.Context, email string, password string) (*string, error) {
+	// Lookup the user by their email address
+	row := db.DB.QueryRow("SELECT id, password_hash, is_disabled FROM public.user WHERE email = $1;", email)
+
+	var id string
+	var passwordHash string
+	var isDisabled bool
+	if err := row.Scan(&id, &passwordHash, &isDisabled); err != nil {
+		if err == sql.ErrNoRows {
+			// The user does not exist
+			return nil, errors.NewUnauthorizedError(ctx, "Invalid email or password")
+		}
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while logging you in.", err)
+	}
+
+	// Make sure the password they provided is correct
+	err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password))
+	if err != nil {
+		// Password was invalid
+		return nil, errors.NewUnauthorizedError(ctx, "Incorrect email or password")
+	}
+
+	// If the login info was correct, make sure the account is not disabled
+	if isDisabled {
+		return nil, errors.NewForbiddenError(ctx, "Your account has been disabled.")
+	}
+
+	return &id, nil
+}
+
+// Creates a new user session token
+func (s *UserService) CreateUserSession(ctx context.Context, userId string) (*string, error) {
+	token := uuid.NewString()
+	expires := time.Now().Add(time.Hour).UTC()
+
+	_, err := db.DB.Exec("INSERT INTO user_session (session_token, user_id, expires) VALUES ($1, $2, $3);", token, userId, expires)
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while logging you in.", err)
+	}
+
+	return &token, nil
 }
