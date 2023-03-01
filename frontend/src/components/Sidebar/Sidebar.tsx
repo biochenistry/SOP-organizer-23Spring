@@ -53,7 +53,7 @@ const Sidebar: React.FunctionComponent = () => {
                 {folder.contents.map((file) => {
                     return (
                         <MenuItems>
-                            <span style={{ marginLeft: '24px' }}></span>{file.name}
+                            <span style={{ marginLeft: '24px', fontSize: '12px'}}>{file.name}</span>
                         </MenuItems>
                     )
                 })}
@@ -81,8 +81,8 @@ const MenuItems = styled.li`
     align-items: center;
     justify-content: start;
     width: 100%;
-    height: 70px;
-    padding: 1rem 0 1.25rem;
+    height: 60px;
+    
 `
 
 const SidebarMenu = styled.div<{ close: boolean }>`
