@@ -82,8 +82,7 @@ const MenuItems = styled.li`
     justify-content: start;
     width: 100%;
     height: 60px;
-    
-`
+  `
 
 const SidebarMenu = styled.div<{ close: boolean }>`
     width: 250px;
