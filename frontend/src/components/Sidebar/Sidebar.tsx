@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-
+import { css, StyleSheet} from 'aphrodite'
 import { gql, useQuery } from '@apollo/client'
 
 const GET_ALL_FOLDERS = gql`
@@ -25,10 +25,13 @@ type GetAllFoldersResponse = {
   folders: Folder[];
 }
 
+type FileContentItem = Folder | File;
+
 type Folder = {
   id: string;
   name: string;
-  contents: File[];
+  contents: FileContentItem[];
+  __typename: "Folder";
 }
 
 type File = {
@@ -37,10 +40,18 @@ type File = {
   created: string;
   lastUpdated: string;
   lastModifiedBy: string;
+  __typename: "File";
 }
 
 const Sidebar: React.FunctionComponent = () => {
   const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
+
+  /** 
+   * Below checks if the contents of the folder is a folder or a file
+  if (data?.folders[0].contents[0].__typename === "File") {
+
+  }
+  **/
 
   const [close, setClose] = useState(true)
   const showSidebar = () => setClose(!close)
@@ -52,37 +63,29 @@ const Sidebar: React.FunctionComponent = () => {
             <li>{folder.name}
                 {folder.contents.map((file) => {
                     return (
-                        <MenuItems>
-                            <span style={{ marginLeft: '24px', fontSize: '12px'}}>{file.name}</span>
-                        </MenuItems>
+                        <div className={css(folderContents.loadingContainer)}>
+                          <span style={{ marginLeft: '24px', fontSize: '12px'}}>{file.name}</span>
+                        </div>
                     )
                 })}
                 
             </li>
           );
         })}
-
-        {/* {SidebarData.map((item, index) => {
-          return (
-            <MenuItems key={index}>
-              <span style={{ marginLeft: '16px' }}>{item.title}</span>
-            </MenuItems>
-          )
-        })} */}
       </SidebarMenu>
     </>
   )
 }
 export default Sidebar
 
-const MenuItems = styled.li`
-    list-style: none;
-    display: flex;
-    align-items: center;
-    justify-content: start;
-    width: 100%;
-    height: 60px;
-  `
+const folderContents = StyleSheet.create({
+  loadingContainer: {
+    height: '60px',
+    width: '100%',
+    alignContent: 'center',
+    justifyContent: 'flex-start'
+  },
+});
 
 const SidebarMenu = styled.div<{ close: boolean }>`
     width: 250px;
