@@ -2,6 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
+import { AuthStateProvider } from './components/Auth';
+
+import './index.css'
 
 let url = '/api';
 if (window.location.href.includes('localhost')) {
@@ -20,7 +23,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <ApolloProvider client={client}>
-      <App />
+      <AuthStateProvider>
+        <App />
+      </AuthStateProvider>
     </ApolloProvider>
   </React.StrictMode>
 );
