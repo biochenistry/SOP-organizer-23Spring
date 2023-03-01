@@ -49,7 +49,16 @@ const Sidebar: React.FunctionComponent = () => {
       <SidebarMenu close={close}>
         {data?.folders.map((folder) => {
           return (
-            <p>{folder.name}</p>
+            <p>{folder.name}
+                {folder.contents.map((file) => {
+                    return (
+                        <p>
+                            {file.name}
+                        </p>
+                    )
+                })}
+                
+            </p>
           );
         })}
 
