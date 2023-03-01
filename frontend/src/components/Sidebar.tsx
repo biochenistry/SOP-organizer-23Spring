@@ -49,16 +49,16 @@ const Sidebar: React.FunctionComponent = () => {
       <SidebarMenu close={close}>
         {data?.folders.map((folder) => {
           return (
-            <p>{folder.name}
+            <li>{folder.name}
                 {folder.contents.map((file) => {
                     return (
-                        <p>
-                            {file.name}
-                        </p>
+                        <MenuItems>
+                            <span style={{ marginLeft: '24px' }}></span>{file.name}
+                        </MenuItems>
                     )
                 })}
                 
-            </p>
+            </li>
           );
         })}
 
@@ -81,7 +81,7 @@ const MenuItems = styled.li`
     align-items: center;
     justify-content: start;
     width: 100%;
-    height: 90px;
+    height: 70px;
     padding: 1rem 0 1.25rem;
 `
 
