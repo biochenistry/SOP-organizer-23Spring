@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { SidebarData } from './SidebarData'
+
 import { gql, useQuery } from '@apollo/client'
 
 const GET_ALL_FOLDERS = gql`

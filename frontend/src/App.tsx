@@ -1,6 +1,6 @@
 import Header from './components/Header/Header'
 import { gql, useQuery } from "@apollo/client";
-import Sidebar from './components/Sidebar'
+import Sidebar from './components/Sidebar/Sidebar'
 import View from './components/View/View';
 
 const DEMO_QUERY = gql`
