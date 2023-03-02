@@ -53,11 +53,9 @@ const Sidebar: React.FunctionComponent = () => {
   }
   **/
 
-  const [close, setClose] = useState(true)
-  const showSidebar = () => setClose(!close)
   return (
     <>
-      <SidebarMenu close={close}>
+      <div className={css(sideBarMenu.loadingContainer)}>
         {data?.folders.map((folder) => {
           return (
             <li>{folder.name}
@@ -72,7 +70,8 @@ const Sidebar: React.FunctionComponent = () => {
             </li>
           );
         })}
-      </SidebarMenu>
+      
+      </div>
     </>
   )
 }
@@ -80,16 +79,19 @@ export default Sidebar
 
 const folderContents = StyleSheet.create({
   loadingContainer: {
-    height: '60px',
+    height: '50px',
     width: '100%',
     alignContent: 'center',
     justifyContent: 'flex-start'
   },
 });
 
-const SidebarMenu = styled.div<{ close: boolean }>`
-    width: 250px;
-    background-color: #ffffff;
-    border-right: 1px solid #D7DAD7;
-    transition: .6s;
-`
+const sideBarMenu = StyleSheet.create( {
+  loadingContainer: {
+    width: '250px',
+    backgroundColor: '#ffffff',
+    borderRight: '1px solid #D7DAD7',
+    transition: '.6s',
+    marginLeft: '10px'
+  },
+})
