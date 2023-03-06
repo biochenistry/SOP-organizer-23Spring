@@ -2,37 +2,10 @@ import Header from './components/Header/Header'
 import { gql, useQuery } from "@apollo/client";
 import Sidebar from './components/Sidebar/Sidebar'
 import View from './components/View/View';
-import FileEmbed from './components/FileEmbed/FileEmbed';
-
-const DEMO_QUERY = gql`
-query DemoQuery {
-  me {
-    id
-    firstName
-    lastName
-    email
-    isDisabled
-    isAdmin
-  }
-}
-`;
-
-type DemoQueryResponse = {
-  me: User | null;
-}
-
-type User = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string | null;
-  isDisabled: boolean | null;
-  isAdmin: boolean | null;
-}
+import { Route, Routes } from 'react-router-dom';
+import Login from './pages/Login';
 
 function App() {
-  const { data } = useQuery<DemoQueryResponse>(DEMO_QUERY);
-
   return (
     <>
       <div className="App">
