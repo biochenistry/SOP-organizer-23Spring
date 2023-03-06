@@ -12,13 +12,9 @@ function App() {
         <Header />
         <View container flexDirection='row' height='100%'>
           <Sidebar />
-
-          <Routes>
-            <Route path='/login' element={<Login />} />
-          </Routes>
-          {/* <View padding='32px'>
-            <iframe title='sop-document-embed' src='https://docs.google.com/document/d/1lG_U11017W_mKUPQLnA_rg_im3rXzSXiTSbM8i9U2s0/preview' style={{ width: '1000px', height: '100vh', border: 'none' }} />
-          </View> */}
+          <View padding='32px'>
+            <FileEmbed source='https://docs.google.com/document/d/1lG_U11017W_mKUPQLnA_rg_im3rXzSXiTSbM8i9U2s0/preview' title='sop-document-embed' width='1000px' height='100vh'/>
+          </View>
         </View>
       </div >
     </>
