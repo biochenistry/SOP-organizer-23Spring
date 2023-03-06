@@ -7,6 +7,7 @@ interface ViewProps {
     justifyContent?: | 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'initial' | 'inherit',
     flexWrap?: 'wrap' | 'nowrap' | 'wrap-reverse',
     alignItems?: | 'stretch' | 'center' | 'flex-start' | 'flex-end' | 'baseline' | 'initial' | 'inherit',
+    gap?: string;
     /****** Child Props ********/
     flexGrow?: number,
     flexShrink?: number,
@@ -34,6 +35,7 @@ function View({ ...props }: ViewProps) {
                 flexShrink: props.flexShrink || 1,
                 flexWrap: props.flexWrap || 'nowrap',
                 flex: props.flex || '0 1 auto',
+                gap: props.gap,
                 alignItems: props.alignItems || 'stretch',
                 margin: props.margin || '0',
                 padding: props.padding || '0',
