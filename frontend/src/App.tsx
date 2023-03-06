@@ -5,35 +5,7 @@ import View from './components/View/View';
 import { Route, Routes } from 'react-router-dom';
 import Login from './pages/Login';
 
-const DEMO_QUERY = gql`
-query DemoQuery {
-  me {
-    id
-    firstName
-    lastName
-    email
-    isDisabled
-    isAdmin
-  }
-}
-`;
-
-type DemoQueryResponse = {
-  me: User | null;
-}
-
-type User = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string | null;
-  isDisabled: boolean | null;
-  isAdmin: boolean | null;
-}
-
 function App() {
-  const { data } = useQuery<DemoQueryResponse>(DEMO_QUERY);
-
   return (
     <>
       <div className="App">
