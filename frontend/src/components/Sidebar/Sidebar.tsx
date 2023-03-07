@@ -31,6 +31,7 @@ type Folder = {
   id: string;
   name: string;
   contents: FileContentItem[];
+  childrenVisible: boolean;
   __typename: "Folder";
 }
 
@@ -45,7 +46,8 @@ type File = {
 
 const Sidebar: React.FunctionComponent = () => {
   const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
-
+  const [childVisible, setVis] = useState(false)
+  const showChildren = () => setVis(!childVisible)
   /** 
    * Below checks if the contents of the folder is a folder or a file
   if (data?.folders[0].contents[0].__typename === "File") {
@@ -56,16 +58,21 @@ const Sidebar: React.FunctionComponent = () => {
   return (
     <>
       <div className={css(sideBarMenu.loadingContainer)}>
+        
         {data?.folders.map((folder) => {
+        
           return (
-            <li>{folder.name}
-                {folder.contents.map((file) => {
+            
+            <li onClick={showChildren}>{folder.name}
+                
+                {childVisible && folder.contents.map((file) => {
                     return (
+
                         <div className={css(folderContents.loadingContainer)}>
                           <span style={{ marginLeft: '24px', fontSize: '12px'}}>{file.name}</span>
                         </div>
                     )
-                })}
+                })} 
                 
             </li>
           );
