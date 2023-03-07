@@ -1,34 +1,29 @@
+import { css, StyleSheet } from 'aphrodite';
 import React from 'react';
 
-interface Props {
-    border: string;
-    color: string;
+interface ButtonProps {
     children?: React.ReactNode;
-    height: string;
     onClick: () => void;
-    radius: string;
-    width: string;
 }
 
-const Button: React.FC<Props> = ({
-    border,
-    color,
+const Button: React.FC<ButtonProps> = ({
     children,
-    height,
-    onClick,
-    radius,
-    width
+    onClick
   }) => {
+    const styles = StyleSheet.create({
+      defaultButton: {
+        border: '2px solid #FFFFFF',
+        color: 'red',
+        height: '50px',
+        radius: '0%',
+        width: '200px',
+      },
+    });
+
   return (
     <button
       onClick={onClick}
-      style={{
-        backgroundColor: color,
-        border,
-        borderRadius: radius,
-        height,
-        width
-      }}
+      className={css(styles.defaultButton)}
     >
     {children}
     </button>
