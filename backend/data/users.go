@@ -23,6 +23,7 @@ func (s *UserService) NewUserModel() *model.User {
 	return user
 }
 
+// Creates a new user account in the database
 func (s *UserService) CreateUser(ctx context.Context, firstname string, lastname string, email string, password string, admin bool) (*string, error) {
 	// Generate a new user id
 	id := uuid.NewString()
@@ -47,11 +48,29 @@ func (s *UserService) CreateUser(ctx context.Context, firstname string, lastname
 	return &id, nil
 }
 
-// TODO: Implement
-func (s *UserService) UpdateUser() error {
+// Updates a users account in the database
+func (s *UserService) UpdateUser(ctx context.Context, id string, firstname string, lastname string, email string) error {
+	// Check if the user actually exists
+	_, err := s.GetUserById(ctx, id)
+	if err != nil {
+		// just return the error that was returned
+		return err
+	}
+	// User exists, update user information
+	_, err = db.DB.Exec("UPDATE public.user SET first_name = $2, last_name = $3, email = $4 WHERE id = $1",
+		id,
+		firstname,
+		lastname,
+		email,
+	)
+	if err != nil {
+		return errors.NewInternalError(ctx, "An unexpected error has occurred while updating user account.", err)
+	}
+
 	return nil
 }
 
+// Get's all users from the database
 func (s *UserService) GetAllUsers(ctx context.Context) ([]*model.User, error) {
 	users := []*model.User{}
 	// Get all users from table
@@ -86,6 +105,21 @@ func (s *UserService) GetUserById(ctx context.Context, id string) (*model.User, 
 	}
 
 	return user, nil
+}
+
+// Changes a users role
+func (s *UserService) ChangeUserRole(ctx context.Context, id string, admin bool) error {
+	_, err := s.GetUserById(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.DB.Exec("UPDATE public.user SET is_admin = $2 WHERE id = $1", id, admin)
+	if err != nil {
+		return errors.NewInternalError(ctx, "An unexpected error occurred while updating user role", err)
+	}
+
+	return nil
 }
 
 func (s *UserService) ChangeUserPassword(ctx context.Context, id string, newPassword string) error {
