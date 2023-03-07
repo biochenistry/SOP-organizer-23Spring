@@ -57,7 +57,7 @@ export default function Login() {
     if (state.user) {
       navigate('/');
     }
-  }, [state]);
+  }, [state, navigate]);
 
   return (
     <View container alignItems='center' justifyContent='center' width='100%'>
@@ -66,7 +66,7 @@ export default function Login() {
           <View container gap='16px' flexDirection='column'>
             <TextField label='Email' name='email' type='text' value={loginForm.values.email} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} />
             <TextField label='Password' name='password' type='password' value={loginForm.values.password} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} />
-            {hasError && <Paragraph color={Colors.error}>Invalid email or password</Paragraph>}
+            {hasError && <Paragraph style={{ color: Colors.error }}>Invalid email or password</Paragraph>}
             {/* TODO: Update to button component */}
             <button type='submit'>Login</button>
           </View>
