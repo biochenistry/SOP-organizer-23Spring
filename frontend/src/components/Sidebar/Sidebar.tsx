@@ -32,11 +32,10 @@ export type Folder = {
   id: string;
   name: string;
   contents: FileContentItem[];
-  childrenVisible: boolean;
   __typename: "Folder";
 }
 
-type File = {
+export type File = {
   id: string;
   name: string;
   created: string;
@@ -48,12 +47,6 @@ type File = {
 const Sidebar: React.FunctionComponent = () => {
   const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
 
-  /** 
-   * Below checks if the contents of the folder is a folder or a file
-  if (data?.folders[0].contents[0].__typename === "File") {
-
-  }
-  **/
 
   return (
     <>
