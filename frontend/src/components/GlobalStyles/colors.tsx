@@ -5,7 +5,10 @@ const Colors = {
   neutralActive: '#CACECA',
   textPrimary: '#031203',
   isuYellow: '#F1BE48',
+  isuYellowDark: '#EDAB12',
   isuRed: '#C8102E',
+  isuRedDark: '#B30F2A',
+  isuRedLight: '#fde8eb',
 };
 
 export default Colors;

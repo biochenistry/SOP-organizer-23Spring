@@ -8,6 +8,7 @@ import Paragraph from "../components/Paragraph/Paragraph";
 import { Colors } from "../components/GlobalStyles";
 import { useAuthState } from "../components/Auth";
 import { useNavigate } from "react-router";
+import Button from "../components/Button/Button";
 
 const LOGIN = gql`
 mutation login($email: String!, $password: String!) {
@@ -67,8 +68,7 @@ export default function Login() {
             <TextField label='Email' name='email' type='text' value={loginForm.values.email} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} />
             <TextField label='Password' name='password' type='password' value={loginForm.values.password} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} />
             {hasError && <Paragraph style={{ color: Colors.error }}>Invalid email or password</Paragraph>}
-            {/* TODO: Update to button component */}
-            <button type='submit'>Login</button>
+            <Button label='Login' variant='primary' type='submit' />
           </View>
         </Form>
       </View>

@@ -12,6 +12,7 @@ import { gql, useMutation } from '@apollo/client';
 import { logout } from '../Auth/authStateReducer';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
+import Button from '../Button/Button';
 
 const LOGOUT = gql`
 mutation logout {
@@ -116,7 +117,7 @@ function Header() {
               </div>
             </>
             :
-            <>ADD LOGIN BUTTON</>
+            <Button label='Login' href='/login' variant='secondary' onDark type='submit' style={{ width: '100%' }} />
           }
         </View>
       </View>
