@@ -23,6 +23,54 @@ func (s *UserService) NewUserModel() *model.User {
 	return user
 }
 
+func (s *UserService) CreateUser(ctx context.Context, firstname string, lastname string, email string, password string, admin bool) error {
+	// Create a new password hash
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return errors.NewInternalError(ctx, "An unexpected error occurred while creating new user account.", err)
+	}
+	// Create new user account in db
+	_, err = db.DB.Exec("INSERT INTO public.user (first_name, last_name, email, password_hash, is_admin) VALUES ($1, $2, $3, $4, $5)",
+		firstname,
+		lastname,
+		email,
+		hash,
+		admin,
+	)
+
+	if err != nil {
+		return errors.NewInternalError(ctx, "An unexpected error occurred while creating new user account.", err)
+	}
+
+	return nil
+}
+
+// TODO: Implement
+func (s *UserService) UpdateUser() error {
+	return nil
+}
+
+func (s *UserService) GetAllUsers(ctx context.Context) ([]*model.User, error) {
+	users := []*model.User{}
+	// Get all users from table
+	rows, err := db.DB.Query("SELECT id, first_name, last_name, email, is_disabled, is_admin FROM public.user")
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving all users", err)
+	}
+
+	for rows.Next() {
+		user := s.NewUserModel()
+		// scan row data into user model
+		if err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.IsDisabled, &user.IsAdmin); err != nil {
+			return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving a user's information", err)
+		}
+		// add user to list
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
 func (s *UserService) GetUserById(ctx context.Context, id string) (*model.User, error) {
 	user := s.NewUserModel()
 
