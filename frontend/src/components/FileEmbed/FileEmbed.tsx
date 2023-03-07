@@ -4,11 +4,13 @@ import React from 'react';
 interface FileEmbedProps {
     title: string;
     docId: string;
+    isEditing: boolean;
 }
 
 const FileEmbed: React.FC<FileEmbedProps> = ({
         title,
-        docId
+        docId,
+        isEditing
     }) => {
         const styles = StyleSheet.create({
             defaultFileEmbed: {
@@ -19,10 +21,19 @@ const FileEmbed: React.FC<FileEmbedProps> = ({
         });
 
     // auto append either /edit or /preview depending on whether user has privilege or not
+    if (isEditing) {
+        return (
+            <iframe
+                className={css(styles.defaultFileEmbed)}
+                src={'https://docs.google.com/document/d/' + docId + '/edit'}
+                title={title}
+            />
+        );
+    }
     return (
         <iframe
             className={css(styles.defaultFileEmbed)}
-            src={'https://docs.google.com/document/d/' + docId + '/edit'}
+            src={'https://docs.google.com/document/d/' + docId + '/preview'}
             title={title}
         />
     );
