@@ -25,7 +25,6 @@ const SidebarFolder = (props:folderProps) => {
             
            {collapseContents && props.folder?.contents.map((file, index) => {
                 return (
-                    <Paragraph>
                     <div className={css(folderContents.loadingContainer)} key={index}>
                         { (file?.__typename === "File") ? 
                             <Link to={'/file/' + file.id}>
@@ -39,7 +38,7 @@ const SidebarFolder = (props:folderProps) => {
                             </div>
                         }
                     </div>
-                    </Paragraph>
+                    
                 )
             })}
         </>
