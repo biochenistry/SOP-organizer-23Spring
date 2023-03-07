@@ -15,7 +15,6 @@ function Header() {
       return 'Please register or login';
     }
 
-
     return (
       <View 
         container

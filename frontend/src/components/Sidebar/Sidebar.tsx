@@ -1,5 +1,4 @@
-import React, { useState } from 'react'
-import styled from 'styled-components'
+import React from 'react'
 import { css, StyleSheet} from 'aphrodite'
 import { gql, useQuery } from '@apollo/client'
 import SidebarFolder from '../Folder/Folder';
@@ -17,6 +16,32 @@ query getAllFolders {
         lastUpdated
         lastModifiedBy
       }
+      ...on Folder {
+        id
+        name
+        contents {
+          ...on File {
+        id
+        name
+        created
+        lastUpdated
+        lastModifiedBy
+      }
+      ...on Folder {
+        id
+        name
+        contents {
+          ...on File {
+        id
+        name
+        created
+        lastUpdated
+        lastModifiedBy
+      }
+        }
+      }
+        }
+      }
     }
   }
 }
@@ -33,7 +58,7 @@ export type Folder = {
   name: string;
   contents: FileContentItem[];
   __typename: "Folder";
-}
+} | null;
 
 export type File = {
   id: string;
@@ -52,10 +77,10 @@ const Sidebar: React.FunctionComponent = () => {
     <>
       <div className={css(sideBarMenu.loadingContainer)}>
         
-        {data?.folders.map((folder) => {
+        {data?.folders.map((folder, index) => {
         
           return (
-            <div>
+            <div key={index}>
               <SidebarFolder folder={folder}></SidebarFolder>
             </div>
           );
