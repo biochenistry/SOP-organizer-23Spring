@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import { css, StyleSheet} from 'aphrodite'
 import { gql, useQuery } from '@apollo/client'
+import SidebarFolder from '../Folder/Folder';
 
 const GET_ALL_FOLDERS = gql`
 query getAllFolders {
@@ -27,7 +28,7 @@ type GetAllFoldersResponse = {
 
 type FileContentItem = Folder | File;
 
-type Folder = {
+export type Folder = {
   id: string;
   name: string;
   contents: FileContentItem[];
@@ -46,8 +47,7 @@ type File = {
 
 const Sidebar: React.FunctionComponent = () => {
   const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
-  const [childVisible, setVis] = useState(false)
-  const showChildren = () => setVis(!childVisible)
+
   /** 
    * Below checks if the contents of the folder is a folder or a file
   if (data?.folders[0].contents[0].__typename === "File") {
@@ -62,19 +62,7 @@ const Sidebar: React.FunctionComponent = () => {
         {data?.folders.map((folder) => {
         
           return (
-            
-            <li onClick={showChildren}>{folder.name}
-                
-                {childVisible && folder.contents.map((file) => {
-                    return (
-
-                        <div className={css(folderContents.loadingContainer)}>
-                          <span style={{ marginLeft: '24px', fontSize: '12px'}}>{file.name}</span>
-                        </div>
-                    )
-                })} 
-                
-            </li>
+            <SidebarFolder folder={folder}></SidebarFolder>
           );
         })}
       
@@ -84,14 +72,7 @@ const Sidebar: React.FunctionComponent = () => {
 }
 export default Sidebar
 
-const folderContents = StyleSheet.create({
-  loadingContainer: {
-    height: '50px',
-    width: '100%',
-    alignContent: 'center',
-    justifyContent: 'flex-start'
-  },
-});
+
 
 const sideBarMenu = StyleSheet.create( {
   loadingContainer: {
