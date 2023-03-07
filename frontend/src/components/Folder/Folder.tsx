@@ -16,13 +16,6 @@ const SidebarFolder = (props:folderProps) => {
     const [collapseContents, setCollapse] = useState(false)
     const [dropdown, setDropdown] = useState(false)
     const collapse = () => (setCollapse(!collapseContents), setDropdown(!dropdown))
-
-  /** 
-   * Below checks if the contents of the folder is a folder or a file
-  if (data?.folders[0].contents[0].__typename === "File") {
-
-  }
-  **/
     
     return  (
         <>
