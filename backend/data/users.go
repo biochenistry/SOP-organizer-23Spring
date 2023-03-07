@@ -23,13 +23,13 @@ func (s *UserService) NewUserModel() *model.User {
 	return user
 }
 
-func (s *UserService) CreateUser(ctx context.Context, firstname string, lastname string, email string, password string, admin bool) error {
+func (s *UserService) CreateUser(ctx context.Context, firstname string, lastname string, email string, password string, admin bool) (*string, error) {
 	// Generate a new user id
 	id := uuid.NewString()
 	// Create a new password hash
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return errors.NewInternalError(ctx, "An unexpected error occurred while creating new user account.", err)
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while creating new user account.", err)
 	}
 	// Create new user account in db
 	_, err = db.DB.Exec("INSERT INTO public.user (id, first_name, last_name, email, password_hash, is_admin) VALUES ($1, $2, $3, $4, $5, $6)",
@@ -41,10 +41,10 @@ func (s *UserService) CreateUser(ctx context.Context, firstname string, lastname
 		admin,
 	)
 	if err != nil {
-		return errors.NewInternalError(ctx, "An unexpected error occurred while creating new user account.", err)
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while creating new user account.", err)
 	}
 
-	return nil
+	return &id, nil
 }
 
 // TODO: Implement

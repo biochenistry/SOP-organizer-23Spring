@@ -14,6 +14,9 @@ type UserService interface {
 	// Get all users
 	GetAllUsers(ctx context.Context) ([]*model.User, error)
 
+	// Create a new user account
+	CreateUser(ctx context.Context, firstname string, lastname string, email string, password string, admin bool) (*string, error)
+
 	// Change's an existing users password
 	ChangeUserPassword(ctx context.Context, id string, newPassword string) error
 
