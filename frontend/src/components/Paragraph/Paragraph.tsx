@@ -1,5 +1,5 @@
 interface ParagraphProps {
-    text: string;
+    children: React.ReactNode;
     color?: string;
     size?: number;
     align?: 'left' | 'center' | 'right';
@@ -13,7 +13,7 @@ function Paragraph({ ...props }: ParagraphProps) {
             textAlign: props.align || 'left',
             color: props.color || 'black',
         }}>
-            {props.text}
+            {props.children}
         </p>
     )
 }

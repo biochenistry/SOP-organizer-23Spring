@@ -1,10 +1,9 @@
 import { css, StyleSheet } from 'aphrodite';
-import { gql, useLazyQuery } from "@apollo/client";
-import React, { createContext, Dispatch, useEffect } from 'react';
-import { AuthAction, AuthState, authStateReducer, initialState, login, logout, User } from './authStateReducer';
+import React, { createContext, Dispatch, useEffect, useState } from 'react';
+import { AuthAction, AuthState, authStateReducer, initialState, login, logout } from './authStateReducer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 
-const GET_CURRENT_USER = gql`
+const GET_CURRENT_USER = `
 query getCurrentUser {
   me {
     id
@@ -15,10 +14,6 @@ query getCurrentUser {
   }
 }
 `;
-
-type GetCurrentUserResponse = {
-  me: User | null;
-}
 
 type AuthStateContextProps = {
   state: AuthState;
@@ -38,17 +33,43 @@ export const AuthStateContext = createContext<AuthStateContextProps>({} as AuthS
  */
 export const AuthStateProvider = ({ children }: AuthStateProviderProps) => {
   const [state, dispatch] = React.useReducer(authStateReducer, initialState);
-  const [getUser, { data, loading }] = useLazyQuery<GetCurrentUserResponse>(GET_CURRENT_USER);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // A util for making a network request with a JSON response
+  const request = async (method: "GET" | "POST" | "PUT" | "DELETE", path: string, bodyData?: object) => {
+    const response = await fetch(path, (method === "GET") ? undefined : {
+      method,
+      body: JSON.stringify(bodyData),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: 'include',
+    });
+
+    const data = await response.json();
+    return data;
+  };
 
   useEffect(() => {
-    getUser();
-  }, [getUser]);
+    // Determine the appropriate API gateway
+    let gateway = '/api';
+    if (window.location.href.includes('localhost')) {
+      gateway = 'http://localhost:8080/api';
+    }
 
-  if (data?.me && !state.user) {
-    dispatch(login(data.me));
-  } else if (!data?.me && state.user) {
-    dispatch(logout());
-  }
+    request('POST', gateway, {
+      query: GET_CURRENT_USER,
+      operationName: "getCurrentUser",
+    }).then((d) => {
+      if (d.data?.me) {
+        dispatch(login(d.data.me));
+      } else {
+        dispatch(logout());
+      }
+
+      setIsLoading(false);
+    });
+  }, []);
 
   const styles = StyleSheet.create({
     loadingContainer: {
@@ -60,7 +81,7 @@ export const AuthStateProvider = ({ children }: AuthStateProviderProps) => {
     },
   });
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className={css(styles.loadingContainer)}>
         <LoadingSpinner size='large' />
