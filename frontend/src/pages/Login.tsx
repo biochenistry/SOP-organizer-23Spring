@@ -9,6 +9,7 @@ import { Colors } from "../components/GlobalStyles";
 import { useAuthState } from "../components/Auth";
 import { useNavigate } from "react-router";
 import Button from "../components/Button/Button";
+import Heading from "../components/Heading/Heading";
 
 const LOGIN = gql`
 mutation login($email: String!, $password: String!) {
@@ -62,11 +63,17 @@ export default function Login() {
 
   return (
     <View container alignItems='center' justifyContent='center' width='100%'>
-      <View container>
+      <View container flexDirection='column' gap='32px' style={{ minWidth: '400px', maxWidth: '600px' }} >
+        
+        <View container flexDirection='column' gap='8px'>
+          <Heading text='Welcome Back!' renderAs='h1' />
+          <Paragraph style={{ color: Colors.textSecondary }}>Please login to your account to continue.</Paragraph>
+        </View>
+        
         <Form handleSubmit={loginForm.handleSubmit}>
           <View container gap='16px' flexDirection='column'>
-            <TextField label='Email' name='email' type='text' value={loginForm.values.email} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} />
-            <TextField label='Password' name='password' type='password' value={loginForm.values.password} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} />
+            <TextField label='Email' name='email' type='text' value={loginForm.values.email} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} required />
+            <TextField label='Password' name='password' type='password' value={loginForm.values.password} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} required />
             {hasError && <Paragraph style={{ color: Colors.error }}>Invalid email or password</Paragraph>}
             <Button label='Login' variant='primary' type='submit' />
           </View>

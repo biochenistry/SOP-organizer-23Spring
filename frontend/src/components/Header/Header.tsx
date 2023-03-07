@@ -25,11 +25,6 @@ type LogoutResponse = {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    backgroundColor: Colors.isuRed,
-    borderBottom: `4px solid ${Colors.isuYellow}`,
-    color: '#ffffff',
-  },
   popupAction: {
     padding: '16px',
     'user-select': 'none',
@@ -100,10 +95,11 @@ function Header() {
     <>
       <View
         container
-        className={css(styles.header)}
         justifyContent='space-between'
         alignItems='center'
-        padding='30px 10%'>
+        padding='30px 10%'
+        style={{ backgroundColor: Colors.isuRed, borderBottom: `4px solid ${Colors.isuYellow}`, color: '#ffffff',}}
+      >
 
         <Heading text='SOP Organizer' renderAs='h1' />
 
