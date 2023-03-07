@@ -13,6 +13,11 @@ import { useNavigate } from "react-router";
 /*
 TODO- find query that gets all users -not made yet, that is okay
 -find a way to list them 
+-name
+-email
+-is admin
+-some sort of settings
+(4 columns, number of user rows)
 */
 
 type GetAllUsersResponse = {
@@ -63,18 +68,47 @@ export default function Page() {
         
     });
 
+    function determineAdmin(person: User){
+        if (person.isAdmin){
+            return "Admin";
+        }
+        else{
+            return "Not Admin";
+        }
+    }
+
     return (
+        // currently returns a table that does not list each first name in a new block
         <View container alignItems='center' justifyContent='center' width='100%'>
         
         {user_list.map((User) => {
           return (
-            <li>{User.firstName} {User.email}  
-            </li>
+            <View container gap='32px' flexDirection='column' justifyContent='space-between' alignItems='stretch'>
+                <li>{User.firstName} {User.email} </li>
+            </View>
           );
         })}
 
+        
+        <table>
+                {user_list.map((User) => {
+                    return(
+                    <tr>
+                        <td>{User.firstName}</td> <td>{User.lastName}</td> <td>{User.email}</td> <td>{determineAdmin(User)} </td>
+                    </tr>
+                    );
+                })}
+
+        </table>
+
         </View> 
         
+        
+        
+
+        
+
+
     );
 }  
   
