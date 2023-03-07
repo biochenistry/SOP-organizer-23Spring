@@ -62,7 +62,9 @@ const Sidebar: React.FunctionComponent = () => {
         {data?.folders.map((folder) => {
         
           return (
-            <SidebarFolder folder={folder}></SidebarFolder>
+            <div>
+              <SidebarFolder folder={folder}></SidebarFolder>
+            </div>
           );
         })}
       
