@@ -45,3 +45,18 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 
 	return user, nil
 }
+
+// All is the resolver for the all field.
+func (r *queryResolver) All(ctx context.Context) ([]*model.User, error) {
+	authUser := auth.GetUserFromContext(ctx)
+	if authUser == nil {
+		return nil, nil
+	}
+
+	users, err := r.UserService.GetAllUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}

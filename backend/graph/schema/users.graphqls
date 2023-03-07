@@ -1,5 +1,6 @@
 extend type Query {
     me: User
+    all: [User]
 }
 
 extend type Mutation {
