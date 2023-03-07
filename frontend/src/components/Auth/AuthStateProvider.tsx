@@ -50,13 +50,13 @@ export const AuthStateProvider = ({ children }: AuthStateProviderProps) => {
     return data;
   };
 
-  // Determine the appropriate API gateway
-  let gateway = '/api';
-  if (window.location.href.includes('localhost')) {
-    gateway = 'http://localhost:8080/api';
-  }
-
   useEffect(() => {
+    // Determine the appropriate API gateway
+    let gateway = '/api';
+    if (window.location.href.includes('localhost')) {
+      gateway = 'http://localhost:8080/api';
+    }
+
     request('POST', gateway, {
       query: GET_CURRENT_USER,
       operationName: "getCurrentUser",

@@ -3,7 +3,7 @@ import Form from "../components/Form/Form";
 import useForm from "../components/Form/useForm";
 import TextField from "../components/TextField/TextField";
 import View from "../components/View/View";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Paragraph from "../components/Paragraph/Paragraph";
 import { Colors } from "../components/GlobalStyles";
 import { useAuthState } from "../components/Auth";
@@ -53,9 +53,11 @@ export default function Login() {
     onSubmit: handleLogin,
   });
 
-  if (state.user) {
-    navigate('/');
-  }
+  useEffect(() => {
+    if (state.user) {
+      navigate('/');
+    }
+  }, [state]);
 
   return (
     <View container alignItems='center' justifyContent='center' width='100%'>
