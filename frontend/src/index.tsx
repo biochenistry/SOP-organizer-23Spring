@@ -5,6 +5,7 @@ import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
 import { AuthStateProvider } from './components/Auth';
 
 import './index.css'
+import { BrowserRouter } from 'react-router-dom';
 
 let url = '/api';
 if (window.location.href.includes('localhost')) {
@@ -22,10 +23,12 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <ApolloProvider client={client}>
-      <AuthStateProvider>
-        <App />
-      </AuthStateProvider>
-    </ApolloProvider>
+    <BrowserRouter>
+      <ApolloProvider client={client}>
+        <AuthStateProvider>
+          <App />
+        </AuthStateProvider>
+      </ApolloProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
