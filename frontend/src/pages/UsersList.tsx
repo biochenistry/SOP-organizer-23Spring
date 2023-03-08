@@ -78,23 +78,24 @@ export default function Page() {
     }
 
     return (
+        
         // currently returns a table that does not list each first name in a new block
         <View container alignItems='center' justifyContent='center' width='100%'>
         
-        {user_list.map((User) => {
-          return (
-            <View container gap='32px' flexDirection='column' justifyContent='space-between' alignItems='stretch'>
-                <li>{User.firstName} {User.email} </li>
-            </View>
-          );
-        })}
-
-        
         <table>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Admin?</th>
+            </tr>
                 {user_list.map((User) => {
                     return(
                     <tr>
-                        <td>{User.firstName}</td> <td>{User.lastName}</td> <td>{User.email}</td> <td>{determineAdmin(User)} </td>
+                        <td>{User.firstName}</td> 
+                        <td>{User.lastName}</td> 
+                        <td>{User.email}</td> 
+                        <td>{determineAdmin(User)} </td> 
                     </tr>
                     );
                 })}
