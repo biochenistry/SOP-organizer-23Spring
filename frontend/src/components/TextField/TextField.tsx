@@ -1,5 +1,9 @@
 import React from 'react';
 import { ChangeEvent, useEffect } from "react";
+import View from '../View/View';
+import { StyleSheet, css } from 'aphrodite';
+import Paragraph from '../Paragraph/Paragraph';
+import { Colors } from '../GlobalStyles';
 
 
 export type TextFieldProps = {
@@ -13,23 +17,77 @@ export type TextFieldProps = {
   onChange?: (name: string, value: string) => void;
   validate?: (name: string, value: string) => string | null;
   onValidate?: (name: string, error: string | null) => void;
-  helpModal?: React.ReactNode;
   id?: string;
-  type?: 'text' | 'email' | 'password' | 'number' | 'url' | 'currency';
+  type?: 'text' | 'email' | 'password' | 'number' | 'url';
   disabled?: boolean;
   testId?: string;
 }
 
-
+const styles = StyleSheet.create({
+  description: {
+    color: Colors.textSecondary,
+    fontSize: '14px',
+    lineHeight: '20px',
+    marginBottom: '4px',
+  },
+  error: {
+    marginTop: '4px',
+  },
+  inputContainer: {
+    display: 'flex',
+    position: 'relative',
+  },
+  labelContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    marginBottom: '4px',
+  },
+  required: {
+    color: Colors.error,
+    marginLeft: '4px',
+  },
+  inputShared: {
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: Colors.harlineGrey,
+    borderRadius: '4px',
+    boxShadow: 'none',
+    boxSizing: 'border-box',
+    color: Colors.textPrimary,
+    fontSize: '16px',
+    height: '40px',
+    lineHeight: '24px',
+    margin: '0',
+    padding: '0 12px',
+    flexGrow: 1,
+    width: '100%',
+    '-webkit-appearance': 'none',
+  },
+  errorField: {
+    borderColor: Colors.error,
+    ':focus': {
+      borderColor: Colors.error,
+    },
+    ':focus-visible': {
+      borderColor: Colors.error,
+    }
+  },
+  infoContainer: {
+    marginBottom: '4px',
+  },
+  inputDisabled: {
+    backgroundColor: '#FBFBFB',
+    color: '#919991',
+  },
+});
 
 /**
  * A text input field used for collecting user input.
  * 
  * ### Usage
  * 
- * ```jsx
- * import { TextField } from '@barscience/global-components';
- * 
+ * ```jsx 
  * <TextField
  *   type='text'
  *   name='fieldName'
@@ -45,27 +103,7 @@ export default function TextField(props: TextFieldProps) {
     if (props.required !== undefined && (props.value === '' || props.value === null || props.value === undefined)) {
       props.onValidate && props.onValidate(props.name, '');
     }
-  }, []);
-
-  const validate = (value: string) => {
-    let error = null;
-
-    if (props.validate) {
-      error = props.validate(props.name, value);
-    }
-
-    if (error !== null) {
-      props.onValidate && props.onValidate(props.name, error);
-    }
-    else {
-      if (props.required !== undefined && value === '') {
-        props.onValidate && props.onValidate(props.name, typeof props.required === 'boolean' ? 'This field is required' : props.required);
-      }
-      else {
-        props.onValidate && props.onValidate(props.name, null);
-      }
-    }
-  }
+  }, [props]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (props.required) {
@@ -91,54 +129,62 @@ export default function TextField(props: TextFieldProps) {
     props.onChange && props.onChange(props.name, e.target.value);
   }
 
-  /*
-  const handleBlur = () => {
-    if (props.type === 'currency') {      
-      if (props.value) {
-        const formattedValue = currency(props.value).format();
-        props.onChange && props.onChange(props.name, formattedValue);
-      }
-      else {
-        props.onChange && props.onChange(props.name, '');
-      }
-    }
-
-    validate(props.value || '');
-  }
-  */
-
   // Prevents the input value from changing when the user scrolls while the mouse is over the field (only for type=number inputs)
   const handleScroll = (e: React.WheelEvent) => {
-    if (props.type === 'number' || props.type === 'currency') {
+    if (props.type === 'number') {
       const target = e.target as HTMLInputElement;
       target.blur();
     }
   }
 
   return (
-    <div>
+    <View container flexDirection='column'>
+      <div className={css(styles.infoContainer)}>
+        {props.label && (
+          <div className={css(styles.labelContainer)}>
+            <label htmlFor={props.id || props.name + '-field'}><Paragraph>{props.label}{props.required !== undefined && <span className={css(styles.required)}>*</span>}</Paragraph></label>
+          </div>
+        )}
+
+        {props.description && (
+          <p className={css(styles.description)}>{props.description}</p>
+        )}
+      </div>
+      
+      <div className={css(styles.inputContainer)}>
         <input
-          type={getType(props.type) || 'text'}
+          type={props.type || 'text'}
           name={props.name}
-          value={props.type === 'currency' ? props.value?.replace('$', '') : props.value}
+          value={props.value}
           placeholder={props.placeholder}
           id={props.id || props.name + '-field'}
           data-testid={props.testId}
           onChange={handleChange}
+          className={css(styles.inputShared, (typeof props.error === 'string' && props.error !== '') && styles.errorField, props.disabled && styles.inputDisabled)}
           disabled={props.disabled}
           onWheel={handleScroll}
         />
       </div>
 
-      
+      {props.error && (
+        <Paragraph style={{ color: Colors.error }}>{props.error}</Paragraph>
+      )}
+    </View>
   );
-}
 
-const getType = (type?: string) => {
-  switch (type) {
-    case 'currency':
-      return 'text';
-    default:
-      return type;
-  }
+  // return (
+  //   <div>
+  //       <input
+  //         type={props.type || 'text'}
+  //         name={props.name}
+  //         value={props.value}
+  //         placeholder={props.placeholder}
+  //         id={props.id || props.name + '-field'}
+  //         data-testid={props.testId}
+  //         onChange={handleChange}
+  //         disabled={props.disabled}
+  //         onWheel={handleScroll}
+  //       />
+  //     </div>
+  // );
 }
