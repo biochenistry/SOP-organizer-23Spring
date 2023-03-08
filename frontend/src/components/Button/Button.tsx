@@ -4,11 +4,13 @@ import React from 'react';
 interface ButtonProps {
     children?: React.ReactNode;
     onClick: () => void;
+    hidden?: boolean;
 }
 
 const Button: React.FC<ButtonProps> = ({
     children,
-    onClick
+    onClick,
+    hidden
   }) => {
     const styles = StyleSheet.create({
       defaultButton: {
@@ -24,6 +26,7 @@ const Button: React.FC<ButtonProps> = ({
     <button
       onClick={onClick}
       className={css(styles.defaultButton)}
+      hidden={hidden}
     >
     {children}
     </button>
