@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar/Sidebar'
 import View from './components/View/View';
 import { Route, Routes } from 'react-router';
 import Login from './pages/Login';
+import Page from './pages/UsersList';
 
 function App() {
   return (
@@ -15,6 +16,11 @@ function App() {
           <Routes>
             <Route path='/login' element={<Login />} />
           </Routes>
+
+          <Routes>
+            <Route path='/users' element={<Page />} />
+          </Routes>
+
         </View>
       </div >
     </>
