@@ -104,11 +104,6 @@ export default function Page() {
 
         </View> 
         
-        
-        
-
-        
-
 
     );
 }  
