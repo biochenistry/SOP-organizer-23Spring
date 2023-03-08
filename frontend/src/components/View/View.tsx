@@ -23,6 +23,8 @@ interface ViewProps {
   height?: string,
   maxWidth?: string,
   maxHeight?: string
+
+  onClick?: (() => void) | (() => Promise<void>)
 }
 
 function View({ ...props }: ViewProps) {
@@ -49,6 +51,7 @@ function View({ ...props }: ViewProps) {
   return (
     <div
       className={css(styles.default, createStyle(props.style))}
+      onClick={props.onClick}
     >
       {props.children}
     </div>
