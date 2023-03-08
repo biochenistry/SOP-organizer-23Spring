@@ -1,7 +1,12 @@
-import React, { useState } from 'react'
-import styled from 'styled-components'
-
+import React from 'react'
+import { CSSProperties } from 'aphrodite'
 import { gql, useQuery } from '@apollo/client'
+import SidebarFolder from '../Folder/Folder';
+import { Colors } from '../GlobalStyles';
+import View from '../View/View';
+import { Link } from 'react-router-dom';
+import Paragraph from '../Paragraph/Paragraph';
+import { useAuthState } from '../Auth';
 
 const GET_ALL_FOLDERS = gql`
 query getAllFolders {
@@ -16,6 +21,32 @@ query getAllFolders {
         lastUpdated
         lastModifiedBy
       }
+      ...on Folder {
+        id
+        name
+        contents {
+          ...on File {
+        id
+        name
+        created
+        lastUpdated
+        lastModifiedBy
+      }
+      ...on Folder {
+        id
+        name
+        contents {
+          ...on File {
+        id
+        name
+        created
+        lastUpdated
+        lastModifiedBy
+      }
+        }
+      }
+        }
+      }
     }
   }
 }
@@ -25,68 +56,65 @@ type GetAllFoldersResponse = {
   folders: Folder[];
 }
 
-type Folder = {
+type FileContentItem = Folder | File;
+
+export type Folder = {
   id: string;
   name: string;
-  contents: File[];
-}
+  contents: FileContentItem[];
+  __typename: "Folder";
+} | null;
 
-type File = {
+export type File = {
   id: string;
   name: string;
   created: string;
   lastUpdated: string;
   lastModifiedBy: string;
+  __typename: "File";
+}
+
+const sidebarContainerStyle: CSSProperties = {
+  backgroundColor: '#ffffff',
+  borderRight: `1px solid ${Colors.harlineGrey}`,
+  height: 'calc(100vh - 104px)',
+  paddingTop: '24px',
+  width: '250px',
+}
+
+const adminLinksStyle: CSSProperties = {
+  borderTop: `1px solid ${Colors.harlineGrey}`,
+  padding: '16px',
+  ':hover': {
+    backgroundColor: Colors.neutralHover,
+  },
+  ':active': {
+    backgroundColor: Colors.neutralActive,
+  }
 }
 
 const Sidebar: React.FunctionComponent = () => {
+  const { state } = useAuthState();
   const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
 
-  const [close, setClose] = useState(true)
-  const showSidebar = () => setClose(!close)
   return (
-    <>
-      <SidebarMenu close={close}>
-        {data?.folders.map((folder) => {
+    <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
+      <View container gap='8px' flexDirection='column' padding='0 16px'>
+        {data?.folders.map((folder, index) => {
           return (
-            <li>{folder.name}
-                {folder.contents.map((file) => {
-                    return (
-                        <MenuItems>
-                            <span style={{ marginLeft: '24px', fontSize: '12px'}}>{file.name}</span>
-                        </MenuItems>
-                    )
-                })}
-                
-            </li>
+            <div key={index}>
+              <SidebarFolder folder={folder}></SidebarFolder>
+            </div>
           );
         })}
+      </View>
 
-        {/* {SidebarData.map((item, index) => {
-          return (
-            <MenuItems key={index}>
-              <span style={{ marginLeft: '16px' }}>{item.title}</span>
-            </MenuItems>
-          )
-        })} */}
-      </SidebarMenu>
-    </>
+      {(state.user?.isAdmin) &&
+        <View container flexDirection='column' style={adminLinksStyle}>
+          <Link to='/users' style={{ textDecoration: 'none' }}><Paragraph>Manage Users</Paragraph></Link>
+        </View>
+      }
+    </View>
   )
 }
-export default Sidebar
-
-const MenuItems = styled.li`
-    list-style: none;
-    display: flex;
-    align-items: center;
-    justify-content: start;
-    width: 100%;
-    height: 60px;
-  `
-
-const SidebarMenu = styled.div<{ close: boolean }>`
-    width: 250px;
-    background-color: #ffffff;
-    border-right: 1px solid #D7DAD7;
-    transition: .6s;
-`
+export default Sidebar;
