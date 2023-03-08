@@ -5,6 +5,7 @@ import Button from '../components/Button/Button';
 import { useAuthState } from "../components/Auth";
 import { useEffect, useState } from 'react';
 
+/* Only need to pass in docId to the FileView page */
 export type FileViewProps = {
     docId: string;
 }
@@ -21,18 +22,27 @@ export default function FileView(props: FileViewProps) {
         }
     }, [state, setCanEdit]);
 
-    return (
-        <View container alignItems='center' justifyContent='center' width='100%' flexDirection='column'>
-            <View container>
+    const downloadFile = () => {
+        window.location.href = 'https://docs.google.com/feeds/download/documents/export/Export?id=' + props.docId + '&exportFormat=docx';
+    }
 
-                {/* Todo: Add download functionality here. */}
-                <Button onClick={() => console.log("Temp: Replace with download function.")} children="Download SOP" />
-                <Button onClick={() => {setIsEditing(true);}} children="Edit Document" hidden={!canEdit} />
+    return (
+        <View container alignItems='center' justifyContent='center' width='100%' flexDirection='row'>
+            {/* This is the actual embedded file that gets displayed. */}
+            <FileEmbed docId={props.docId} isEditing={isEditing} />
+
+            {/* Todo: Align buttons at top of View container */}
+            <View container flexDirection='column'>
+                {/* Todo: Create style for these buttons (in Button component and then use className). */}
+
+                <Button onClick={downloadFile} children="Download SOP" />
+                <Button onClick={() => {setIsEditing(true);}} children="Edit Document" hidden={!canEdit || isEditing} />
 
                 {/* Add any other doc save functionality to onClick function here. */}
                 <Button onClick={() => {setIsEditing(false)}} children="Save & Finish" hidden={!isEditing} />
+
+                {/* Other potential buttons: View Edit History, Delete SOP */}
             </View>
-            <FileEmbed title='test-sop' docId={props.docId} isEditing={isEditing} />
         </View>
     );
 }
