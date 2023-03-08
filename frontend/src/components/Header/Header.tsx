@@ -1,4 +1,3 @@
-import { useFloating, offset } from '@floating-ui/react';
 import { FaUserCircle } from 'react-icons/fa'
 import Heading from '../Heading/Heading';
 import View from '../View/View';
@@ -12,6 +11,7 @@ import { gql, useMutation } from '@apollo/client';
 import { logout } from '../Auth/authStateReducer';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
+import { useFloating, offset } from '@floating-ui/react';
 
 const LOGOUT = gql`
 mutation logout {

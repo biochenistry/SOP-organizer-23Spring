@@ -18,18 +18,21 @@ const SidebarFolder = (props:folderProps) => {
     
     return  (
         <>
-            <span>
+        <Paragraph>
+            
                 {dropdown ? <FiChevronRight onClick={collapse}/> : <FiChevronDown onClick={collapse}/>}
                 {props.folder?.name}
-            </span>
+            
             
            {collapseContents && props.folder?.contents.map((file, index) => {
                 return (
                     <div className={css(folderContents.loadingContainer)} key={index}>
                         { (file?.__typename === "File") ? 
+                   
                             <Link to={'/file/' + file.id}>
                                 <span style={{ marginLeft: '24px', fontSize: '12px'}}>{file.name}</span>
                             </Link>
+                    
                             :
                             <div>
                                 {(file?.__typename === "Folder") &&
@@ -41,6 +44,7 @@ const SidebarFolder = (props:folderProps) => {
                     
                 )
             })}
+            </Paragraph>
         </>
     )
 };
