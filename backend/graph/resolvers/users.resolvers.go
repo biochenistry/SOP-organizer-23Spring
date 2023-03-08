@@ -117,8 +117,6 @@ func (r *queryResolver) All(ctx context.Context) ([]*model.User, error) {
 
 	return users, nil
 }
-<<<<<<< HEAD
-=======
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, userID string) (*model.User, error) {
@@ -134,4 +132,3 @@ func (r *queryResolver) User(ctx context.Context, userID string) (*model.User, e
 
 	return user, nil
 }
->>>>>>> 6bd3563b1c3eec70993a40e7680265930bbbf189

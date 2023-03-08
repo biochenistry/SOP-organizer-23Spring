@@ -104,10 +104,7 @@ type QueryResolver interface {
 	File(ctx context.Context, id string) (*model.File, error)
 	Me(ctx context.Context) (*model.User, error)
 	All(ctx context.Context) ([]*model.User, error)
-<<<<<<< HEAD
-=======
 	User(ctx context.Context, userID string) (*model.User, error)
->>>>>>> 6bd3563b1c3eec70993a40e7680265930bbbf189
 }
 
 type executableSchema struct {
@@ -236,8 +233,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Logout(childComplexity), true
 
-<<<<<<< HEAD
-=======
 	case "Mutation.updateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
 			break
@@ -250,7 +245,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateUser(childComplexity, args["userId"].(string), args["firstname"].(string), args["lastname"].(string), args["email"].(string)), true
 
->>>>>>> 6bd3563b1c3eec70993a40e7680265930bbbf189
 	case "Query.all":
 		if e.complexity.Query.All == nil {
 			break
@@ -502,12 +496,8 @@ type File {
 }`, BuiltIn: false},
 	{Name: "../schema/users.graphqls", Input: `extend type Query {
     me: User
-<<<<<<< HEAD
-    all: [User]
-=======
     all: [User!]
     user(userId: ID!): User
->>>>>>> 6bd3563b1c3eec70993a40e7680265930bbbf189
 }
 
 extend type Mutation {
@@ -1782,11 +1772,7 @@ func (ec *executionContext) _Query_all(ctx context.Context, field graphql.Collec
 	}
 	res := resTmp.([]*model.User)
 	fc.Result = res
-<<<<<<< HEAD
-	return ec.marshalOUser2ᚕᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
-=======
 	return ec.marshalOUser2ᚕᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
->>>>>>> 6bd3563b1c3eec70993a40e7680265930bbbf189
 }
 
 func (ec *executionContext) fieldContext_Query_all(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1816,8 +1802,6 @@ func (ec *executionContext) fieldContext_Query_all(ctx context.Context, field gr
 	return fc, nil
 }
 
-<<<<<<< HEAD
-=======
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_user(ctx, field)
 	if err != nil {
@@ -1883,7 +1867,6 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 	return fc, nil
 }
 
->>>>>>> 6bd3563b1c3eec70993a40e7680265930bbbf189
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query___type(ctx, field)
 	if err != nil {
@@ -4361,8 +4344,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-<<<<<<< HEAD
-=======
 		case "user":
 			field := field
 
@@ -4383,7 +4364,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
->>>>>>> 6bd3563b1c3eec70993a40e7680265930bbbf189
 		case "__type":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -5248,11 +5228,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-<<<<<<< HEAD
-func (ec *executionContext) marshalOUser2ᚕᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
-=======
 func (ec *executionContext) marshalOUser2ᚕᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
->>>>>>> 6bd3563b1c3eec70993a40e7680265930bbbf189
 	if v == nil {
 		return graphql.Null
 	}
@@ -5279,11 +5255,7 @@ func (ec *executionContext) marshalOUser2ᚕᚖgitᚗlasᚗiastateᚗeduᚋSenio
 			if !isLen1 {
 				defer wg.Done()
 			}
-<<<<<<< HEAD
-			ret[i] = ec.marshalOUser2ᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
-=======
 			ret[i] = ec.marshalNUser2ᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
->>>>>>> 6bd3563b1c3eec70993a40e7680265930bbbf189
 		}
 		if isLen1 {
 			f(i)
@@ -5294,15 +5266,12 @@ func (ec *executionContext) marshalOUser2ᚕᚖgitᚗlasᚗiastateᚗeduᚋSenio
 	}
 	wg.Wait()
 
-<<<<<<< HEAD
-=======
 	for _, e := range ret {
 		if e == graphql.Null {
 			return graphql.Null
 		}
 	}
 
->>>>>>> 6bd3563b1c3eec70993a40e7680265930bbbf189
 	return ret
 }
 
