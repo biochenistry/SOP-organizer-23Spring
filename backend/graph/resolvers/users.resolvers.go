@@ -12,6 +12,63 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/model"
 )
 
+// CreateUser is the resolver for the createUser field.
+func (r *mutationResolver) CreateUser(ctx context.Context, firstname string, lastname string, email string, password string, admin bool) (*model.User, error) {
+	authUser := auth.GetUserFromContext(ctx)
+	if authUser == nil {
+		return nil, errs.NewUnauthorizedError(ctx, "You must be logged in to create user accounts.")
+	}
+
+	if !auth.IsAdmin(authUser) {
+		return nil, errs.NewForbiddenError(ctx, "You do not have permission to create new user accounts.")
+	}
+
+	id, err := r.UserService.CreateUser(ctx, firstname, lastname, email, password, admin)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.Query().User(ctx, *id)
+}
+
+// ChangeUserRole is the resolver for the changeUserRole field.
+func (r *mutationResolver) ChangeUserRole(ctx context.Context, userID string, admin bool) (*model.User, error) {
+	authUser := auth.GetUserFromContext(ctx)
+	if authUser == nil {
+		return nil, errs.NewUnauthorizedError(ctx, "You must be logged in to change user role.")
+	}
+
+	if !auth.IsAdmin(authUser) {
+		return nil, errs.NewForbiddenError(ctx, "You do not have permission to change other users' roles.")
+	}
+
+	err := r.UserService.ChangeUserRole(ctx, userID, admin)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.Query().User(ctx, userID)
+}
+
+// UpdateUser is the resolver for the updateUser field.
+func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, firstname string, lastname string, email string) (*model.User, error) {
+	authUser := auth.GetUserFromContext(ctx)
+	if authUser == nil {
+		return nil, errs.NewUnauthorizedError(ctx, "You must be logged in to update user account's.")
+	}
+
+	if userID != authUser.ID && !auth.IsAdmin(authUser) {
+		return nil, errs.NewForbiddenError(ctx, "You do not have permission to change other user account's.")
+	}
+
+	err := r.UserService.UpdateUser(ctx, userID, firstname, lastname, email)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.Query().User(ctx, userID)
+}
+
 // ChangePassword is the resolver for the changePassword field.
 func (r *mutationResolver) ChangePassword(ctx context.Context, userID string, newPassword string) (bool, error) {
 	authUser := auth.GetUserFromContext(ctx)
@@ -60,3 +117,21 @@ func (r *queryResolver) All(ctx context.Context) ([]*model.User, error) {
 
 	return users, nil
 }
+<<<<<<< HEAD
+=======
+
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context, userID string) (*model.User, error) {
+	authUser := auth.GetUserFromContext(ctx)
+	if authUser == nil {
+		return nil, nil
+	}
+
+	user, err := r.UserService.GetUserById(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+>>>>>>> 6bd3563b1c3eec70993a40e7680265930bbbf189
