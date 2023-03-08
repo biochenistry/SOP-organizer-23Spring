@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar/Sidebar'
 import View from './components/View/View';
 import { Route, Routes } from 'react-router';
 import Login from './pages/Login';
+import FileView from './pages/FileView';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
 
           <Routes>
             <Route path='/login' element={<Login />} />
+            <Route path='/file/:fileId' element={<FileView />} />
           </Routes>
         </View>
       </div >
