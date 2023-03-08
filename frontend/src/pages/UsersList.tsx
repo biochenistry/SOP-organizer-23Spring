@@ -55,7 +55,6 @@ const Page: React.FunctionComponent = () => {
                         <td>{user.lastName}</td> 
                         <td>{user.email}</td> 
                         <td>{determineAdmin(user)} </td> 
-                        
                     </tr>
                     );
                 })}
