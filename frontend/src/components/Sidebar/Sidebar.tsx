@@ -1,7 +1,12 @@
 import React from 'react'
-import { css, StyleSheet} from 'aphrodite'
+import { CSSProperties } from 'aphrodite'
 import { gql, useQuery } from '@apollo/client'
 import SidebarFolder from '../Folder/Folder';
+import { Colors } from '../GlobalStyles';
+import View from '../View/View';
+import { Link } from 'react-router-dom';
+import Paragraph from '../Paragraph/Paragraph';
+import { useAuthState } from '../Auth';
 
 const GET_ALL_FOLDERS = gql`
 query getAllFolders {
@@ -69,37 +74,47 @@ export type File = {
   __typename: "File";
 }
 
+const sidebarContainerStyle: CSSProperties = {
+  backgroundColor: '#ffffff',
+  borderRight: `1px solid ${Colors.harlineGrey}`,
+  height: 'calc(100vh - 104px)',
+  paddingTop: '24px',
+  width: '250px',
+}
+
+const adminLinksStyle: CSSProperties = {
+  borderTop: `1px solid ${Colors.harlineGrey}`,
+  padding: '16px',
+  ':hover': {
+    backgroundColor: Colors.neutralHover,
+  },
+  ':active': {
+    backgroundColor: Colors.neutralActive,
+  }
+}
+
 const Sidebar: React.FunctionComponent = () => {
+  const { state } = useAuthState();
   const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
 
-
   return (
-    <>
-      <div className={css(sideBarMenu.loadingContainer)}>
-        
+    <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
+      <View container gap='8px' flexDirection='column' padding='0 16px'>
         {data?.folders.map((folder, index) => {
-        
           return (
             <div key={index}>
               <SidebarFolder folder={folder}></SidebarFolder>
             </div>
           );
         })}
-      
-      </div>
-    </>
+      </View>
+
+      {(state.user?.isAdmin) &&
+        <View container flexDirection='column' style={adminLinksStyle}>
+          <Link to='/users' style={{ textDecoration: 'none' }}><Paragraph>Manage Users</Paragraph></Link>
+        </View>
+      }
+    </View>
   )
 }
-export default Sidebar
-
-
-
-const sideBarMenu = StyleSheet.create( {
-  loadingContainer: {
-    width: '250px',
-    backgroundColor: '#ffffff',
-    borderRight: '1px solid #D7DAD7',
-    transition: '.6s',
-    marginLeft: '10px'
-  },
-})
+export default Sidebar;
