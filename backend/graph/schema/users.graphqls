@@ -1,8 +1,25 @@
 extend type Query {
     me: User
+    all: [User!]
+    user(userId: ID!): User
 }
 
 extend type Mutation {
+    """
+    Creates a new user account with the given information. Available to admin users only.
+    """
+    createUser(firstname: String!, lastname: String!, email: String!, password: String!, admin: Boolean!): User
+
+    """
+    Changes a user's role for the user with the given ID.
+    """
+    changeUserRole(userId: ID!, admin: Boolean!): User
+
+    """
+    Updates an existing user account
+    """
+    updateUser(userId: ID!, firstname: String!, lastname: String!, email: String!): User
+
     """
     Changes the password for the user with the given ID. Admin users can use this to change any user's password. Regular users can only change their own password.
     """
