@@ -1,5 +1,7 @@
+import { useNavigate } from "react-router";
 import View from "../components/View/View";
 import { gql, useQuery } from '@apollo/client'
+import { useAuthState } from "../components/Auth";
 
 
 const GET_ALL_USERS = gql`
@@ -16,7 +18,7 @@ query getAllUsers {
 `;
 
 type GetAllUsersResponse = {
-    all: User[];
+    all: User[] | null;
 }
 
 type User = {
@@ -38,7 +40,14 @@ function determineAdmin(person: User){
 }
 
 const Page: React.FunctionComponent = () => {
+    const navigate = useNavigate();
+    const { state } = useAuthState();
     const { data } = useQuery<GetAllUsersResponse>(GET_ALL_USERS);
+
+    if (!state.user?.isAdmin) {
+        navigate('/');
+    }
+
     return (      
         <View container alignItems='center' justifyContent='center' width='100%'>
         <table>
@@ -48,7 +57,7 @@ const Page: React.FunctionComponent = () => {
                 <th>Email</th>
                 <th>Admin?</th>
             </tr>
-            {data?.all.map((user) => {
+            {data?.all?.map((user) => {
                     return(
                     <tr>
                         <td>{user.firstName}</td> 
