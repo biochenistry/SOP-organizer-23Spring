@@ -9,3 +9,5 @@ Transfer the binary file to the remote server.
 Make the file executable: `sudo chmod +x sop`
 
 Run the application: `./sop`
+
+To transfer the application to a background process: Ctr+Z, then enter `bg`

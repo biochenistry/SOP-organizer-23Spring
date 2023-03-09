@@ -41,7 +41,7 @@ func (r *Request) SetAuthToken(token string, expires time.Time) {
 		Name:     "sop_auth",
 		Value:    token,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   false,
 		Path:     "/",
 		Expires:  time.Now().Add(time.Hour),
 	})
@@ -54,7 +54,7 @@ func (r *Request) ClearAuthToken() {
 		Name:     "sop_auth",
 		Value:    "",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   false,
 		Path:     "/",
 		Expires:  expires,
 	})
