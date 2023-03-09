@@ -10,16 +10,11 @@ export default function FileView() {
     const navigate = useNavigate();
     const { fileId } = useParams();
     const { state } = useAuthState();
-    const [canEdit, setCanEdit] = useState<boolean>(false);
     const [isEditing, setIsEditing] = useState<boolean>(false);
 
     if (!fileId) {
         navigate('/');
         return null;
-    }
-
-    if (state.user?.isAdmin) {
-        setCanEdit(true);
     }
 
     const downloadFile = () => {
@@ -32,11 +27,11 @@ export default function FileView() {
             <FileEmbed docId={fileId} isEditing={isEditing} />
 
             {/* Todo: Align buttons at top of View container */}
-            <View container flexDirection='column'>
+            <View container flexDirection='column' gap='16px'>
                 {/* Todo: Create style for these buttons (in Button component and then use className). */}
 
                 <Button variant='primary' onClick={downloadFile} label="Download SOP" />
-                <Button variant='primary' onClick={() => {setIsEditing(true);}} label="Edit Document" hidden={!canEdit || isEditing} />
+                <Button variant='primary' onClick={() => {setIsEditing(true);}} label="Edit Document" hidden={!state.user?.isAdmin || isEditing} />
 
                 {/* Add any other doc save functionality to onClick function here. */}
                 <Button variant='primary' onClick={() => {setIsEditing(false)}} label="Save & Finish" hidden={!isEditing} />

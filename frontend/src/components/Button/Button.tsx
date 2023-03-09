@@ -108,6 +108,7 @@ const Button: React.FC<ButtonProps> = ({
       onClick={handleClick}
       className={css(styles.default, getButtonStyle(variant, onDark), createStyle(style))}
       type={type}
+      hidden={hidden}
     >
       <Paragraph style={{ color: 'inherit', fontWeight: 'bold', textAlign: 'center' }}>{label}</Paragraph>
     </button>

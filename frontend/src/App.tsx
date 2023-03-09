@@ -17,12 +17,8 @@ function App() {
           <Routes>
             <Route path='/login' element={<Login />} />
             <Route path='/file/:fileId' element={<FileView />} />
-          </Routes>
-
-          <Routes>
             <Route path='/users' element={<UsersList />} />
           </Routes>
-
         </View>
       </div >
     </>
