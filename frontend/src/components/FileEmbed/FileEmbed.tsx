@@ -2,13 +2,11 @@ import { css, StyleSheet } from 'aphrodite';
 import React from 'react';
 
 interface FileEmbedProps {
-    title: string;
     docId: string;
     isEditing: boolean;
 }
 
 const FileEmbed: React.FC<FileEmbedProps> = ({
-        title,
         docId,
         isEditing
     }) => {
@@ -26,7 +24,8 @@ const FileEmbed: React.FC<FileEmbedProps> = ({
             <iframe
                 className={css(styles.defaultFileEmbed)}
                 src={'https://docs.google.com/document/d/' + docId + '/edit'}
-                title={title}
+                /* iframe requires title */
+                title='title'
             />
         );
     }
@@ -34,7 +33,8 @@ const FileEmbed: React.FC<FileEmbedProps> = ({
         <iframe
             className={css(styles.defaultFileEmbed)}
             src={'https://docs.google.com/document/d/' + docId + '/preview'}
-            title={title}
+            /* iframe requires title */
+            title='title'
         />
     );
 }
