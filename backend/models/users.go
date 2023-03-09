@@ -8,7 +8,22 @@ import (
 )
 
 type UserService interface {
+	// Gets a user by id
 	GetUserById(ctx context.Context, id string) (*model.User, error)
+
+	// Get all users
+	GetAllUsers(ctx context.Context) ([]*model.User, error)
+
+	// Create a new user account
+	CreateUser(ctx context.Context, firstname string, lastname string, email string, password string, admin bool) (*string, error)
+
+	// Updates an existing user account
+	UpdateUser(ctx context.Context, id string, firstname string, lastname string, email string) error
+
+	// Change's amn existing users role
+	ChangeUserRole(ctx context.Context, id string, admin bool) error
+
+	// Change's an existing users password
 	ChangeUserPassword(ctx context.Context, id string, newPassword string) error
 
 	// Verifies that the provided email and password combination is associated with a user. Returns the ID of the associated user if the login information is correct

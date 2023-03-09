@@ -4,6 +4,7 @@ import View from './components/View/View';
 import { Route, Routes } from 'react-router';
 import Login from './pages/Login';
 import FileView from './pages/FileView';
+import UsersList from './pages/UsersList';
 
 function App() {
   return (
@@ -17,6 +18,11 @@ function App() {
             <Route path='/login' element={<Login />} />
             <Route path='/file/:fileId' element={<FileView />} />
           </Routes>
+
+          <Routes>
+            <Route path='/users' element={<UsersList />} />
+          </Routes>
+
         </View>
       </div >
     </>

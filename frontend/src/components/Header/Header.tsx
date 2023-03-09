@@ -1,4 +1,3 @@
-import { useFloating, offset } from '@floating-ui/react';
 import { FaUserCircle } from 'react-icons/fa'
 import Heading from '../Heading/Heading';
 import View from '../View/View';
@@ -12,6 +11,8 @@ import { gql, useMutation } from '@apollo/client';
 import { logout } from '../Auth/authStateReducer';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
+import { useFloating, offset } from '@floating-ui/react';
+import Button from '../Button/Button';
 
 const LOGOUT = gql`
 mutation logout {
@@ -24,11 +25,6 @@ type LogoutResponse = {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    backgroundColor: Colors.isuRed,
-    borderBottom: `4px solid ${Colors.isuYellow}`,
-    color: '#ffffff',
-  },
   popupAction: {
     padding: '16px',
     'user-select': 'none',
@@ -99,10 +95,11 @@ function Header() {
     <>
       <View
         container
-        className={css(styles.header)}
         justifyContent='space-between'
         alignItems='center'
-        padding='30px 10%'>
+        padding='30px 10%'
+        style={{ backgroundColor: Colors.isuRed, borderBottom: `4px solid ${Colors.isuYellow}`, color: '#ffffff',}}
+      >
 
         <Heading text='SOP Organizer' renderAs='h1' />
 
@@ -116,7 +113,7 @@ function Header() {
               </div>
             </>
             :
-            <>ADD LOGIN BUTTON</>
+            <Button label='Login' href='/login' variant='secondary' onDark type='submit' style={{ width: '100%' }} />
           }
         </View>
       </View>
