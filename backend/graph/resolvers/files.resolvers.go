@@ -51,6 +51,16 @@ func (r *queryResolver) File(ctx context.Context, id string) (*model.File, error
 	return file, nil
 }
 
+// Search is the resolver for the search field.
+func (r *queryResolver) Search(ctx context.Context, query string) ([]*model.File, error) {
+	files, err := r.FileService.SearchFiles(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
+}
+
 // Folder returns generated.FolderResolver implementation.
 func (r *Resolver) Folder() generated.FolderResolver { return &folderResolver{r} }
 

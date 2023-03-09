@@ -13,6 +13,11 @@ extend type Query {
     Gets a single file by ID
     """
     file(id: ID!): File
+
+    """
+    Searches all folders for files with titles or text content containing the given string
+    """
+    search(query: String!): [File]
 }
 
 """

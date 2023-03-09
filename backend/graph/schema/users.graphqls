@@ -1,11 +1,7 @@
 extend type Query {
     me: User
-<<<<<<< HEAD
-    all: [User]
-=======
     all: [User!]
     user(userId: ID!): User
->>>>>>> 6bd3563b1c3eec70993a40e7680265930bbbf189
 }
 
 extend type Mutation {

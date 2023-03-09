@@ -32,6 +32,18 @@ type DriveFolderItem struct {
 	LastModifiedBy string `json:"lastModifyingUserName"`
 }
 
+type DriveSearchQueryResponse struct {
+	Incomplete bool               `json:"incompleteSearch"`
+	Files      []*DriveSearchItem `json:"files"`
+}
+
+type DriveSearchItem struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+	Kind string `json:"kind"`
+	Type string `json:"mimeType"`
+}
+
 // Creates a new folder struct
 func (s *FileService) NewFolderModel() *model.Folder {
 	folder := &model.Folder{}
@@ -211,4 +223,62 @@ func (s *FileService) GetFileById(ctx context.Context, id string) (*model.File, 
 	file.LastModifiedBy = data.LastModifiedBy
 
 	return file, nil
+}
+
+func (s *FileService) SearchFiles(ctx context.Context, query string) ([]*model.File, error) {
+	return s.SearchFilesRec(ctx, query, os.Getenv("ROOT_FOLDER_ID"))
+}
+
+func (s *FileService) SearchFilesRec(ctx context.Context, query string, folderId string) ([]*model.File, error) {
+	// Make a request to Google Drive API to get all items in the root folder
+	requestURL := fmt.Sprintf("https://www.googleapis.com/drive/v3/files?q=fullText+contains+'%s'+and+trashed+%%3d+false+and+'%s'+in+parents&key=%s",
+		query,
+		folderId,
+		os.Getenv("GOOGLE_DRIVE_API_KEY"),
+	)
+	fmt.Println(requestURL)
+	res, err := http.Get(requestURL)
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while searching files.", err)
+	}
+
+	// Read the response
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while searching files.", err)
+	}
+
+	// Parse the JSON string response into a struct
+	data := &DriveSearchQueryResponse{}
+	err = json.Unmarshal([]byte(resBody), &data)
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while searching files.", err)
+	}
+
+	// check if the search was incomplete; if so, an error occurred with the search request string
+	if data.Incomplete {
+		return nil, errors.NewInternalError(ctx, "An incomplete search was conducted", err)
+	}
+
+	files := []*model.File{}
+	for _, item := range data.Files {
+		// Found a nested folder, recurse and search all of its items
+		if item.Type == "application/vnd.google-apps.folder" {
+			nestedFiles, err := s.SearchFilesRec(ctx, query, item.Id)
+			if err != nil {
+				return nil, err
+			}
+			// Add each nested file to the list of files
+			files = append(files, nestedFiles...)
+		}
+		// Get the file object using id
+		file, err := s.GetFileById(ctx, item.Id)
+		if err != nil {
+			return nil, err
+		}
+		// Append file to list
+		files = append(files, file)
+	}
+
+	return files, nil
 }
