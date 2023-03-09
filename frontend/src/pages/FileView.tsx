@@ -35,11 +35,11 @@ export default function FileView() {
             <View container flexDirection='column'>
                 {/* Todo: Create style for these buttons (in Button component and then use className). */}
 
-                <Button onClick={downloadFile} children="Download SOP" />
-                <Button onClick={() => {setIsEditing(true);}} children="Edit Document" hidden={!canEdit || isEditing} />
+                <Button variant='primary' onClick={downloadFile} label="Download SOP" />
+                <Button variant='primary' onClick={() => {setIsEditing(true);}} label="Edit Document" hidden={!canEdit || isEditing} />
 
                 {/* Add any other doc save functionality to onClick function here. */}
-                <Button onClick={() => {setIsEditing(false)}} children="Save & Finish" hidden={!isEditing} />
+                <Button variant='primary' onClick={() => {setIsEditing(false)}} label="Save & Finish" hidden={!isEditing} />
 
                 {/* Other potential buttons: View Edit History, Delete SOP */}
             </View>
