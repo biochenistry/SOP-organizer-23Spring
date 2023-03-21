@@ -23,7 +23,7 @@ export default function FileView() {
     }
 
     return (
-        <View container alignItems='center' justifyContent='center' width='100%' flexDirection='row'>
+        <View container justifyContent='center' alignItems='center' width='100%' flexDirection='row'>
             {/* This is the actual embedded file that gets displayed. */}
             <FileEmbed docId={fileId} isEditing={isEditing} />
 
@@ -31,8 +31,8 @@ export default function FileView() {
             <View container flexDirection='column' gap='16px'>
                 <Button variant='primary' onClick={downloadFile} label="Download SOP" />
 
-                {/* Todo: Only check if user is logged in rather than admin */}
-                <Button variant='primary' onClick={() => {setIsEditing(true);}} label="Edit Document" hidden={!state.user?.isAdmin || isEditing} />
+                {/* Only shows Edit Document button if user is logged in */}
+                <Button variant='primary' onClick={() => {setIsEditing(true);}} label="Edit Document" hidden={!state.user || isEditing} />
 
                 {/* Add any other doc save functionality to onClick function here. */}
                 <Button variant='primary' onClick={() => {setIsEditing(false)}} label="Save & Finish" hidden={!isEditing} />
