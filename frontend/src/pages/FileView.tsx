@@ -23,12 +23,12 @@ export default function FileView() {
     }
 
     return (
-        <View container justifyContent='center' alignItems='center' width='100%' flexDirection='row'>
+        <View container width='100%' flexDirection='row'>
             {/* This is the actual embedded file that gets displayed. */}
             <FileEmbed docId={fileId} isEditing={isEditing} />
 
             {/* Todo: Align buttons at top of View container */}
-            <View container flexDirection='column' gap='16px'>
+            <View container flexDirection='column' width='calc(100% - 1000px)' gap='2px' padding='4px'>
                 <Button variant='primary' onClick={downloadFile} label="Download SOP" />
 
                 {/* Only shows Edit Document button if user is logged in */}
