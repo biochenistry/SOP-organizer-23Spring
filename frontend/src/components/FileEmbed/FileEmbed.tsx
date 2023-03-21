@@ -10,10 +10,18 @@ const FileEmbed: React.FC<FileEmbedProps> = ({
         docId,
         isEditing
     }) => {
+        // set height to screen height - header height
+        const head = document.getElementById('header');
+        let hgt = window.innerHeight;
+
+        if (head != null) {
+            hgt -= head.clientHeight + head.offsetHeight;
+        }
+        
         const styles = StyleSheet.create({
             defaultFileEmbed: {
                 width: '1000px',
-                height: '100vh',
+                height: hgt,
                 border: 'none'
             },
         });
