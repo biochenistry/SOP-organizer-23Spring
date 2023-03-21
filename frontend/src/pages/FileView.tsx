@@ -17,6 +17,7 @@ export default function FileView() {
         return null;
     }
 
+    /* Todo: Add option to select file format */
     const downloadFile = () => {
         window.location.href = 'https://docs.google.com/feeds/download/documents/export/Export?id=' + fileId + '&exportFormat=docx';
     }
@@ -28,9 +29,9 @@ export default function FileView() {
 
             {/* Todo: Align buttons at top of View container */}
             <View container flexDirection='column' gap='16px'>
-                {/* Todo: Create style for these buttons (in Button component and then use className). */}
-
                 <Button variant='primary' onClick={downloadFile} label="Download SOP" />
+
+                {/* Todo: Only check if user is logged in rather than admin */}
                 <Button variant='primary' onClick={() => {setIsEditing(true);}} label="Edit Document" hidden={!state.user?.isAdmin || isEditing} />
 
                 {/* Add any other doc save functionality to onClick function here. */}
