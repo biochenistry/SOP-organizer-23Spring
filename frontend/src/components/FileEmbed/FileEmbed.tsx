@@ -15,7 +15,7 @@ const FileEmbed: React.FC<FileEmbedProps> = ({
         let hgt = window.innerHeight;
 
         if (head != null) {
-            hgt -= head.clientHeight + head.offsetHeight;
+            hgt -= head.offsetHeight + 4;
         }
         
         const styles = StyleSheet.create({
