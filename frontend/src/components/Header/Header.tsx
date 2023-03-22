@@ -92,7 +92,7 @@ function Header() {
   }
 
   return (
-    <>
+    <div id='header'>
       <View
         container
         justifyContent='space-between'
@@ -126,7 +126,7 @@ function Header() {
           <div className={css(styles.popupAction)} onClick={handleLogout}><Paragraph>Logout</Paragraph></div>
         </div>
       }
-    </>
+    </div>
   );
 }
 

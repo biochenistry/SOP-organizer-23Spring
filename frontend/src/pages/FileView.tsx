@@ -17,21 +17,22 @@ export default function FileView() {
         return null;
     }
 
+    /* Todo: Add option to select file format */
     const downloadFile = () => {
         window.location.href = 'https://docs.google.com/feeds/download/documents/export/Export?id=' + fileId + '&exportFormat=docx';
     }
 
     return (
-        <View container alignItems='center' justifyContent='center' width='100%' flexDirection='row'>
+        <View container width='100%' flexDirection='row'>
             {/* This is the actual embedded file that gets displayed. */}
             <FileEmbed docId={fileId} isEditing={isEditing} />
 
             {/* Todo: Align buttons at top of View container */}
-            <View container flexDirection='column' gap='16px'>
-                {/* Todo: Create style for these buttons (in Button component and then use className). */}
-
+            <View container flexDirection='column' width='calc(100% - 1000px)' gap='2px' padding='4px'>
                 <Button variant='primary' onClick={downloadFile} label="Download SOP" />
-                <Button variant='primary' onClick={() => {setIsEditing(true);}} label="Edit Document" hidden={!state.user?.isAdmin || isEditing} />
+
+                {/* Only shows Edit Document button if user is logged in */}
+                <Button variant='primary' onClick={() => {setIsEditing(true);}} label="Edit Document" hidden={!state.user || isEditing} />
 
                 {/* Add any other doc save functionality to onClick function here. */}
                 <Button variant='primary' onClick={() => {setIsEditing(false)}} label="Save & Finish" hidden={!isEditing} />
