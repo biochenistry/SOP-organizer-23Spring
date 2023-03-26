@@ -16,10 +16,7 @@ export type FormProps = {
  * The child elements of a `Form` are automatically wrapped in a `View`. To position input fields in the same row, wrap them in another `View` with `flexDirection: 'row'`.
  * 
  * ### Usage
- * 
- * ```jsx
- * import { Form, TextField, useForm } from '@barscience/global-components';
- * 
+ *
  * type ExampleFormType = {
  *   firstName: string;
  *   lastName: string;
@@ -39,8 +36,8 @@ export type FormProps = {
  *  <TextField label='First Name' name='firstName' value={form.values.firstName} error={form.errors.firstName} onChange={form.handleChange} onValidate={form.handleValidate} />
  *  <TextField label='Last Name' name='lastName' value={form.values.lastName} error={form.errors.lastName} onChange={form.handleChange} onValidate={form.handleValidate} />
  * </Form>
- * ```
  */
+
 export default function Form(props: FormProps) {
   return (
     <form onSubmit={props.handleSubmit} id={props.id} data-testid={props.testId}>

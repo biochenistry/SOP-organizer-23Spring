@@ -3,7 +3,7 @@ import View from "../components/View/View";
 import { gql, useQuery } from '@apollo/client'
 import { useAuthState } from "../components/Auth";
 
-
+//query defined in backend
 const GET_ALL_USERS = gql`
 query getAllUsers {
     all{
@@ -39,6 +39,7 @@ function determineAdmin(person: User){
     }
 }
 
+//allows admin users to access user information
 const Page: React.FunctionComponent = () => {
     const navigate = useNavigate();
     const { state } = useAuthState();
@@ -48,6 +49,7 @@ const Page: React.FunctionComponent = () => {
         navigate('/');
     }
 
+    //Returns a table with each user's information
     return (      
         <View container alignItems='center' justifyContent='center' width='100%'>
         <table>
