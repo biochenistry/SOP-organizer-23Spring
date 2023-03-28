@@ -40,8 +40,6 @@ type DriveSearchQueryResponse struct {
 type DriveSearchItem struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
-	Kind string `json:"kind"`
-	Type string `json:"mimeType"`
 }
 
 // Creates a new folder struct
@@ -54,6 +52,11 @@ func (s *FileService) NewFolderModel() *model.Folder {
 func (s *FileService) NewFileModel() *model.File {
 	file := &model.File{}
 	return file
+}
+
+func (s *FileService) NewSearchResultModel() *model.SearchResult {
+	result := &model.SearchResult{}
+	return result
 }
 
 // Gets a list of all folders in the root folder
@@ -225,18 +228,72 @@ func (s *FileService) GetFileById(ctx context.Context, id string) (*model.File, 
 	return file, nil
 }
 
-func (s *FileService) SearchFiles(ctx context.Context, query string) ([]*model.File, error) {
-	return s.SearchFilesRec(ctx, query, os.Getenv("ROOT_FOLDER_ID"))
+func (s *FileService) SearchFiles(ctx context.Context, query string) ([]*model.SearchResult, error) {
+	folders, err := s.GetAllFolders(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Replace any spaces in the query string with a '+' character (e.g. "Hello World" becomes "Hello+World")
+	query = strings.Replace(query, " ", "+", -1)
+
+	folderIds := []string{}
+	// Append all root folder ids to slice
+	for _, folder := range folders {
+		folderIds = append(folderIds, folder.ID)
+	}
+
+	// Append all nested folder ids inside of each root folder to slice
+	for _, folder := range folders {
+		// Get all nested folders under this folder
+		err = s.GetNestedFoldersRec(ctx, folder.ID, &folderIds)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	fmt.Printf("Found %d folders\n", len(folderIds))
+
+	results := []*model.SearchResult{}
+	for _, id := range folderIds {
+		result, err := s.SearchFolder(ctx, query, id)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, result...)
+	}
+
+	return results, nil
 }
 
-func (s *FileService) SearchFilesRec(ctx context.Context, query string, folderId string) ([]*model.File, error) {
+// Recursive algorithm for extracting nested folders inside of a given folder
+func (s *FileService) GetNestedFoldersRec(ctx context.Context, folderId string, folderIds *[]string) error {
+	folderContents, err := s.GetFolderContents(ctx, folderId)
+	if err != nil {
+		return err
+	}
+
+	for _, item := range folderContents {
+		if folder, ok := item.(*model.Folder); ok {
+			// If this is a folder, then recurse and search it to find nested folders
+			err := s.GetNestedFoldersRec(ctx, folder.ID, folderIds)
+			if err != nil {
+				return err
+			}
+			*folderIds = append(*folderIds, folder.ID)
+		}
+	}
+
+	return nil
+}
+
+func (s *FileService) SearchFolder(ctx context.Context, query string, folderId string) ([]*model.SearchResult, error) {
 	// Make a request to Google Drive API to get all items in the root folder
 	requestURL := fmt.Sprintf("https://www.googleapis.com/drive/v3/files?q=fullText+contains+'%s'+and+trashed+%%3d+false+and+'%s'+in+parents&key=%s",
 		query,
 		folderId,
 		os.Getenv("GOOGLE_DRIVE_API_KEY"),
 	)
-	fmt.Println(requestURL)
 	res, err := http.Get(requestURL)
 	if err != nil {
 		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while searching files.", err)
@@ -249,36 +306,27 @@ func (s *FileService) SearchFilesRec(ctx context.Context, query string, folderId
 	}
 
 	// Parse the JSON string response into a struct
-	data := &DriveSearchQueryResponse{}
+	data := new(DriveSearchQueryResponse)
 	err = json.Unmarshal([]byte(resBody), &data)
 	if err != nil {
 		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while searching files.", err)
 	}
 
-	// check if the search was incomplete; if so, an error occurred with the search request string
+	// Check if the search was incomplete; if so, an error occurred with the search request string
 	if data.Incomplete {
 		return nil, errors.NewInternalError(ctx, "An incomplete search was conducted", err)
 	}
 
-	files := []*model.File{}
+	results := []*model.SearchResult{}
 	for _, item := range data.Files {
-		// Found a nested folder, recurse and search all of its items
-		if item.Type == "application/vnd.google-apps.folder" {
-			nestedFiles, err := s.SearchFilesRec(ctx, query, item.Id)
-			if err != nil {
-				return nil, err
-			}
-			// Add each nested file to the list of files
-			files = append(files, nestedFiles...)
-		}
-		// Get the file object using id
-		file, err := s.GetFileById(ctx, item.Id)
-		if err != nil {
-			return nil, err
-		}
 		// Append file to list
-		files = append(files, file)
+		result := s.NewSearchResultModel()
+
+		result.ID = item.Id
+		result.Name = item.Name
+
+		results = append(results, result)
 	}
 
-	return files, nil
+	return results, nil
 }
