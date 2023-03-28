@@ -85,9 +85,7 @@ const styles = StyleSheet.create({
 /**
  * A text input field used for collecting user input.
  * 
- * ### Usage
  * 
- * ```jsx 
  * <TextField
  *   type='text'
  *   name='fieldName'
@@ -96,8 +94,8 @@ const styles = StyleSheet.create({
  *   label='Sample Field'
  *   onChange={() => {}} onValidate={() => {}}
  * />
- * ```
  */
+
 export default function TextField(props: TextFieldProps) {
   useEffect(() => {
     if (props.required !== undefined && (props.value === '' || props.value === null || props.value === undefined)) {
@@ -171,20 +169,4 @@ export default function TextField(props: TextFieldProps) {
       )}
     </View>
   );
-
-  // return (
-  //   <div>
-  //       <input
-  //         type={props.type || 'text'}
-  //         name={props.name}
-  //         value={props.value}
-  //         placeholder={props.placeholder}
-  //         id={props.id || props.name + '-field'}
-  //         data-testid={props.testId}
-  //         onChange={handleChange}
-  //         disabled={props.disabled}
-  //         onWheel={handleScroll}
-  //       />
-  //     </div>
-  // );
 }
