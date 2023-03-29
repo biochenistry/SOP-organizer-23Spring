@@ -97,11 +97,11 @@ function Header() {
         container
         justifyContent='space-between'
         alignItems='center'
-        padding='30px 10%'
+        padding='12px 10%'
         style={{ backgroundColor: Colors.isuRed, borderBottom: `4px solid ${Colors.isuYellow}`, color: '#ffffff',}}
       >
 
-        <Heading text='SOP Organizer' renderAs='h1' />
+        <Heading text='SOP Organizer' renderAs='h2' />
 
 
         <View container alignItems='center' gap='16px'>
