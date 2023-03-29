@@ -4,7 +4,6 @@ go 1.19
 
 require (
 	github.com/99designs/gqlgen v0.17.24
-	github.com/go-chi/chi v1.5.4
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/jackc/pgx/v4 v4.17.2
