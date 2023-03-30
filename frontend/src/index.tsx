@@ -3,9 +3,12 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
 import { AuthStateProvider } from './components/Auth';
-
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en.json';
 import './index.css'
 import { BrowserRouter } from 'react-router-dom';
+
+TimeAgo.addDefaultLocale(en)
 
 let url = '/api';
 if (window.location.href.includes('localhost')) {

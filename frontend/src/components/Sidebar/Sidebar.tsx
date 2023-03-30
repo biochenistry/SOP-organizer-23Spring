@@ -77,7 +77,7 @@ export type File = {
 const sidebarContainerStyle: CSSProperties = {
   backgroundColor: '#ffffff',
   borderRight: `1px solid ${Colors.harlineGrey}`,
-  height: 'calc(100vh - 104px)',
+  height: '100%',
   maxWidth: '250px',
   minWidth: '250px',
   paddingTop: '24px',

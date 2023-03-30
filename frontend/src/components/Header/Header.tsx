@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     padding: '4px 0',
+    zIndex: 1,
   },
 });
 
@@ -59,7 +60,7 @@ function Header() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [logoutUser] = useMutation<LogoutResponse>(LOGOUT);
   const { x, y, strategy, refs } = useFloating({
-    placement: 'bottom-start',
+    placement: 'bottom-end',
     middleware: [offset(4)],
   });
 
@@ -97,8 +98,9 @@ function Header() {
         container
         justifyContent='space-between'
         alignItems='center'
-        padding='12px 10%'
-        style={{ backgroundColor: Colors.isuRed, borderBottom: `4px solid ${Colors.isuYellow}`, color: '#ffffff',}}
+        padding='16px'
+        width='100%'
+        style={{ backgroundColor: Colors.isuRed, borderBottom: `4px solid ${Colors.isuYellow}`, color: '#ffffff' }}
       >
 
         <Heading text='SOP Organizer' renderAs='h2' />
