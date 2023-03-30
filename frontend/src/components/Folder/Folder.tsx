@@ -38,21 +38,21 @@ const SidebarFolder = (props: folderProps) => {
   const collapse = () => (setCollapse(!collapseContents), setDropdown(!dropdown))
 
   return (
-    <View container flexDirection='column' gap='12px'>
+    <View container flexDirection='column' gap='8px'>
       <View container gap='8px' alignItems='center' style={{ cursor: 'pointer', 'user-select': 'none' }} onClick={collapse}>
         {dropdown ? <FiChevronDown /> : <FiChevronRight />}
-        <Paragraph style={{ fontWeight: 'bold', fontSize: '20px' }}>{props.folder?.name}</Paragraph>
+        <Paragraph style={{ fontWeight: 'bold', fontSize: '16px' }}>{props.folder?.name}</Paragraph>
       </View>
 
-      <View container flexDirection='column' gap='16px' padding='0 0 16px 0'>
+      <View container flexDirection='column' gap='8px' padding='0 0 8px 0'>
         {collapseContents && props.folder?.contents.map((file, index) => {
           return (
             (file?.__typename === "File") ?
               <Link to={'/file/' + file.id} className={css(createStyle({ textDecoration: 'none', userSelect: 'none', ...(location.pathname === `/file/${file.id}` ? fileLinkSelected : {}) }))} key={index}>
-                <Paragraph style={fileLinkStyle}>{file.name}</Paragraph>
+                <Paragraph style={{...fileLinkStyle, fontSize: '14px'}}>{file.name}</Paragraph>
               </Link>
               :
-              <View margin='0 0 0 24px' key={index}>
+              <View margin='0 0 0 8px' key={index}>
                 {(file?.__typename === "Folder") &&
                   <SidebarFolder folder={file}></SidebarFolder>
                 }

@@ -1,19 +1,15 @@
-import React from 'react';
-import View from '../components/View/View';
-import FileEmbed from '../components/FileEmbed/FileEmbed';
-import Button from '../components/Button/Button';
+import { useNavigate, useParams } from "react-router-dom";
+import FileEmbed from "../components/FileEmbed/FileEmbed";
+import View from "../components/View/View";
+import { gql, useQuery } from "@apollo/client";
+import { Colors } from "../components/GlobalStyles";
+import Heading from "../components/Heading/Heading";
+import Paragraph from "../components/Paragraph/Paragraph";
+import ReactTimeAgo from "react-time-ago";
 import { useAuthState } from "../components/Auth";
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { CSSProperties } from 'aphrodite';
-import { Colors } from '../components/GlobalStyles';
-import Heading from '../components/Heading/Heading';
-import { gql, useQuery } from '@apollo/client';
-import LoadingSpinner from '../components/LoadingSpinner';
-import Paragraph from '../components/Paragraph/Paragraph';
-import ReactTimeAgo from 'react-time-ago';
-import ActionMenu from '../components/ActionMenu/ActionMenu';
-import ActionItem from '../components/ActionMenu/ActionItem';
+import Button from "../components/Button/Button";
+import { CSSProperties } from "aphrodite";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const GET_FILE_DETAILS = gql`
 query getFileDetails($id: ID!) {
@@ -49,25 +45,19 @@ const toolbarStyle: CSSProperties = {
   width: '100%',
 };
 
-export default function FileView() {
+export default function FileViewFullscreen() {
   const navigate = useNavigate();
   const { fileId } = useParams();
   const { state } = useAuthState();
-  const { data: fileData, loading: fileIsLoading, refetch: refetchFile } = useQuery<GetFileDetailsResponse>(GET_FILE_DETAILS, {
+  const { data: fileData, loading: fileIsLoading } = useQuery<GetFileDetailsResponse>(GET_FILE_DETAILS, {
     variables: {
       id: fileId,
     },
   });
-  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   if (!fileId) {
     navigate('/');
     return null;
-  }
-
-  /* Todo: Add option to select file format */
-  const downloadFile = (format: 'docx' | 'pdf') => {
-    window.location.href = 'https://docs.google.com/feeds/download/documents/export/Export?id=' + fileId + '&exportFormat=' + format;
   }
 
   if (fileIsLoading && !fileData) {
@@ -87,8 +77,7 @@ export default function FileView() {
   }
 
   return (
-    <View container width='100%' flexDirection='column' height='100%' >
-
+    <View container width='100%' flexDirection='column' height='100vh' >
       <View style={toolbarStyle} container>
         <View container flexDirection='row' gap='16px' alignItems='center'>
           <Heading renderAs='h3' text={fileData?.file?.name || ''} fontWeight='bold' />
@@ -98,22 +87,12 @@ export default function FileView() {
           </Paragraph>
         </View>
         <View container flexDirection='row' gap='24px' alignItems='center'>
-          <ActionMenu label='Download'>
-            <ActionItem label='PDF' onClick={() => { downloadFile('pdf'); }} />
-            <ActionItem label='DOCX' onClick={() => { downloadFile('docx'); }} />
-          </ActionMenu>
-          <Button label='Fullscreen' onClick={() => { navigate('/file/' + fileId + '/fullscreen'); }} variant='secondary' />
-          {state.user &&
-            (isEditing ?
-            <Button variant='primary' onClick={() => { setIsEditing(false); refetchFile(); }} label='Done' />
-            :
-            <Button variant='primary' onClick={() => { setIsEditing(true); }} label='Edit' />)
-          }
+          <Button label='Exit Fullscreen' onClick={() => { navigate('/file/' + fileId ); }} variant='secondary' />
         </View>
       </View>
-
+      
       <View flexGrow={1} height='100%' container>
-        <FileEmbed docId={fileId} isEditing={isEditing} />
+        <FileEmbed docId={fileId || ''} isEditing={false} isFullscreen />
       </View>
     </View>
   );

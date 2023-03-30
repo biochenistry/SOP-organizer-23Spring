@@ -77,7 +77,7 @@ export type File = {
 const sidebarContainerStyle: CSSProperties = {
   backgroundColor: '#ffffff',
   borderRight: `1px solid ${Colors.harlineGrey}`,
-  height: 'calc(100vh - 104px)',
+  height: '100%',
   maxWidth: '250px',
   minWidth: '250px',
   paddingTop: '24px',
@@ -106,7 +106,7 @@ const Sidebar: React.FunctionComponent = () => {
 
   return (
     <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
-      <View container gap='8px' flexDirection='column' padding='0 0 0 16px'>
+      <View container gap='4px' flexDirection='column' padding='0 0 0 8px'>
         {data?.folders.map((folder, index) => {
           return (
             <div key={index}>

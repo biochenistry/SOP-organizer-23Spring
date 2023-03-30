@@ -110,7 +110,7 @@ const Button: React.FC<ButtonProps> = ({
       type={type}
       hidden={hidden}
     >
-      <Paragraph style={{ color: 'inherit', fontWeight: 'bold', textAlign: 'center' }}>{label}</Paragraph>
+      <Paragraph style={{ color: 'inherit', textAlign: 'center' }}>{label}</Paragraph>
     </button>
   );
 }
