@@ -14,6 +14,7 @@ interface ButtonProps {
   type?: 'button' | 'submit';
   style?: CSSProperties;
   hidden?: boolean;
+  disabled?: boolean;
 }
 
 const styles = StyleSheet.create({
@@ -90,6 +91,7 @@ const Button: React.FC<ButtonProps> = ({
   type,
   style,
   hidden,
+  disabled,
 }) => {
   const navigate = useNavigate();
 
@@ -109,6 +111,7 @@ const Button: React.FC<ButtonProps> = ({
       className={css(styles.default, getButtonStyle(variant, onDark), createStyle(style))}
       type={type}
       hidden={hidden}
+      disabled={disabled}
     >
       <Paragraph style={{ color: 'inherit', textAlign: 'center' }}>{label}</Paragraph>
     </button>
