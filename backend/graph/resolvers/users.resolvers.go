@@ -51,22 +51,22 @@ func (r *mutationResolver) ChangeUserRole(ctx context.Context, userID string, ad
 }
 
 // UpdateUser is the resolver for the updateUser field.
-func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, firstname string, lastname string, email string) (*model.User, error) {
+func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, firstname string, lastname string, email string) (bool, error) {
 	authUser := auth.GetUserFromContext(ctx)
 	if authUser == nil {
-		return nil, errs.NewUnauthorizedError(ctx, "You must be logged in to update user account's.")
+		return false, errs.NewUnauthorizedError(ctx, "You must be logged in to update user account's.")
 	}
 
 	if userID != authUser.ID && !auth.IsAdmin(authUser) {
-		return nil, errs.NewForbiddenError(ctx, "You do not have permission to change other user account's.")
+		return false, errs.NewForbiddenError(ctx, "You do not have permission to change other user account's.")
 	}
 
 	err := r.UserService.UpdateUser(ctx, userID, firstname, lastname, email)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	return r.Query().User(ctx, userID)
+	return true, nil
 }
 
 // ChangePassword is the resolver for the changePassword field.
