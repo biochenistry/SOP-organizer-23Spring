@@ -95,7 +95,7 @@ type MutationResolver interface {
 	Logout(ctx context.Context) (bool, error)
 	CreateUser(ctx context.Context, firstname string, lastname string, email string, password string, admin bool) (*model.User, error)
 	ChangeUserRole(ctx context.Context, userID string, admin bool) (*model.User, error)
-	UpdateUser(ctx context.Context, userID string, firstname string, lastname string, email string) (*model.User, error)
+	UpdateUser(ctx context.Context, userID string, firstname string, lastname string, email string) (bool, error)
 	ChangePassword(ctx context.Context, userID string, newPassword string) (bool, error)
 }
 type QueryResolver interface {
@@ -514,7 +514,7 @@ extend type Mutation {
     """
     Updates an existing user account
     """
-    updateUser(userId: ID!, firstname: String!, lastname: String!, email: String!): User
+    updateUser(userId: ID!, firstname: String!, lastname: String!, email: String!): Boolean!
 
     """
     Changes the password for the user with the given ID. Admin users can use this to change any user's password. Regular users can only change their own password.
@@ -1422,11 +1422,14 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 		ec.Error(ctx, err)
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.User)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1436,21 +1439,7 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "isDisabled":
-				return ec.fieldContext_User_isDisabled(ctx, field)
-			case "isAdmin":
-				return ec.fieldContext_User_isAdmin(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	defer func() {
