@@ -2,6 +2,12 @@ import { useNavigate } from "react-router";
 import View from "../components/View/View";
 import { gql, useQuery } from '@apollo/client'
 import { useAuthState } from "../components/Auth";
+import Button from "../components/Button/Button";
+
+//TODO: Button to each row to remove user
+//Button in each row to upgrade user to admin
+//button to add a user, pop up
+//info button explaining what everything is
 
 //query defined in backend
 const GET_ALL_USERS = gql`
@@ -66,6 +72,10 @@ const Page: React.FunctionComponent = () => {
                         <td>{user.lastName}</td> 
                         <td>{user.email}</td> 
                         <td>{determineAdmin(user)} </td> 
+                        <td>
+                            <Button label='Remove' href='/login' variant='secondary' onDark type='submit' style={{ width: '100%' }} />
+                        </td>
+                        
                     </tr>
                     );
                 })}
