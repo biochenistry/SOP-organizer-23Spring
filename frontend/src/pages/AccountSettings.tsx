@@ -5,7 +5,6 @@ import Heading from '../components/Heading/Heading';
 import Form from '../components/Form/Form';
 import useForm from "../components/Form/useForm";
 import TextField from '../components/TextField/TextField';
-import Paragraph from '../components/Paragraph/Paragraph';
 import { useAuthState } from "../components/Auth";
 import { useState } from 'react';
 import { gql, useMutation } from "@apollo/client";
@@ -41,7 +40,6 @@ type PasswordInput = {
 }
 
 /* Todo:
-    - make layout look prettier (fix spacing and positioning)
     - add confirmation/error message after changes are saved
 */
 
@@ -49,7 +47,7 @@ export default function AccountSettings() {
     const { state } = useAuthState();
     const [updateUser] = useMutation<UpdateUserResponse>(UPDATE_USER, { errorPolicy: 'all' });
     const [changePassword] = useMutation<UpdatePassResponse>(UPDATE_PASS, { errorPolicy: 'all' });
-    const [hasError, setHasError] = useState<boolean>(false);
+    // const [hasError, setHasError] = useState<boolean>(false);
     const [isChangingInfo, setIsChangingInfo] = useState<boolean>(false);
     const [isChangingPass, setIsChangingPass] = useState<boolean>(false);
     const [submitEditsDisabled, setSubmitEditsDisabled] = useState<boolean>(true);
@@ -65,7 +63,7 @@ export default function AccountSettings() {
         });
 
         if (!data?.success) {
-            setHasError(true);
+            // setHasError(true);
         }
 
         setIsChangingInfo(false);
@@ -81,7 +79,7 @@ export default function AccountSettings() {
         });
 
         if (!data?.success) {
-            setHasError(true);
+            // setHasError(true);
         }
 
         setIsChangingPass(false);
