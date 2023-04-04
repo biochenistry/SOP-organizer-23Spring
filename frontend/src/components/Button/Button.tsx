@@ -4,6 +4,8 @@ import { Colors } from '../GlobalStyles';
 import { useNavigate } from 'react-router';
 import { createStyle } from '../../util/createStyle';
 import Paragraph from '../Paragraph/Paragraph';
+import LoadingSpinner from '../LoadingSpinner';
+import View from '../View/View';
 
 interface ButtonProps {
   onClick?: (() => void) | (() => Promise<void>);
@@ -14,6 +16,8 @@ interface ButtonProps {
   type?: 'button' | 'submit';
   style?: CSSProperties;
   hidden?: boolean;
+  disabled?: boolean;
+  isLoading?: boolean;
 }
 
 const styles = StyleSheet.create({
@@ -90,6 +94,8 @@ const Button: React.FC<ButtonProps> = ({
   type,
   style,
   hidden,
+  disabled,
+  isLoading,
 }) => {
   const navigate = useNavigate();
 
@@ -109,8 +115,12 @@ const Button: React.FC<ButtonProps> = ({
       className={css(styles.default, getButtonStyle(variant, onDark), createStyle(style))}
       type={type}
       hidden={hidden}
+      disabled={disabled}
     >
-      <Paragraph style={{ color: 'inherit', textAlign: 'center' }}>{label}</Paragraph>
+      <View container alignItems='center' justifyContent='center' style={{ position: 'relative', left: 0, top: 0, ...(isLoading ? { height: '100%' } : {}) }}>
+        {isLoading && <LoadingSpinner size='small' />}
+      </View>
+      <Paragraph style={{ color: 'inherit', textAlign: 'center', ...(isLoading ? { visibility: 'hidden' } : {}) }}>{label}</Paragraph>
     </button>
   );
 }

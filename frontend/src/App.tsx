@@ -7,6 +7,7 @@ import FileView from './pages/FileView';
 import UsersList from './pages/UsersList';
 import Home from './pages/Home';
 import FileViewFullscreen from './pages/FileViewFullscreen';
+import AccountSettings from './pages/AccountSettings';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Route path='/file/:fileId' element={<WithHeaderAndSidebar><FileView /></WithHeaderAndSidebar>} />
       <Route path='/file/:fileId/fullscreen' element={<FileViewFullscreen />} />
       <Route path='/users' element={<WithHeaderAndSidebar><UsersList /></WithHeaderAndSidebar>} />
+      <Route path='/account-settings' element={<WithHeaderAndSidebar><AccountSettings /></WithHeaderAndSidebar>} />
     </Routes>
   );
 }
