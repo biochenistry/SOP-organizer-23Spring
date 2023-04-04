@@ -18,7 +18,7 @@ extend type Mutation {
     """
     Updates an existing user account
     """
-    updateUser(userId: ID!, firstname: String!, lastname: String!, email: String!): Boolean!
+    updateUser(userId: ID!, firstname: String!, lastname: String!, email: String!): User
 
     """
     Changes the password for the user with the given ID. Admin users can use this to change any user's password. Regular users can only change their own password.

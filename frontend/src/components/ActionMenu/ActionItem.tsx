@@ -1,7 +1,6 @@
 import { css, StyleSheet } from 'aphrodite';
 import React from 'react';
 import { Colors } from '../GlobalStyles';
-import Paragraph from '../Paragraph/Paragraph';
 
 export type ActionItemProps = {
   label: string;

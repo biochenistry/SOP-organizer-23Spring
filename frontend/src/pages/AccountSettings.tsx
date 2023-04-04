@@ -6,12 +6,20 @@ import Form from '../components/Form/Form';
 import useForm from "../components/Form/useForm";
 import TextField from '../components/TextField/TextField';
 import { useAuthState } from "../components/Auth";
-import { useState } from 'react';
 import { gql, useMutation } from "@apollo/client";
+import Paragraph from '../components/Paragraph/Paragraph';
+import { Colors } from '../components/GlobalStyles';
+import { login } from '../components/Auth/authStateReducer';
+import { useNavigate } from 'react-router';
 
 const UPDATE_USER = gql`
 mutation updateUser($userId: ID!, $firstname: String!, $lastname: String!, $email: String!) {
-  success: updateUser(userId: $userId, firstname: $firstname, lastname: $lastname, email: $email)
+  updateUser(userId: $userId, firstname: $firstname, lastname: $lastname, email: $email) {
+    id
+    firstName
+    lastName
+    email
+  }
 }
 `;
 
@@ -22,126 +30,128 @@ mutation changePassword($userId: ID!, $newPassword: String!) {
 `;
 
 type UpdateUserResponse = {
-    success: boolean;
+  user: User;
+}
+
+type User = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
 }
 
 type UserInput = {
-    firstname: string;
-    lastname: string;
-    email: string;
+  firstname: string;
+  lastname: string;
+  email: string;
 }
 
 type PasswordInput = {
-    password: string;
+  password: string;
 }
 
-/* Todo:
-    - add confirmation/error message after changes are saved
-*/
-
 export default function AccountSettings() {
-    const { state } = useAuthState();
-    const [updateUser] = useMutation<UpdateUserResponse>(UPDATE_USER, { errorPolicy: 'all' });
-    const [changePassword] = useMutation<UpdateUserResponse>(UPDATE_PASS, { errorPolicy: 'all' });
-    // const [hasError, setHasError] = useState<boolean>(false);
-    const [isChangingInfo, setIsChangingInfo] = useState<boolean>(false);
-    const [isChangingPass, setIsChangingPass] = useState<boolean>(false);
-    const [submitEditsDisabled, setSubmitEditsDisabled] = useState<boolean>(true);
+  const navigate = useNavigate();
+  const { state, dispatch } = useAuthState();
+  const [updateUser, { loading: updateUserIsLoading, data: updateUserData, reset: resetUpdateUser }] = useMutation<UpdateUserResponse>(UPDATE_USER, { errorPolicy: 'all' });
+  const [changePassword, { loading: changePasswordIsLoading, data: changePasswordData, reset: resetChangePassword }] = useMutation<UpdateUserResponse>(UPDATE_PASS, { errorPolicy: 'all' });
 
-    /* Runs when the user submits profile changes */
-    const handleUserUpdate = async (values: UserInput) => {
-        const { data } = await updateUser({
-            variables: {
-                userId: state.user?.id,
-                firstname: values.firstname !== '' ? values.firstname : state.user?.firstName,
-                lastname: values.lastname !== '' ? values.lastname : state.user?.lastName,
-                email: values.email !== '' ? values.email : state.user?.email,
-            },
-        });
-
-        if (!data?.success) {
-            // setHasError(true);
-        }
-
-        setIsChangingInfo(false);
-        setSubmitEditsDisabled(true);
-    }
-
-    /* Runs when the user submits a password change */
-    const handlePassUpdate = async (values: PasswordInput) => {
-        const { data } = await changePassword({
-            variables: {
-                userId: state.user?.id,
-                newPassword: values.password,
-            },
-        });
-
-        if (!data?.success) {
-            // setHasError(true);
-        }
-
-        setIsChangingPass(false);
-    }
-
-    const userForm = useForm<UserInput>({
-        initialValues: {
-            firstname: state.user?.firstName != null ? state.user?.firstName : '',
-            lastname: state.user?.lastName != null ? state.user?.lastName : '',
-            email: state.user?.email != null ? state.user?.email : ''
-        },
-        onSubmit: handleUserUpdate,
+  /* Runs when the user submits profile changes */
+  const handleUserUpdate = async (values: UserInput) => {
+    await updateUser({
+      variables: {
+        userId: state.user?.id,
+        firstname: values.firstname,
+        lastname: values.lastname,
+        email: values.email,
+      },
     });
 
-    const passwordForm = useForm<PasswordInput>({
-        initialValues: {
-            password: ''
-        },
-        onSubmit: handlePassUpdate,
+    if (state.user) {
+      dispatch(login({
+        ...state.user,
+        firstName: values.firstname,
+        lastName: values.lastname,
+        email: values.email,
+      }));
+    }
+
+    setTimeout(() => {
+      resetUpdateUser();
+    }, 3000);
+  }
+
+  /* Runs when the user submits a password change */
+  const handlePassUpdate = async (values: PasswordInput) => {
+    await changePassword({
+      variables: {
+        userId: state.user?.id,
+        newPassword: values.password,
+      },
     });
 
-    return (
-        <View container flexDirection='column' padding='24px' width='100%'>
-            <Heading text='Account Settings' renderAs='h1' />
-            <View container flexDirection='column' alignItems='center' justifyContent='center' gap='20px' height='100%' width='100%'>
-                {isChangingPass ?
-                    <Form handleSubmit={passwordForm.handleSubmit}>
-                        <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='16px'>
-                           <Heading text='New Password:' renderAs='h3' />
-                           <TextField name='password' type='password' onChange={passwordForm.handleChange} onValidate={passwordForm.handleValidate} />
-                       </View>
-                       <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='16px'>
-                           <Button variant='secondary' type='submit' label='Save' />
-                           <Button variant='secondary' onClick={() => { setIsChangingPass(false); }} label='Cancel' />
-                       </View>
-                    </Form>
-                    :
-                    <View container flexDirection='column' alignItems='center' justifyContent='center'>
-                        <Form handleSubmit={userForm.handleSubmit}>
-                            <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='16px'>
-                                <Heading text='Name:' renderAs='h3' />
-                                <TextField name='firstname' type='text' description='First Name' placeholder={userForm.values.firstname} onChange={userForm.handleChange} onValidate={userForm.handleValidate} disabled={!isChangingInfo} />
-                                <TextField name='lastname' type='text' description='Last Name' placeholder={userForm.values.lastname} onChange={userForm.handleChange} onValidate={userForm.handleValidate} disabled={!isChangingInfo} />
-                            </View>
-                            <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='16px'>
-                                <Heading text='Email:' renderAs='h3' />
-                                <TextField name='email' type='text' placeholder={userForm.values.email} onChange={userForm.handleChange} onValidate={userForm.handleValidate} disabled={!isChangingInfo} />
-                            </View>
-                            {isChangingInfo ?
-                                <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='12px'>
-                                    <Button variant='secondary' type='submit' label='Save Changes' disabled={submitEditsDisabled} />
-                                    <Button variant='secondary' onClick={() => { setIsChangingInfo(false); }} label="Cancel" />
-                                </View>
-                                :
-                                <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='12px'>
-                                    { /* Timeout is required here otherwise the click is also registered for the submit button */ }
-                                    <Button variant='secondary' onClick={() => { setIsChangingInfo(true); setTimeout(() => setSubmitEditsDisabled(false), 500); }} label="Edit Profile" />
-                                    <Button variant='secondary' onClick={() => { setIsChangingPass(true); }} label="Change Password" />
-                                </View>
-                            }
-                        </Form>
-                    </View>
-                }
+    setTimeout(() => {
+      resetChangePassword();
+    }, 3000);
+  }
+
+  const userForm = useForm<UserInput>({
+    initialValues: {
+      firstname: state.user?.firstName != null ? state.user?.firstName : '',
+      lastname: state.user?.lastName != null ? state.user?.lastName : '',
+      email: state.user?.email != null ? state.user?.email : ''
+    },
+    onSubmit: handleUserUpdate,
+  });
+
+  const passwordForm = useForm<PasswordInput>({
+    initialValues: {
+      password: ''
+    },
+    onSubmit: handlePassUpdate,
+  });
+
+  if (!state.user) {
+    navigate('/');
+  }
+
+  return (
+    <View container flexDirection='column' padding='24px' gap='32px'>
+      <Heading text='Account Settings' renderAs='h1' />
+      <View container flexDirection='column' gap='48px'>
+
+        <View container flexDirection='column' gap='16px'>
+          <Heading text='Profile Info' renderAs='h2' />
+          <Form handleSubmit={userForm.handleSubmit}>
+            <View container flexDirection='column' gap='16px'>
+              <View container flexDirection='row' gap='16px'>
+                <TextField name='firstname' type='text' label='First Name' value={userForm.values.firstname} error={userForm.errors.firstname} onChange={userForm.handleChange} onValidate={userForm.handleValidate} required />
+                <TextField name='lastname' type='text' label='Last Name' value={userForm.values.lastname} error={userForm.errors.lastname} onChange={userForm.handleChange} onValidate={userForm.handleValidate} required />
+              </View>
+              <TextField name='email' type='text' label='Email' value={userForm.values.email} error={userForm.errors.email} onChange={userForm.handleChange} onValidate={userForm.handleValidate} required />
+              <View container alignItems='center' flexDirection='row' gap='16px'>
+                <Button variant='primary' type='submit' label='Save Changes' style={{ maxWidth: 'fit-content' }} isLoading={updateUserIsLoading} disabled={userForm.hasError} />
+                {(!updateUserIsLoading && updateUserData) && <Paragraph style={{ color: Colors.textSecondary }}>Changes saved!</Paragraph>}
+              </View>
             </View>
+          </Form>
         </View>
-    );
+
+        <View container flexDirection='column' gap='16px'>
+          <Heading text='Change Password' renderAs='h2' />
+          <Form handleSubmit={passwordForm.handleSubmit}>
+            <View container flexDirection='column' gap='16px'>
+              <View container flexDirection='row' alignItems='center' gap='16px'>
+                <TextField name='password' type='password' label='New Password' value={passwordForm.values.password} error={passwordForm.errors.password} onChange={passwordForm.handleChange} onValidate={passwordForm.handleValidate} required />
+              </View>
+              <View container alignItems='center' flexDirection='row' gap='16px'>
+                <Button variant='primary' type='submit' label='Change Password' style={{ maxWidth: 'fit-content' }} isLoading={changePasswordIsLoading} disabled={passwordForm.hasError} />
+                {(!changePasswordIsLoading && changePasswordData) && <Paragraph style={{ color: Colors.textSecondary }}>Password changed!</Paragraph>}
+              </View>
+            </View>
+          </Form>
+        </View>
+      </View>
+    </View>
+  );
 }
