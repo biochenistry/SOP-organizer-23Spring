@@ -16,6 +16,15 @@ import { createStyle } from '../util/createStyle';
 
 
 //  style={{ backgroundColor: Colors.isuRed, borderBottom: `4px solid ${Colors.isuYellow}`, color: '#ffffff', width: '80%', padding: '15px', }}>
+//add user mutation is already in there
+//changeuserrole //create user
+//separate page for creating user
+
+//add user button transitions into new page 
+/*
+page has form to create new user and cancel button brings them back to manage user page
+
+*/
 
 const styles = StyleSheet.create({
     usertable: {
@@ -57,8 +66,49 @@ query getAllUsers {
 }
 `;
 
+//how do I use this part, need to be able to insert the right userID,
+//just work on making admin/removing admin for one of them 
+//add in create user button 
+/*
+const MAKE_ADMIN = gql`
+mutation makeAdmin {
+    changeUserRole(
+        userID: 
+        admin: true
+    )
+    {
+        id
+        firstName
+        lastName
+        email
+        isDisabled
+        isAdmin
+    }
+}
+`;
+*/
+
+
 type GetAllUsersResponse = {
     all: User[] | null;
+}
+
+const ADD_USER = gql`
+mutation createUser($firstname: String!, $lastname: String!, $email: String!, $password: String!, $admin: Boolean!){
+    success: createUser(firstname: $firstname, lastname: $lastname, email: $email, password: $password, admin: $admin)
+}
+`;
+
+type CreateUserResponse = {
+    success: User;
+}
+
+type CreateUserInput = {
+    firstname: string;
+    lastname: string;
+    email: string;
+    password: string;
+    admin: boolean;
 }
 
 type User = {
@@ -91,7 +141,9 @@ const Page: React.FunctionComponent = () => {
 
     //Returns a table with each user's information
     return (      
-        <View container alignItems='center' justifyContent='center' width='100%'>
+        <View container alignItems='center' justifyContent='center' width='100%' flexDirection="column">
+        <Button label='Add User' href='/login' variant='secondary' onDark type='submit' style={{ width: '20%' }} />
+
         <table style={{ borderBottom: `4px solid ${Colors.isuYellow}`, width: '80%', padding: '15px', }}>
             <tr>
                 <th style={{textAlign: 'left'}}>First Name</th>
