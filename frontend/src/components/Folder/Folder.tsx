@@ -49,7 +49,7 @@ const SidebarFolder = (props: folderProps) => {
           return (
             (file?.__typename === "File") ?
               <Link to={'/file/' + file.id} className={css(createStyle({ textDecoration: 'none', userSelect: 'none', ...(location.pathname === `/file/${file.id}` ? fileLinkSelected : {}) }))} key={index}>
-                <Paragraph style={{...fileLinkStyle, fontSize: '14px'}}>{file.name}</Paragraph>
+                  <Paragraph style={{...fileLinkStyle, fontSize: '14px'}}>- {file.name}</Paragraph>
               </Link>
               :
               <View margin='0 0 0 8px' key={index}>
