@@ -85,9 +85,7 @@ const styles = StyleSheet.create({
 /**
  * A text input field used for collecting user input.
  * 
- * ### Usage
  * 
- * ```jsx 
  * <TextField
  *   type='text'
  *   name='fieldName'
@@ -96,14 +94,17 @@ const styles = StyleSheet.create({
  *   label='Sample Field'
  *   onChange={() => {}} onValidate={() => {}}
  * />
- * ```
  */
+
 export default function TextField(props: TextFieldProps) {
+  const { required, value, name, onValidate } = props;
+  
   useEffect(() => {
-    if (props.required !== undefined && (props.value === '' || props.value === null || props.value === undefined)) {
-      props.onValidate && props.onValidate(props.name, '');
+    if (required !== undefined && (value === '' || value === null || value === undefined)) {
+      onValidate && onValidate(name, '');
     }
-  }, [props]);
+    // Don't add depencies to array, as this causes infinite re-renders
+  }, []);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (props.required) {
@@ -114,11 +115,11 @@ export default function TextField(props: TextFieldProps) {
       }
 
       if (error !== null) {
-        props.onValidate && props.onValidate(props.name, '');
+        props.onValidate && props.onValidate(props.name, error);
       }
       else {
         if (props.required !== undefined && e.target.value === '') {
-          props.onValidate && props.onValidate(props.name, '');
+          props.onValidate && props.onValidate(props.name, 'This field is required');
         }
         else {
           props.onValidate && props.onValidate(props.name, null);
@@ -138,7 +139,7 @@ export default function TextField(props: TextFieldProps) {
   }
 
   return (
-    <View container flexDirection='column'>
+    <View container flexDirection='column' flexGrow={1}>
       <div className={css(styles.infoContainer)}>
         {props.label && (
           <div className={css(styles.labelContainer)}>
@@ -167,24 +168,8 @@ export default function TextField(props: TextFieldProps) {
       </div>
 
       {props.error && (
-        <Paragraph style={{ color: Colors.error }}>{props.error}</Paragraph>
+        <Paragraph style={{ color: Colors.error, marginTop: '4px' }}>{props.error}</Paragraph>
       )}
     </View>
   );
-
-  // return (
-  //   <div>
-  //       <input
-  //         type={props.type || 'text'}
-  //         name={props.name}
-  //         value={props.value}
-  //         placeholder={props.placeholder}
-  //         id={props.id || props.name + '-field'}
-  //         data-testid={props.testId}
-  //         onChange={handleChange}
-  //         disabled={props.disabled}
-  //         onWheel={handleScroll}
-  //       />
-  //     </div>
-  // );
 }

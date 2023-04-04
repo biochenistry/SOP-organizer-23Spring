@@ -6,6 +6,7 @@ interface HeaderProps {
     className?: string;
     renderAs: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
     display?: 'block' | 'inline-block';
+    fontWeight?: string | number;
 }
 
 function Heading({ ...props }: HeaderProps) {
@@ -13,7 +14,8 @@ function Heading({ ...props }: HeaderProps) {
       className: props.className,
       style: {
         display: props.display || 'block',
-        color: props.color || 'inherit'
+        color: props.color || 'inherit',
+        fontWeight: props.fontWeight,
       }
     }, props.text);
 

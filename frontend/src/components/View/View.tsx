@@ -15,7 +15,6 @@ interface ViewProps {
   flexGrow?: number,
   flexShrink?: number,
   flexBasis?: number,
-  flex?: string,
   /****** Common Layout Props ********/
   padding?: string,
   margin?: string,
@@ -37,7 +36,6 @@ function View({ ...props }: ViewProps) {
       flexBasis: props.flexBasis || 'auto',
       flexShrink: props.flexShrink || 1,
       flexWrap: props.flexWrap || 'nowrap',
-      flex: props.flex || '0 1 auto',
       gap: props.gap,
       alignItems: props.alignItems || 'stretch',
       margin: props.margin || '0',
