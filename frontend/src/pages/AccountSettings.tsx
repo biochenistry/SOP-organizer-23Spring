@@ -25,10 +25,6 @@ type UpdateUserResponse = {
     success: boolean;
 }
 
-type UpdatePassResponse = {
-    success: boolean;
-}
-
 type UserInput = {
     firstname: string;
     lastname: string;
@@ -46,12 +42,13 @@ type PasswordInput = {
 export default function AccountSettings() {
     const { state } = useAuthState();
     const [updateUser] = useMutation<UpdateUserResponse>(UPDATE_USER, { errorPolicy: 'all' });
-    const [changePassword] = useMutation<UpdatePassResponse>(UPDATE_PASS, { errorPolicy: 'all' });
+    const [changePassword] = useMutation<UpdateUserResponse>(UPDATE_PASS, { errorPolicy: 'all' });
     // const [hasError, setHasError] = useState<boolean>(false);
     const [isChangingInfo, setIsChangingInfo] = useState<boolean>(false);
     const [isChangingPass, setIsChangingPass] = useState<boolean>(false);
     const [submitEditsDisabled, setSubmitEditsDisabled] = useState<boolean>(true);
 
+    /* Runs when the user submits profile changes */
     const handleUserUpdate = async (values: UserInput) => {
         const { data } = await updateUser({
             variables: {
@@ -70,6 +67,7 @@ export default function AccountSettings() {
         setSubmitEditsDisabled(true);
     }
 
+    /* Runs when the user submits a password change */
     const handlePassUpdate = async (values: PasswordInput) => {
         const { data } = await changePassword({
             variables: {
@@ -135,6 +133,7 @@ export default function AccountSettings() {
                                 </View>
                                 :
                                 <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='12px'>
+                                    { /* Timeout is required here otherwise the click is also registered for the submit button */ }
                                     <Button variant='secondary' onClick={() => { setIsChangingInfo(true); setTimeout(() => setSubmitEditsDisabled(false), 500); }} label="Edit Profile" />
                                     <Button variant='secondary' onClick={() => { setIsChangingPass(true); }} label="Change Password" />
                                 </View>
