@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"sort"
 	"strings"
@@ -234,9 +236,6 @@ func (s *FileService) SearchFiles(ctx context.Context, query string) ([]*model.S
 		return nil, err
 	}
 
-	// Replace any spaces in the query string with a '+' character (e.g. "Hello World" becomes "Hello+World")
-	query = strings.Replace(query, " ", "+", -1)
-
 	folderIds := []string{}
 	// Append all root folder ids to slice
 	for _, folder := range folders {
@@ -252,8 +251,6 @@ func (s *FileService) SearchFiles(ctx context.Context, query string) ([]*model.S
 		}
 	}
 
-	fmt.Printf("Found %d folders\n", len(folderIds))
-
 	results := []*model.SearchResult{}
 	for _, id := range folderIds {
 		result, err := s.SearchFolder(ctx, query, id)
@@ -262,6 +259,8 @@ func (s *FileService) SearchFiles(ctx context.Context, query string) ([]*model.S
 		}
 		results = append(results, result...)
 	}
+
+	log.Println("Search finished")
 
 	return results, nil
 }
@@ -288,12 +287,15 @@ func (s *FileService) GetNestedFoldersRec(ctx context.Context, folderId string, 
 }
 
 func (s *FileService) SearchFolder(ctx context.Context, query string, folderId string) ([]*model.SearchResult, error) {
-	// Make a request to Google Drive API to get all items in the root folder
-	requestURL := fmt.Sprintf("https://www.googleapis.com/drive/v3/files?q=fullText+contains+'%s'+and+trashed+%%3d+false+and+'%s'+in+parents&key=%s",
-		query,
-		folderId,
-		os.Getenv("GOOGLE_DRIVE_API_KEY"),
-	)
+	// Google Search API: https://developers.google.com/drive/api/v3/reference/query-ref#examples
+	queryStr := fmt.Sprintf("fullText contains '\"%s\"' and trashed = false and '%s' in parents", query, folderId)
+	// Encode url query string
+	queryStr = url.QueryEscape(queryStr)
+	// Make a request to Google Drive API to get all items in the given folder
+	requestURL := fmt.Sprintf("https://www.googleapis.com/drive/v3/files?q=%s&key=%s", queryStr, os.Getenv("GOOGLE_DRIVE_API_KEY"))
+
+	log.Printf("Request url: %s\n", requestURL)
+
 	res, err := http.Get(requestURL)
 	if err != nil {
 		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while searching files.", err)
@@ -318,8 +320,8 @@ func (s *FileService) SearchFolder(ctx context.Context, query string, folderId s
 	}
 
 	results := []*model.SearchResult{}
+	// Map result objects to model and append to list
 	for _, item := range data.Files {
-		// Append file to list
 		result := s.NewSearchResultModel()
 
 		result.ID = item.Id
