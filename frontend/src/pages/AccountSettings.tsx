@@ -52,6 +52,7 @@ export default function AccountSettings() {
     const [hasError, setHasError] = useState<boolean>(false);
     const [isChangingInfo, setIsChangingInfo] = useState<boolean>(false);
     const [isChangingPass, setIsChangingPass] = useState<boolean>(false);
+    const [submitEditsDisabled, setSubmitEditsDisabled] = useState<boolean>(true);
 
     const handleUserUpdate = async (values: UserInput) => {
         const { data } = await updateUser({
@@ -68,6 +69,7 @@ export default function AccountSettings() {
         }
 
         setIsChangingInfo(false);
+        setSubmitEditsDisabled(true);
     }
 
     const handlePassUpdate = async (values: PasswordInput) => {
@@ -108,49 +110,39 @@ export default function AccountSettings() {
                 {isChangingPass ?
                     <Form handleSubmit={passwordForm.handleSubmit}>
                         <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='16px'>
-                            <Heading text='New Password:' renderAs='h3' />
-                            <TextField name='password' type='password' onChange={passwordForm.handleChange} onValidate={passwordForm.handleValidate} />
-                        </View>
-                        <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='16px'>
-                            <Button variant='secondary' type='submit' label='Save' />
-                            <Button variant='secondary' onClick={() => { setIsChangingPass(false); }} label='Cancel' />
-                        </View>
+                           <Heading text='New Password:' renderAs='h3' />
+                           <TextField name='password' type='password' onChange={passwordForm.handleChange} onValidate={passwordForm.handleValidate} />
+                       </View>
+                       <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='16px'>
+                           <Button variant='secondary' type='submit' label='Save' />
+                           <Button variant='secondary' onClick={() => { setIsChangingPass(false); }} label='Cancel' />
+                       </View>
                     </Form>
                     :
                     <View container flexDirection='column' alignItems='center' justifyContent='center'>
-                        {isChangingInfo ?
-                            <Form handleSubmit={userForm.handleSubmit}>
-                                <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='16px'>
-                                    <Heading text='Name:' renderAs='h3' />
-                                    <TextField name='firstname' type='text' description='First Name' placeholder={userForm.values.firstname} onChange={userForm.handleChange} onValidate={userForm.handleValidate} />
-                                    <TextField name='lastname' type='text' description='Last Name' placeholder={userForm.values.lastname} onChange={userForm.handleChange} onValidate={userForm.handleValidate} />
-                                </View>
-                                <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='16px'>
-                                    <Heading text='Email:' renderAs='h3' />
-                                    <TextField name='email' type='text' placeholder={userForm.values.email} onChange={userForm.handleChange} onValidate={userForm.handleValidate} />
-                                </View>
+                        <Form handleSubmit={userForm.handleSubmit}>
+                            <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='16px'>
+                                <Heading text='Name:' renderAs='h3' />
+                                <TextField name='firstname' type='text' description='First Name' placeholder={userForm.values.firstname} onChange={userForm.handleChange} onValidate={userForm.handleValidate} disabled={!isChangingInfo} />
+                                <TextField name='lastname' type='text' description='Last Name' placeholder={userForm.values.lastname} onChange={userForm.handleChange} onValidate={userForm.handleValidate} disabled={!isChangingInfo} />
+                            </View>
+                            <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='16px'>
+                                <Heading text='Email:' renderAs='h3' />
+                                <TextField name='email' type='text' placeholder={userForm.values.email} onChange={userForm.handleChange} onValidate={userForm.handleValidate} disabled={!isChangingInfo} />
+                            </View>
+                            {isChangingInfo ?
                                 <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='12px'>
-                                    <Button variant='secondary' type='submit' label='Save Changes' />
+                                    <Button variant='secondary' type='submit' label='Save Changes' disabled={submitEditsDisabled} />
                                     <Button variant='secondary' onClick={() => { setIsChangingInfo(false); }} label="Cancel" />
                                 </View>
-                            </Form>
-                            :
-                            <View container flexDirection='column' alignItems='center' justifyContent='center'>
-                                <View container flexDirection='row' alignItems='center' justifyContent='center' padding='16px' gap='16px'>
-                                    <Heading text='Name:' renderAs='h3' />
-                                    <Paragraph>{userForm.values.firstname + " " + userForm.values.lastname}</Paragraph>
-                                </View>
-                                <View container flexDirection='row' alignItems='center' justifyContent='center' padding='16px' gap='16px'>
-                                    <Heading text='Email:' renderAs='h3' />
-                                    <Paragraph>{userForm.values.email}</Paragraph>
-                                </View>
-                                <View container flexDirection='row' alignItems='center' justifyContent='center' padding='16px' gap='12px'>
-                                    <Button variant='secondary' onClick={() => { setIsChangingInfo(true); }} label="Edit Profile" />
+                                :
+                                <View container flexDirection='row' alignItems='center' justifyContent='center' padding='10px' gap='12px'>
+                                    <Button variant='secondary' onClick={() => { setIsChangingInfo(true); setTimeout(() => setSubmitEditsDisabled(false), 500); }} label="Edit Profile" />
                                     <Button variant='secondary' onClick={() => { setIsChangingPass(true); }} label="Change Password" />
                                 </View>
-                            </View>
-                        }
-                    </View>    
+                            }
+                        </Form>
+                    </View>
                 }
             </View>
         </View>
