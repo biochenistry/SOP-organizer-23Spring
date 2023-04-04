@@ -4,7 +4,7 @@ import { gql, useQuery } from '@apollo/client'
 import SidebarFolder from '../Folder/Folder';
 import { Colors } from '../GlobalStyles';
 import View from '../View/View';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Paragraph from '../Paragraph/Paragraph';
 import { useAuthState } from '../Auth';
 
@@ -77,7 +77,9 @@ export type File = {
 const sidebarContainerStyle: CSSProperties = {
   backgroundColor: '#ffffff',
   borderRight: `1px solid ${Colors.harlineGrey}`,
-  height: 'calc(100vh - 104px)',
+  height: '100%',
+  maxWidth: '250px',
+  minWidth: '250px',
   paddingTop: '24px',
   width: '250px',
 }
@@ -93,13 +95,18 @@ const adminLinksStyle: CSSProperties = {
   }
 }
 
+const adminLinkSelected: CSSProperties = {
+  borderRight: `4px solid ${Colors.isuRed}`,
+}
+
 const Sidebar: React.FunctionComponent = () => {
+  const location = useLocation();
   const { state } = useAuthState();
   const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
 
   return (
     <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
-      <View container gap='8px' flexDirection='column' padding='0 16px'>
+      <View container gap='4px' flexDirection='column' padding='0 0 0 8px'>
         {data?.folders.map((folder, index) => {
           return (
             <div key={index}>
@@ -110,7 +117,7 @@ const Sidebar: React.FunctionComponent = () => {
       </View>
 
       {(state.user?.isAdmin) &&
-        <View container flexDirection='column' style={adminLinksStyle}>
+        <View container flexDirection='column' style={{...adminLinksStyle, ...(location.pathname === '/users' ? adminLinkSelected : {})}}>
           <Link to='/users' style={{ textDecoration: 'none' }}><Paragraph>Manage Users</Paragraph></Link>
         </View>
       }

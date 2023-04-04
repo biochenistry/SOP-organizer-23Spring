@@ -16,7 +16,7 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/models"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/go-chi/chi"
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 )
@@ -33,7 +33,7 @@ func main() {
 	// Create database connection
 	db.InitDB()
 
-	router := chi.NewRouter()
+	router := mux.NewRouter()
 	router.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000", "coms-402-sd-11.class.las.iastate.edu"},
 		AllowCredentials: true,
@@ -67,11 +67,12 @@ func main() {
 	if os.Getenv("MODE") == "dev" {
 		router.Handle("/playground", playground.Handler("SOP Schema Playground", "/api"))
 	}
+
 	router.Handle("/api", srv)
 
 	// Serve React application
-	router.Handle("/static/*", http.FileServer(http.Dir("./build")))
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	router.PathPrefix("/static").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./build"))))
+	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./build/index.html")
 	})
 
