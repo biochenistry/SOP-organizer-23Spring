@@ -142,7 +142,7 @@ const Page: React.FunctionComponent = () => {
     //Returns a table with each user's information
     return (      
         <View container alignItems='center' justifyContent='center' width='100%' flexDirection="column">
-        <Button label='Add User' href='/login' variant='secondary' onDark type='submit' style={{ width: '20%' }} />
+        <Button label='Add User' href='/adduser' variant='secondary' onDark type='submit' style={{ width: '20%' }} />
 
         <table style={{ borderBottom: `4px solid ${Colors.isuYellow}`, width: '80%', padding: '15px', }}>
             <tr>
