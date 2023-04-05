@@ -40,7 +40,7 @@ const SidebarFolder = (props: folderProps) => {
   const { state } = useAuthState();
 
   return (
-    <View container flexDirection='column' gap='8px'>
+    <View container flexDirection='column' gap='4px'>
       <View container gap='8px'>
         <View container gap='8px' alignItems='center' style={{ cursor: 'pointer', 'user-select': 'none' }} onClick={collapse}>
           {dropdown ? <FiChevronDown /> : <FiChevronRight />}
@@ -48,8 +48,8 @@ const SidebarFolder = (props: folderProps) => {
         </View>
         {(state.user?.isAdmin) && 
           <View> 
-            <Link to={'https://drive.google.com/drive/folders/' + props.folder?.id}> 
-              <IoIosFolder></IoIosFolder>
+              <Link to={'https://drive.google.com/drive/folders/' + props.folder?.id}> 
+                <IoIosFolder></IoIosFolder>
               </Link>
           </View>
         }
@@ -64,7 +64,7 @@ const SidebarFolder = (props: folderProps) => {
                   <Paragraph style={{...fileLinkStyle, fontSize: '14px'}}>- {file.name}</Paragraph>
               </Link>
               :
-              <View margin='0 0 0 8px' key={index}>
+              <View padding='0 0 0 24px' key={index}>
                 {(file?.__typename === "Folder") &&
                     <SidebarFolder folder={file}></SidebarFolder>
                 }

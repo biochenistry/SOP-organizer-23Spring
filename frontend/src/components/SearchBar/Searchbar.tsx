@@ -1,5 +1,4 @@
 import React from 'react'
-import {IoIosSearch} from 'react-icons/io'
 import View from '../View/View'
 
 const Searchbar: React.FunctionComponent = () => {
