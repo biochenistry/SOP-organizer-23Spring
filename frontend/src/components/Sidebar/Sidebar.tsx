@@ -117,10 +117,10 @@ const Sidebar: React.FunctionComponent = () => {
           );
         })}
       </View>
-      
+
 
       {(state.user?.isAdmin) &&
-        <View container flexDirection='column' style={{...adminLinksStyle, ...(location.pathname === '/users' ? adminLinkSelected : {})}}>
+        <View container flexDirection='column' style={{ ...adminLinksStyle, ...(location.pathname === '/users' ? adminLinkSelected : {}) }}>
           <Link to='/users' style={{ textDecoration: 'none' }}><Paragraph>Manage Users</Paragraph></Link>
         </View>
       }
