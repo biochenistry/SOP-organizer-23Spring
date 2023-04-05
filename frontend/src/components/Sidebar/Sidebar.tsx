@@ -108,7 +108,7 @@ const Sidebar: React.FunctionComponent = () => {
   return (
     <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
       <View container gap='4px' flexDirection='column' padding='0 0 0 8px'>
-      <Searchbar></Searchbar>
+        <Searchbar></Searchbar>
         {data?.folders.map((folder, index) => {
           return (
             <div key={index}>
