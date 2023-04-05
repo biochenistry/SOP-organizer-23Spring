@@ -1,4 +1,4 @@
-
+import {IoIosFolder} from 'react-icons/io'
 import { CSSProperties, css } from 'aphrodite'
 import { Folder } from '../Sidebar/Sidebar'
 import { Link, useLocation } from 'react-router-dom'
@@ -8,6 +8,7 @@ import Paragraph from '../Paragraph/Paragraph';
 import View from '../View/View';
 import { Colors } from '../GlobalStyles';
 import { createStyle } from '../../util/createStyle';
+import { useAuthState } from '../Auth';
 
 type folderProps = {
   folder: Folder;
@@ -36,12 +37,23 @@ const SidebarFolder = (props: folderProps) => {
   const [collapseContents, setCollapse] = useState(false)
   const [dropdown, setDropdown] = useState(false)
   const collapse = () => (setCollapse(!collapseContents), setDropdown(!dropdown))
+  const { state } = useAuthState();
 
   return (
     <View container flexDirection='column' gap='8px'>
-      <View container gap='8px' alignItems='center' style={{ cursor: 'pointer', 'user-select': 'none' }} onClick={collapse}>
-        {dropdown ? <FiChevronDown /> : <FiChevronRight />}
-        <Paragraph style={{ fontWeight: 'bold', fontSize: '16px' }}>{props.folder?.name}</Paragraph>
+      <View container gap='8px'>
+        <View container gap='8px' alignItems='center' style={{ cursor: 'pointer', 'user-select': 'none' }} onClick={collapse}>
+          {dropdown ? <FiChevronDown /> : <FiChevronRight />}
+          <Paragraph style={{ fontWeight: 'bold', fontSize: '16px' }}>{props.folder?.name}</Paragraph>
+        </View>
+        {(state.user?.isAdmin) && 
+          <View> 
+            <Link to={'https://drive.google.com/drive/folders/' + props.folder?.id}> 
+              <IoIosFolder></IoIosFolder>
+              </Link>
+          </View>
+        }
+        
       </View>
 
       <View container flexDirection='column' gap='8px' padding='0 0 8px 0'>
@@ -54,7 +66,7 @@ const SidebarFolder = (props: folderProps) => {
               :
               <View margin='0 0 0 8px' key={index}>
                 {(file?.__typename === "Folder") &&
-                  <SidebarFolder folder={file}></SidebarFolder>
+                    <SidebarFolder folder={file}></SidebarFolder>
                 }
               </View>
           )
