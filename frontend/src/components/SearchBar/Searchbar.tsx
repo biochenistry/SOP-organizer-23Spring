@@ -8,7 +8,7 @@ const Searchbar: React.FunctionComponent = () => {
     return (
         <View container padding='0 8px 8px 0' gap='4px'>
             <TextField placeholder='Search...' name='searchBar' type='text' />
-            <Button label='Search' variant='primary' type='submit' style={{width: '50%'}} />
+            <Button label='Search' variant='primary' type='submit' style={{width: '25%', marginTop: '4px'}} />
         </View>
     )
 }
