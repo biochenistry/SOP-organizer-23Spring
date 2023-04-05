@@ -18,7 +18,7 @@ const fileLinkStyle: CSSProperties = {
   borderRadius: '4px',
   marginLeft: '24px',
   marginRight: '16px',
-  padding: '8px 12px',
+  padding: '4px 12px',
   textDecoration: 'none',
   ':hover': {
     backgroundColor: Colors.neutralHover,
