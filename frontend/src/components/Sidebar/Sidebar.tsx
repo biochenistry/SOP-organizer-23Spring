@@ -108,19 +108,19 @@ const Sidebar: React.FunctionComponent = () => {
   return (
     <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
       <View container gap='4px' flexDirection='column' padding='0 0 0 8px'>
-      <Searchbar></Searchbar>
-        {data?.folders.map((folder, index) => {
-          return (
-            <div key={index}>
-              <SidebarFolder folder={folder}></SidebarFolder>
-            </div>
-          );
-        })}
+        <Searchbar></Searchbar>
+        <View container flexDirection='column' gap='8px'>
+          {data?.folders.map((folder, index) => {
+            return (
+              <SidebarFolder folder={folder} key={index}></SidebarFolder>
+            );
+          })}
+        </View>
       </View>
-      
+
 
       {(state.user?.isAdmin) &&
-        <View container flexDirection='column' style={{...adminLinksStyle, ...(location.pathname === '/users' ? adminLinkSelected : {})}}>
+        <View container flexDirection='column' style={{ ...adminLinksStyle, ...(location.pathname === '/users' ? adminLinkSelected : {}) }}>
           <Link to='/users' style={{ textDecoration: 'none' }}><Paragraph>Manage Users</Paragraph></Link>
         </View>
       }

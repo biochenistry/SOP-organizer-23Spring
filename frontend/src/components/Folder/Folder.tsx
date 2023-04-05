@@ -1,4 +1,4 @@
-import {IoIosFolder} from 'react-icons/io'
+import { IoIosFolder } from 'react-icons/io'
 import { CSSProperties, css } from 'aphrodite'
 import { Folder } from '../Sidebar/Sidebar'
 import { Link, useLocation } from 'react-router-dom'
@@ -9,6 +9,7 @@ import View from '../View/View';
 import { Colors } from '../GlobalStyles';
 import { createStyle } from '../../util/createStyle';
 import { useAuthState } from '../Auth';
+import { FaPen, FaPenAlt } from 'react-icons/fa';
 
 type folderProps = {
   folder: Folder;
@@ -41,32 +42,32 @@ const SidebarFolder = (props: folderProps) => {
 
   return (
     <View container flexDirection='column' gap='4px'>
-      <View container gap='8px'>
+      <View container gap='8px' alignItems='center' >
         <View container gap='8px' alignItems='center' style={{ cursor: 'pointer', 'user-select': 'none' }} onClick={collapse}>
           {dropdown ? <FiChevronDown /> : <FiChevronRight />}
           <Paragraph style={{ fontWeight: 'bold', fontSize: '16px' }}>{props.folder?.name}</Paragraph>
         </View>
-        {(state.user?.isAdmin) && 
-          <View> 
-              <Link to={'https://drive.google.com/drive/folders/' + props.folder?.id}> 
-                <IoIosFolder></IoIosFolder>
-              </Link>
+        {(state.user?.isAdmin) &&
+          <View>
+            <Link to={'https://drive.google.com/drive/folders/' + props.folder?.id} target='_blank'>
+              <FaPen style={{ fill: Colors.isuRed, width: '16px' }} />
+            </Link>
           </View>
         }
-        
+
       </View>
 
-      <View container flexDirection='column' gap='8px' padding='0 0 8px 0'>
+      <View container flexDirection='column' gap='4px' margin='0 0 0 -12px'>
         {collapseContents && props.folder?.contents.map((file, index) => {
           return (
             (file?.__typename === "File") ?
               <Link to={'/file/' + file.id} className={css(createStyle({ textDecoration: 'none', userSelect: 'none', ...(location.pathname === `/file/${file.id}` ? fileLinkSelected : {}) }))} key={index}>
-                  <Paragraph style={{...fileLinkStyle, fontSize: '14px'}}>- {file.name}</Paragraph>
+                <Paragraph style={{ ...fileLinkStyle, fontSize: '14px' }}>{file.name}</Paragraph>
               </Link>
               :
-              <View padding='0 0 0 24px' key={index}>
+              <View margin='0 0 0 24px' key={index}>
                 {(file?.__typename === "Folder") &&
-                    <SidebarFolder folder={file}></SidebarFolder>
+                  <SidebarFolder folder={file}></SidebarFolder>
                 }
               </View>
           )
