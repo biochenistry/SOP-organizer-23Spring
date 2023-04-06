@@ -93,23 +93,6 @@ type GetAllUsersResponse = {
     all: User[] | null;
 }
 
-const ADD_USER = gql`
-mutation createUser($firstname: String!, $lastname: String!, $email: String!, $password: String!, $admin: Boolean!){
-    success: createUser(firstname: $firstname, lastname: $lastname, email: $email, password: $password, admin: $admin)
-}
-`;
-
-type CreateUserResponse = {
-    success: User;
-}
-
-type CreateUserInput = {
-    firstname: string;
-    lastname: string;
-    email: string;
-    password: string;
-    admin: boolean;
-}
 
 type User = {
     id: string,

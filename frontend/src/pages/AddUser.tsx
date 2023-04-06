@@ -49,11 +49,10 @@ type User = {
 export default function AddUser() {
     const navigate = useNavigate();
     const { state } = useAuthState();
-    const [createUser] = useMutation<CreateUserResponse>(ADD_USER, { errorPolicy: 'all' });
+    const [createUser, { data }] = useMutation<CreateUserResponse>(ADD_USER, { errorPolicy: 'all' });
     const [hasError, setHasError] = useState<boolean>(false);
 
 
-//mutation createUser($firstname: String!, $lastname: String!, $email: String!, $password: String!, $admin: Boolean!){
 
     const handleCreateUser = async (values: CreateUserInput) => {
         const { data } = await createUser({
@@ -66,10 +65,8 @@ export default function AddUser() {
           },
         });
     
-        if (data?.user) {
-          window.location.reload();
-        } else {
-          setHasError(true);
+        if (!data?.user) {
+            setHasError(true);
         }
       }
 
@@ -84,8 +81,16 @@ export default function AddUser() {
         onSubmit: handleCreateUser,
       });
 
+    //plug in the new info-runs when a new user is returned, so remind them to add the user to google drive
+    //issue that user does not reload
+      if (data?.user) {
+        return (
+            <p>Hello</p>
+        );
+      }
+
       
-    //Returns a table with each user's information
+    //Returns a form to fill out users information
     return (      
         <View container alignItems='center' justifyContent='center' width='100%' flexDirection="column">
         <Button label='Cancel' href='/users' variant='secondary' onDark type='submit' style={{ width: '20%' }} />
