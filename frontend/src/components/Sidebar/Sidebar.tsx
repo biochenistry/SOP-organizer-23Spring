@@ -81,7 +81,7 @@ const sidebarContainerStyle: CSSProperties = {
   height: '100%',
   maxWidth: '250px',
   minWidth: '250px',
-  paddingTop: '24px',
+  paddingTop: '2px',
   width: '250px',
 }
 
