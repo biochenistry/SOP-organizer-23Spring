@@ -50,14 +50,8 @@ func (s *UserService) CreateUser(ctx context.Context, firstname string, lastname
 
 // Updates a users account in the database
 func (s *UserService) UpdateUser(ctx context.Context, id string, firstname string, lastname string, email string) error {
-	// Check if the user actually exists
-	_, err := s.GetUserById(ctx, id)
-	if err != nil {
-		// just return the error that was returned
-		return err
-	}
 	// User exists, update user information
-	_, err = db.DB.Exec("UPDATE public.user SET first_name = $2, last_name = $3, email = $4 WHERE id = $1",
+	_, err := db.DB.Exec("UPDATE public.user SET first_name = $2, last_name = $3, email = $4 WHERE id = $1",
 		id,
 		firstname,
 		lastname,
@@ -65,6 +59,15 @@ func (s *UserService) UpdateUser(ctx context.Context, id string, firstname strin
 	)
 	if err != nil {
 		return errors.NewInternalError(ctx, "An unexpected error has occurred while updating user account.", err)
+	}
+
+	return nil
+}
+
+func (s *UserService) DeleteUser(ctx context.Context, id string) error {
+	_, err := db.DB.Exec("DELETE FROM public.user WHERE id = $1;", id)
+	if err != nil {
+		return errors.NewInternalError(ctx, "An unexpected error occurred while deleting user account.", err)
 	}
 
 	return nil

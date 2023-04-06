@@ -1,11 +1,7 @@
 extend type Query {
     me: User
-<<<<<<< HEAD
-    all: [User]
-=======
     all: [User!]
     user(userId: ID!): User
->>>>>>> 6bd3563b1c3eec70993a40e7680265930bbbf189
 }
 
 extend type Mutation {
@@ -23,6 +19,11 @@ extend type Mutation {
     Updates an existing user account
     """
     updateUser(userId: ID!, firstname: String!, lastname: String!, email: String!): User
+
+    """
+    Deletes an existing user account
+    """
+    deleteUser(userId: ID!): Boolean!
 
     """
     Changes the password for the user with the given ID. Admin users can use this to change any user's password. Regular users can only change their own password.
