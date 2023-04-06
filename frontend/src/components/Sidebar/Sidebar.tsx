@@ -7,6 +7,7 @@ import View from '../View/View';
 import { Link, useLocation } from 'react-router-dom';
 import Paragraph from '../Paragraph/Paragraph';
 import { useAuthState } from '../Auth';
+import Searchbar from '../SearchBar/Searchbar';
 
 const GET_ALL_FOLDERS = gql`
 query getAllFolders {
@@ -80,7 +81,7 @@ const sidebarContainerStyle: CSSProperties = {
   height: '100%',
   maxWidth: '250px',
   minWidth: '250px',
-  paddingTop: '24px',
+  paddingTop: '2px',
   width: '250px',
 }
 
@@ -107,6 +108,7 @@ const Sidebar: React.FunctionComponent = () => {
   return (
     <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
       <View container gap='4px' flexDirection='column' padding='0 0 0 8px'>
+        <Searchbar></Searchbar>
         {data?.folders.map((folder, index) => {
           return (
             <div key={index}>
@@ -116,8 +118,9 @@ const Sidebar: React.FunctionComponent = () => {
         })}
       </View>
 
+
       {(state.user?.isAdmin) &&
-        <View container flexDirection='column' style={{...adminLinksStyle, ...(location.pathname === '/users' ? adminLinkSelected : {})}}>
+        <View container flexDirection='column' style={{ ...adminLinksStyle, ...(location.pathname === '/users' ? adminLinkSelected : {}) }}>
           <Link to='/users' style={{ textDecoration: 'none' }}><Paragraph>Manage Users</Paragraph></Link>
         </View>
       }
