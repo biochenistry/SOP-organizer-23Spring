@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import View from "../components/View/View";
-import { gql, useQuery } from '@apollo/client'
+import { gql, useQuery, useMutation } from '@apollo/client'
 import { useAuthState } from "../components/Auth";
 import Button from "../components/Button/Button";
 import { StyleSheet, css } from 'aphrodite';
@@ -66,9 +66,12 @@ query getAllUsers {
 }
 `;
 
+
+
 //how do I use this part, need to be able to insert the right userID,
 //just work on making admin/removing admin for one of them 
 //add in create user button 
+
 /*
 const MAKE_ADMIN = gql`
 mutation makeAdmin {
@@ -87,6 +90,38 @@ mutation makeAdmin {
 }
 `;
 */
+
+/*
+const ADD_USER = gql`
+mutation createUser($firstname: String!, $lastname: String!, $email: String!, $password: String!, $admin: Boolean!){
+    user: createUser(firstname: $firstname, lastname: $lastname, email: $email, password: $password, admin: $admin){
+        firstName
+        lastName
+        email
+        isAdmin
+    }
+}
+`;
+*/
+
+const MAKE_ADMIN = gql`
+mutation changeUserRole($userId: String!, $admin: Boolean!){
+    user: changeUserRole(userId: $userId, admin: $admin){
+        firstName
+        lastName
+        email
+        isAdmin
+    }
+}
+`
+type MakeAdminResponse = {
+    user: User;
+}
+
+type MakeAdminInput = {
+    userId: string;
+    admin: boolean;
+}
 
 
 type GetAllUsersResponse = {
@@ -112,15 +147,35 @@ function determineAdmin(person: User){
     }
 }
 
+
+
 //allows admin users to access user information
 const Page: React.FunctionComponent = () => {
     const navigate = useNavigate();
     const { state } = useAuthState();
     const { data } = useQuery<GetAllUsersResponse>(GET_ALL_USERS);
+    const [makeAdmin] = useMutation<MakeAdminResponse>(MAKE_ADMIN);
+
+
+    
+    const handleMakeAdmin = async (values: MakeAdminInput) => {
+        const { data } = await makeAdmin({
+          variables: {
+            userId: values.userId,
+            admin: true,
+          },
+        });
+
+       
+    }
+
+    
 
     if (!state.user?.isAdmin) {
         navigate('/');
     }
+
+    
 
     //Returns a table with each user's information
     return (      
@@ -142,10 +197,10 @@ const Page: React.FunctionComponent = () => {
                         <td>{user.email}</td> 
                         <td>{determineAdmin(user)} </td> 
                         <td>
-                            <Button label='Remove' href='/login' variant='secondary' onDark type='submit' style={{ width: '100%' }} />
+                            <Button label='Remove' variant='secondary' onDark type='submit' style={{ width: '100%' }} />
                         </td>
                         <td>
-                            <Button label='Make Admin' href='/login' variant='secondary' onDark type='submit' style={{ width: '100%' }} />
+                            <Button label='Make Admin' variant='secondary' onDark type='submit' style={{ width: '100%' }} onClick={()=>{}}/>
                         </td>
                         
                     </tr>
