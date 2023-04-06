@@ -69,6 +69,25 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, firstn
 	return r.Query().User(ctx, userID)
 }
 
+// DeleteUser is the resolver for the deleteUser field.
+func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (bool, error) {
+	authUser := auth.GetUserFromContext(ctx)
+	if authUser == nil {
+		return false, errs.NewUnauthorizedError(ctx, "You must login to delete a user account.")
+	}
+
+	if authUser.ID != userID && !auth.IsAdmin(authUser) {
+		return false, errs.NewForbiddenError(ctx, "You do not have permission to delete other users' accounts.")
+	}
+
+	err := r.UserService.DeleteUser(ctx, userID)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 // ChangePassword is the resolver for the changePassword field.
 func (r *mutationResolver) ChangePassword(ctx context.Context, userID string, newPassword string) (bool, error) {
 	authUser := auth.GetUserFromContext(ctx)

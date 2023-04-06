@@ -20,6 +20,9 @@ type UserService interface {
 	// Updates an existing user account
 	UpdateUser(ctx context.Context, id string, firstname string, lastname string, email string) error
 
+	// Deletes an existing user account
+	DeleteUser(ctx context.Context, id string) error
+
 	// Change's amn existing users role
 	ChangeUserRole(ctx context.Context, id string, admin bool) error
 
