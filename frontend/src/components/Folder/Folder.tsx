@@ -1,4 +1,4 @@
-import { IoIosFolder } from 'react-icons/io'
+
 import { CSSProperties, css } from 'aphrodite'
 import { Folder } from '../Sidebar/Sidebar'
 import { Link, useLocation } from 'react-router-dom'
