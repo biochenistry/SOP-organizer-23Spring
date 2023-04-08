@@ -171,6 +171,17 @@ const Page: React.FunctionComponent = () => {
 
     
 
+    /*
+    const initialMakeAdmin<MakeAdminInput>({
+        initialValues: {
+          email: '',
+          password: ''
+        },
+        onSubmit: handleLogin,
+      });
+      */
+    
+
     if (!state.user?.isAdmin) {
         navigate('/');
     }
