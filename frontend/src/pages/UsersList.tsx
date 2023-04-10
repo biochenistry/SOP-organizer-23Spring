@@ -105,8 +105,9 @@ mutation createUser($firstname: String!, $lastname: String!, $email: String!, $p
 */
 
 const MAKE_ADMIN = gql`
-mutation changeUserRole($userId: String!, $admin: Boolean!){
+mutation changeUserRole($userId: ID!, $admin: Boolean!){
     user: changeUserRole(userId: $userId, admin: $admin){
+        id
         firstName
         lastName
         email
@@ -153,16 +154,18 @@ function determineAdmin(person: User){
 const Page: React.FunctionComponent = () => {
     const navigate = useNavigate();
     const { state } = useAuthState();
-    const { data } = useQuery<GetAllUsersResponse>(GET_ALL_USERS);
-    const [makeAdmin] = useMutation<MakeAdminResponse>(MAKE_ADMIN);
+    const { data } = useQuery<GetAllUsersResponse>(GET_ALL_USERS, {
+        fetchPolicy: "network-only"
+    });
+    const [makeAdmin, {loading: isMakeAdminLoading}] = useMutation<MakeAdminResponse>(MAKE_ADMIN);
 
 
     
-    const handleMakeAdmin = async (values: MakeAdminInput) => {
+    const handleChangeRole = async (values: MakeAdminInput) => {
         const { data } = await makeAdmin({
           variables: {
             userId: values.userId,
-            admin: true,
+            admin: values.admin,
           },
         });
 
@@ -194,15 +197,18 @@ const Page: React.FunctionComponent = () => {
         <Button label='Add User' href='/adduser' variant='secondary' onDark type='submit' style={{ width: '20%' }} />
 
         <table style={{ borderBottom: `4px solid ${Colors.isuYellow}`, width: '80%', padding: '15px', }}>
+            <thead>
             <tr>
                 <th style={{textAlign: 'left'}}>First Name</th>
                 <th style={{textAlign: 'left'}}>Last Name</th>
                 <th style={{textAlign: 'left'}}>Email</th>
                 <th style={{textAlign: 'left'}}>Admin?</th>
             </tr>
-            {data?.all?.map((user) => {
+            </thead>
+            <tbody>
+            {data?.all?.map((user, index) => {
                     return(
-                    <tr>
+                    <tr key={index}>
                         <td>{user.firstName}</td> 
                         <td>{user.lastName}</td> 
                         <td>{user.email}</td> 
@@ -211,13 +217,13 @@ const Page: React.FunctionComponent = () => {
                             <Button label='Remove' variant='secondary' onDark type='submit' style={{ width: '100%' }} />
                         </td>
                         <td>
-                            <Button label='Make Admin' variant='secondary' onDark type='submit' style={{ width: '100%' }} onClick={()=>{}}/>
+                            <Button label='Make Admin' variant='secondary' onDark style={{ width: '100%' }} onClick={()=>{handleChangeRole({userId: user.id, admin: true})}} isLoading= {isMakeAdminLoading}/>
                         </td>
                         
                     </tr>
                     );
                 })}
-
+        </tbody>
         </table>
         </View> 
     );
