@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { CSSProperties } from 'aphrodite'
 import { gql, useQuery } from '@apollo/client'
 import SidebarFolder from '../Folder/Folder';
@@ -7,7 +7,8 @@ import View from '../View/View';
 import { Link, useLocation } from 'react-router-dom';
 import Paragraph from '../Paragraph/Paragraph';
 import { useAuthState } from '../Auth';
-import Searchbar from '../SearchBar/Searchbar';
+import TextField from '../TextField/TextField';
+import Button from '../Button/Button';
 
 const GET_ALL_FOLDERS = gql`
 query getAllFolders {
@@ -104,18 +105,27 @@ const Sidebar: React.FunctionComponent = () => {
   const location = useLocation();
   const { state } = useAuthState();
   const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
+  const [searchState, setSearch] = useState(false);
+  const search = () => {setSearch(!searchState)};
 
   return (
     <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
       <View container gap='4px' flexDirection='column' padding='0 0 0 8px'>
-        <Searchbar></Searchbar>
-        {data?.folders.map((folder, index) => {
+        <View container padding='0 8px 8px 0' gap='4px'>
+            <TextField placeholder='Search...' name='searchBar' type='text' />
+            <Button variant='primary' type='submit' style={{width: '25%', marginTop: '4px'}} onClick={search}/>
+        </View>
+        {(!searchState)? data?.folders.map((folder, index) => {
           return (
             <div key={index}>
               <SidebarFolder folder={folder}></SidebarFolder>
             </div>
           );
-        })}
+        })
+        : <View>
+            Results
+          </View>
+        }
       </View>
 
 
