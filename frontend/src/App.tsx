@@ -5,6 +5,7 @@ import { Route, Routes } from 'react-router';
 import Login from './pages/Login';
 import FileView from './pages/FileView';
 import UsersList from './pages/UsersList';
+import AddUser from './pages/AddUser';
 import Home from './pages/Home';
 import FileViewFullscreen from './pages/FileViewFullscreen';
 import AccountSettings from './pages/AccountSettings';
@@ -17,6 +18,7 @@ function App() {
       <Route path='/file/:fileId' element={<WithHeaderAndSidebar><FileView /></WithHeaderAndSidebar>} />
       <Route path='/file/:fileId/fullscreen' element={<FileViewFullscreen />} />
       <Route path='/users' element={<WithHeaderAndSidebar><UsersList /></WithHeaderAndSidebar>} />
+      <Route path='/adduser' element={<WithHeaderAndSidebar><AddUser /></WithHeaderAndSidebar>} />
       <Route path='/account-settings' element={<WithHeaderAndSidebar><AccountSettings /></WithHeaderAndSidebar>} />
     </Routes>
   );
