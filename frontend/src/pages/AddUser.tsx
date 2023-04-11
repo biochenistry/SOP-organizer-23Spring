@@ -85,7 +85,7 @@ export default function AddUser() {
     //issue that user does not reload
       if (data?.user) {
         return (
-            <p>Hello</p>
+            <p>Don't forget to add the user to the google folder!</p>
         );
       }
 

@@ -8,24 +8,6 @@ import { Colors } from '../components/GlobalStyles';
 import { createStyle } from '../util/createStyle';
 
 
-
-//TODO: Button to each row to remove user
-//Button in each row to upgrade user to admin
-//button to add a user, pop up
-//info button explaining what everything is
-
-
-//  style={{ backgroundColor: Colors.isuRed, borderBottom: `4px solid ${Colors.isuYellow}`, color: '#ffffff', width: '80%', padding: '15px', }}>
-//add user mutation is already in there
-//changeuserrole //create user
-//separate page for creating user
-
-//add user button transitions into new page 
-/*
-page has form to create new user and cancel button brings them back to manage user page
-
-*/
-
 const styles = StyleSheet.create({
     usertable: {
         padding: '16px',
@@ -48,9 +30,6 @@ const styles = StyleSheet.create({
     }
 });
 
-//css(styles.usertable)
-
-
 
 //query defined in backend
 const GET_ALL_USERS = gql`
@@ -65,44 +44,6 @@ query getAllUsers {
     }
 }
 `;
-
-
-
-//how do I use this part, need to be able to insert the right userID,
-//just work on making admin/removing admin for one of them 
-//add in create user button 
-
-/*
-const MAKE_ADMIN = gql`
-mutation makeAdmin {
-    changeUserRole(
-        userID: 
-        admin: true
-    )
-    {
-        id
-        firstName
-        lastName
-        email
-        isDisabled
-        isAdmin
-    }
-}
-`;
-*/
-
-/*
-const ADD_USER = gql`
-mutation createUser($firstname: String!, $lastname: String!, $email: String!, $password: String!, $admin: Boolean!){
-    user: createUser(firstname: $firstname, lastname: $lastname, email: $email, password: $password, admin: $admin){
-        firstName
-        lastName
-        email
-        isAdmin
-    }
-}
-`;
-*/
 
 const MAKE_ADMIN = gql`
 mutation changeUserRole($userId: ID!, $admin: Boolean!){
@@ -163,6 +104,15 @@ function determineAdmin(person: User){
     }
 }
 
+function adminButtonLabel(person: User){
+    if(person.isAdmin){
+        return "Make User";
+    }
+    else{
+        return "Make Admin";
+    }
+}
+
 
 
 //allows admin users to access user information
@@ -195,29 +145,16 @@ const Page: React.FunctionComponent = () => {
     }
     
 
-    /*
-    const initialMakeAdmin<MakeAdminInput>({
-        initialValues: {
-          email: '',
-          password: ''
-        },
-        onSubmit: handleLogin,
-      });
-      */
-    
-
     if (!state.user?.isAdmin) {
         navigate('/');
     }
-
-    
 
     //Returns a table with each user's information
     return (      
         <View container alignItems='center' justifyContent='center' width='100%' flexDirection="column">
         <Button label='Add User' href='/adduser' variant='secondary' onDark type='submit' style={{ width: '20%' }} />
 
-        <table style={{ borderBottom: `4px solid ${Colors.isuYellow}`, width: '80%', padding: '15px', }}>
+        <table style={{ borderBottom: `4px solid ${Colors.isuYellow}`, width: '80%', padding: '15px', }} >
             <thead>
             <tr>
                 <th style={{textAlign: 'left'}}>First Name</th>
@@ -238,9 +175,8 @@ const Page: React.FunctionComponent = () => {
                             <Button label='Remove' variant='secondary' onDark type='submit' style={{ width: '100%' }} onClick={()=>{handleRemoveUser({userId: user.id})}} isLoading = {isRemoveUserLoading}/>
                         </td>
                         <td>
-                            <Button label='Make Admin' variant='secondary' onDark style={{ width: '100%' }} onClick={()=>{handleChangeRole({userId: user.id, admin: true})}} isLoading= {isMakeAdminLoading}/>
+                            <Button label={adminButtonLabel(user)} variant='secondary' onDark style={{ width: '100%' }} onClick={()=>{handleChangeRole({userId: user.id, admin: !user.isAdmin })}} isLoading= {isMakeAdminLoading}/>
                         </td>
-                        
                     </tr>
                     );
                 })}
@@ -250,4 +186,3 @@ const Page: React.FunctionComponent = () => {
     );
 }  
 export default Page
-  
