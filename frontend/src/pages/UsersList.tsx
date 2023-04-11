@@ -119,7 +119,7 @@ function adminButtonLabel(person: User){
 const Page: React.FunctionComponent = () => {
     const navigate = useNavigate();
     const { state } = useAuthState();
-    const { data } = useQuery<GetAllUsersResponse>(GET_ALL_USERS, {
+    const { data, refetch: refetchUsers } = useQuery<GetAllUsersResponse>(GET_ALL_USERS, {
         fetchPolicy: "network-only"
     });
     const [makeAdmin, {loading: isMakeAdminLoading}] = useMutation<MakeAdminResponse>(MAKE_ADMIN);
@@ -142,6 +142,8 @@ const Page: React.FunctionComponent = () => {
             userId: values.userId,
           },
         });
+
+        await refetchUsers();
     }
     
 
