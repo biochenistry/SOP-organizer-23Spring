@@ -115,6 +115,21 @@ mutation changeUserRole($userId: ID!, $admin: Boolean!){
     }
 }
 `
+
+const REMOVE_USER = gql`
+mutation deleteUser($userId: ID!){
+    success: deleteUser(userId: $userId)
+}
+`
+
+type RemoveUserResponse = {
+    success: boolean;
+}
+
+type RemoveUserInput = {
+    userId: string;
+}
+
 type MakeAdminResponse = {
     user: User;
 }
@@ -158,6 +173,7 @@ const Page: React.FunctionComponent = () => {
         fetchPolicy: "network-only"
     });
     const [makeAdmin, {loading: isMakeAdminLoading}] = useMutation<MakeAdminResponse>(MAKE_ADMIN);
+    const [removeUser, {loading: isRemoveUserLoading}] = useMutation<RemoveUserResponse>(REMOVE_USER);
 
 
     
@@ -167,11 +183,16 @@ const Page: React.FunctionComponent = () => {
             userId: values.userId,
             admin: values.admin,
           },
-        });
-
-       
+        });  
     }
 
+    const handleRemoveUser = async (values: RemoveUserInput) => {
+        const { data } = await removeUser({
+          variables: {
+            userId: values.userId,
+          },
+        });
+    }
     
 
     /*
@@ -214,7 +235,7 @@ const Page: React.FunctionComponent = () => {
                         <td>{user.email}</td> 
                         <td>{determineAdmin(user)} </td> 
                         <td>
-                            <Button label='Remove' variant='secondary' onDark type='submit' style={{ width: '100%' }} />
+                            <Button label='Remove' variant='secondary' onDark type='submit' style={{ width: '100%' }} onClick={()=>{handleRemoveUser({userId: user.id})}} isLoading = {isRemoveUserLoading}/>
                         </td>
                         <td>
                             <Button label='Make Admin' variant='secondary' onDark style={{ width: '100%' }} onClick={()=>{handleChangeRole({userId: user.id, admin: true})}} isLoading= {isMakeAdminLoading}/>
