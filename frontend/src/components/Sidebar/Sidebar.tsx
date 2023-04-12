@@ -9,6 +9,8 @@ import Paragraph from '../Paragraph/Paragraph';
 import { useAuthState } from '../Auth';
 import TextField from '../TextField/TextField';
 import Button from '../Button/Button';
+import Form from '../Form/Form';
+import useForm from '../Form/useForm';
 
 const GET_ALL_FOLDERS = gql`
 query getAllFolders {
@@ -53,6 +55,23 @@ query getAllFolders {
   }
 }
 `;
+
+type SearchInput = {
+  search: string;
+}
+
+function searchFiles(arg0: { variables: { search: string; }; }): { data: any; } | PromiseLike<{ data: any; }> {
+  throw new Error('Function not implemented.');
+}
+
+const handleSearch = async (values: SearchInput) => {
+  const { data } = await searchFiles({
+    variables: {
+      search: values.search,
+    },
+  });
+
+}
 
 type GetAllFoldersResponse = {
   folders: Folder[];
@@ -106,15 +125,27 @@ const Sidebar: React.FunctionComponent = () => {
   const { state } = useAuthState();
   const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
   const [searchState, setSearch] = useState(false);
+  
   const search = () => {setSearch(!searchState)};
+
+  const searchForm = useForm<SearchInput>({
+    initialValues: {
+      search: ''
+    },
+    onSubmit: handleSearch,
+  });
+  const clearSearchBar = () => {searchForm.handleChange('search', '')};
 
   return (
     <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
       <View container gap='4px' flexDirection='column' padding='0 0 0 8px'>
-        <View container padding='0 8px 8px 0' gap='4px'>
-            <TextField placeholder='Search...' name='searchBar' type='text' />
-            <Button variant='primary' type='submit' style={{width: '25%', marginTop: '4px'}} onClick={search}/>
-        </View>
+        <Form handleSubmit={searchForm.handleSubmit}>
+          <View container padding='0 8px 8px 0' gap='4px'>
+            <Button variant='primary' type='submit' style={{width: '5%', marginTop: '4px'}} onClick={search}/>
+            <TextField placeholder='Search...' name='search' type='text' value={searchForm.values.search} onChange={searchForm.handleChange} onValidate={searchForm.handleValidate} required/>
+            <Button variant='primary' type='button' style={{width: '5%', marginTop: '4px'}} onClick={clearSearchBar}/>
+          </View>
+        </Form>
         {(!searchState)? data?.folders.map((folder, index) => {
           return (
             <div key={index}>
@@ -138,3 +169,5 @@ const Sidebar: React.FunctionComponent = () => {
   )
 }
 export default Sidebar;
+
+
