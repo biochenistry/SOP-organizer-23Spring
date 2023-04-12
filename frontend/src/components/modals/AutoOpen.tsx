@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 type AutoOpenProps = {
   openModal: (data?: any) => void
@@ -20,9 +20,11 @@ type AutoOpenProps = {
  * @returns 
  */
 export default function AutoOpen(props: AutoOpenProps) {
+  const { openModal } = props;
+
   useEffect(() => {
-    props.openModal();
-  }, []);
+    openModal();
+  }, [openModal]);
 
   return null;
 }

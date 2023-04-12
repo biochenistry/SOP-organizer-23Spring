@@ -10,7 +10,7 @@ export type ModalBodyProps = {
  */
 export default function ModalBody(props: ModalBodyProps) {
   return (
-    <View container style={{ padding: '24px 32px', overflow: 'auto' }}>
+    <View container flexDirection='column' style={{ padding: '24px 32px', overflow: 'auto' }}>
       {props.children}
     </View>
   );

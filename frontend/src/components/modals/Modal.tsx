@@ -76,7 +76,7 @@ export default function Modal(props: ModalProps) {
 
   return (
     <View container style={backgroundStyle}>
-      <View container style={{ ...modalStyle, ...props.style }} >
+      <View container flexDirection='column' style={{ ...modalStyle, ...props.style }} >
         {React.cloneElement(header, {
           onClose: handleClose,
         })}
