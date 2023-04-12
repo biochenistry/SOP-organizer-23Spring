@@ -14,13 +14,13 @@ import (
 )
 
 // Login is the resolver for the login field.
-func (r *mutationResolver) Login(ctx context.Context, email string, password string) (bool, error) {
+func (r *mutationResolver) Login(ctx context.Context, username string, password string) (bool, error) {
 	user := auth.GetUserFromContext(ctx)
 	if user != nil {
 		return false, errs.NewForbiddenError(ctx, "You are already logged in.")
 	}
 
-	userId, err := r.UserService.ValidateLogin(ctx, email, password)
+	userId, err := r.UserService.ValidateLogin(ctx, username, password)
 	if err != nil {
 		return false, err
 	}

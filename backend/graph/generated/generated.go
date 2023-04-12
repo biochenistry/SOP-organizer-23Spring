@@ -63,11 +63,11 @@ type ComplexityRoot struct {
 	Mutation struct {
 		ChangePassword func(childComplexity int, userID string, newPassword string) int
 		ChangeUserRole func(childComplexity int, userID string, admin bool) int
-		CreateUser     func(childComplexity int, firstname string, lastname string, email string, password string, admin bool) int
+		CreateUser     func(childComplexity int, firstname string, lastname string, username string, password string, admin bool) int
 		DeleteUser     func(childComplexity int, userID string) int
-		Login          func(childComplexity int, email string, password string) int
+		Login          func(childComplexity int, username string, password string) int
 		Logout         func(childComplexity int) int
-		UpdateUser     func(childComplexity int, userID string, firstname string, lastname string, email string) int
+		UpdateUser     func(childComplexity int, userID string, firstname string, lastname string) int
 	}
 
 	Query struct {
@@ -80,13 +80,13 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Email                     func(childComplexity int) int
 		FirstName                 func(childComplexity int) int
 		ID                        func(childComplexity int) int
 		IsAdmin                   func(childComplexity int) int
 		IsDisabled                func(childComplexity int) int
 		LastName                  func(childComplexity int) int
 		ShouldForcePasswordChange func(childComplexity int) int
+		Username                  func(childComplexity int) int
 	}
 }
 
@@ -94,11 +94,11 @@ type FolderResolver interface {
 	Contents(ctx context.Context, obj *model.Folder) ([]model.FolderItem, error)
 }
 type MutationResolver interface {
-	Login(ctx context.Context, email string, password string) (bool, error)
+	Login(ctx context.Context, username string, password string) (bool, error)
 	Logout(ctx context.Context) (bool, error)
-	CreateUser(ctx context.Context, firstname string, lastname string, email string, password string, admin bool) (*model.User, error)
+	CreateUser(ctx context.Context, firstname string, lastname string, username string, password string, admin bool) (*model.User, error)
 	ChangeUserRole(ctx context.Context, userID string, admin bool) (*model.User, error)
-	UpdateUser(ctx context.Context, userID string, firstname string, lastname string, email string) (*model.User, error)
+	UpdateUser(ctx context.Context, userID string, firstname string, lastname string) (*model.User, error)
 	DeleteUser(ctx context.Context, userID string) (bool, error)
 	ChangePassword(ctx context.Context, userID string, newPassword string) (bool, error)
 }
@@ -219,7 +219,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateUser(childComplexity, args["firstname"].(string), args["lastname"].(string), args["email"].(string), args["password"].(string), args["admin"].(bool)), true
+		return e.complexity.Mutation.CreateUser(childComplexity, args["firstname"].(string), args["lastname"].(string), args["username"].(string), args["password"].(string), args["admin"].(bool)), true
 
 	case "Mutation.deleteUser":
 		if e.complexity.Mutation.DeleteUser == nil {
@@ -243,7 +243,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.Login(childComplexity, args["email"].(string), args["password"].(string)), true
+		return e.complexity.Mutation.Login(childComplexity, args["username"].(string), args["password"].(string)), true
 
 	case "Mutation.logout":
 		if e.complexity.Mutation.Logout == nil {
@@ -262,7 +262,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateUser(childComplexity, args["userId"].(string), args["firstname"].(string), args["lastname"].(string), args["email"].(string)), true
+		return e.complexity.Mutation.UpdateUser(childComplexity, args["userId"].(string), args["firstname"].(string), args["lastname"].(string)), true
 
 	case "Query.all":
 		if e.complexity.Query.All == nil {
@@ -321,13 +321,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.User(childComplexity, args["userId"].(string)), true
 
-	case "User.email":
-		if e.complexity.User.Email == nil {
-			break
-		}
-
-		return e.complexity.User.Email(childComplexity), true
-
 	case "User.firstName":
 		if e.complexity.User.FirstName == nil {
 			break
@@ -369,6 +362,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.ShouldForcePasswordChange(childComplexity), true
+
+	case "User.username":
+		if e.complexity.User.Username == nil {
+			break
+		}
+
+		return e.complexity.User.Username(childComplexity), true
 
 	}
 	return 0, false
@@ -441,7 +441,7 @@ var sources = []*ast.Source{
     """
     Logs in the user and returns a boolean indicating success. The auth token will be set automatically.
     """
-    login(email: String!, password: String!): Boolean!
+    login(username: String!, password: String!): Boolean!
 
     """
     Logouts out the current user and clears their auth token.
@@ -530,7 +530,7 @@ extend type Mutation {
     """
     Creates a new user account with the given information. Available to admin users only.
     """
-    createUser(firstname: String!, lastname: String!, email: String!, password: String!, admin: Boolean!): User
+    createUser(firstname: String!, lastname: String!, username: String!, password: String!, admin: Boolean!): User
 
     """
     Changes a user's role for the user with the given ID.
@@ -540,7 +540,7 @@ extend type Mutation {
     """
     Updates an existing user account
     """
-    updateUser(userId: ID!, firstname: String!, lastname: String!, email: String!): User
+    updateUser(userId: ID!, firstname: String!, lastname: String!): User
 
     """
     Deletes an existing user account
@@ -570,9 +570,9 @@ type User {
     lastName: String!
 
     """
-    The user's email address
+    The user's username
     """
-    email: String
+    username: String
 
     """
     Indicates whether the user's account has been disabled
@@ -666,14 +666,14 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 	}
 	args["lastname"] = arg1
 	var arg2 string
-	if tmp, ok := rawArgs["email"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+	if tmp, ok := rawArgs["username"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
 		arg2, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["email"] = arg2
+	args["username"] = arg2
 	var arg3 string
 	if tmp, ok := rawArgs["password"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
@@ -714,14 +714,14 @@ func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawAr
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["email"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+	if tmp, ok := rawArgs["username"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["email"] = arg0
+	args["username"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["password"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
@@ -764,15 +764,6 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 		}
 	}
 	args["lastname"] = arg2
-	var arg3 string
-	if tmp, ok := rawArgs["email"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-		arg3, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["email"] = arg3
 	return args, nil
 }
 
@@ -1240,7 +1231,7 @@ func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Login(rctx, fc.Args["email"].(string), fc.Args["password"].(string))
+		return ec.resolvers.Mutation().Login(rctx, fc.Args["username"].(string), fc.Args["password"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1337,7 +1328,7 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateUser(rctx, fc.Args["firstname"].(string), fc.Args["lastname"].(string), fc.Args["email"].(string), fc.Args["password"].(string), fc.Args["admin"].(bool))
+		return ec.resolvers.Mutation().CreateUser(rctx, fc.Args["firstname"].(string), fc.Args["lastname"].(string), fc.Args["username"].(string), fc.Args["password"].(string), fc.Args["admin"].(bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1364,8 +1355,8 @@ func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context
 				return ec.fieldContext_User_firstName(ctx, field)
 			case "lastName":
 				return ec.fieldContext_User_lastName(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
+			case "username":
+				return ec.fieldContext_User_username(ctx, field)
 			case "isDisabled":
 				return ec.fieldContext_User_isDisabled(ctx, field)
 			case "isAdmin":
@@ -1431,8 +1422,8 @@ func (ec *executionContext) fieldContext_Mutation_changeUserRole(ctx context.Con
 				return ec.fieldContext_User_firstName(ctx, field)
 			case "lastName":
 				return ec.fieldContext_User_lastName(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
+			case "username":
+				return ec.fieldContext_User_username(ctx, field)
 			case "isDisabled":
 				return ec.fieldContext_User_isDisabled(ctx, field)
 			case "isAdmin":
@@ -1471,7 +1462,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUser(rctx, fc.Args["userId"].(string), fc.Args["firstname"].(string), fc.Args["lastname"].(string), fc.Args["email"].(string))
+		return ec.resolvers.Mutation().UpdateUser(rctx, fc.Args["userId"].(string), fc.Args["firstname"].(string), fc.Args["lastname"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1498,8 +1489,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 				return ec.fieldContext_User_firstName(ctx, field)
 			case "lastName":
 				return ec.fieldContext_User_lastName(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
+			case "username":
+				return ec.fieldContext_User_username(ctx, field)
 			case "isDisabled":
 				return ec.fieldContext_User_isDisabled(ctx, field)
 			case "isAdmin":
@@ -1846,8 +1837,8 @@ func (ec *executionContext) fieldContext_Query_me(ctx context.Context, field gra
 				return ec.fieldContext_User_firstName(ctx, field)
 			case "lastName":
 				return ec.fieldContext_User_lastName(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
+			case "username":
+				return ec.fieldContext_User_username(ctx, field)
 			case "isDisabled":
 				return ec.fieldContext_User_isDisabled(ctx, field)
 			case "isAdmin":
@@ -1902,8 +1893,8 @@ func (ec *executionContext) fieldContext_Query_all(ctx context.Context, field gr
 				return ec.fieldContext_User_firstName(ctx, field)
 			case "lastName":
 				return ec.fieldContext_User_lastName(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
+			case "username":
+				return ec.fieldContext_User_username(ctx, field)
 			case "isDisabled":
 				return ec.fieldContext_User_isDisabled(ctx, field)
 			case "isAdmin":
@@ -1958,8 +1949,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_firstName(ctx, field)
 			case "lastName":
 				return ec.fieldContext_User_lastName(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
+			case "username":
+				return ec.fieldContext_User_username(ctx, field)
 			case "isDisabled":
 				return ec.fieldContext_User_isDisabled(ctx, field)
 			case "isAdmin":
@@ -2243,8 +2234,8 @@ func (ec *executionContext) fieldContext_User_lastName(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _User_email(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_email(ctx, field)
+func (ec *executionContext) _User_username(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_username(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2257,7 +2248,7 @@ func (ec *executionContext) _User_email(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Email, nil
+		return obj.Username, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2271,7 +2262,7 @@ func (ec *executionContext) _User_email(ctx context.Context, field graphql.Colle
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_User_email(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_username(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -4579,9 +4570,9 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "email":
+		case "username":
 
-			out.Values[i] = ec._User_email(ctx, field, obj)
+			out.Values[i] = ec._User_username(ctx, field, obj)
 
 		case "isDisabled":
 

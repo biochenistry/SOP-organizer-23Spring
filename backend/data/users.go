@@ -24,7 +24,7 @@ func (s *UserService) NewUserModel() *model.User {
 }
 
 // Creates a new user account in the database
-func (s *UserService) CreateUser(ctx context.Context, firstname string, lastname string, email string, password string, admin bool) (*string, error) {
+func (s *UserService) CreateUser(ctx context.Context, firstname string, lastname string, username string, password string, admin bool) (*string, error) {
 	// Generate a new user id
 	id := uuid.NewString()
 	// Create a new password hash
@@ -33,11 +33,11 @@ func (s *UserService) CreateUser(ctx context.Context, firstname string, lastname
 		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while creating new user account.", err)
 	}
 	// Create new user account in db
-	_, err = db.DB.Exec("INSERT INTO public.user (id, first_name, last_name, email, password_hash, is_admin, force_password_change) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+	_, err = db.DB.Exec("INSERT INTO public.user (id, first_name, last_name, username, password_hash, is_admin, force_password_change) VALUES ($1, $2, $3, $4, $5, $6, $7)",
 		id,
 		firstname,
 		lastname,
-		email,
+		username,
 		hash,
 		admin,
 		true,
@@ -50,13 +50,12 @@ func (s *UserService) CreateUser(ctx context.Context, firstname string, lastname
 }
 
 // Updates a users account in the database
-func (s *UserService) UpdateUser(ctx context.Context, id string, firstname string, lastname string, email string) error {
+func (s *UserService) UpdateUser(ctx context.Context, id string, firstname string, lastname string) error {
 	// User exists, update user information
-	_, err := db.DB.Exec("UPDATE public.user SET first_name = $2, last_name = $3, email = $4 WHERE id = $1",
+	_, err := db.DB.Exec("UPDATE public.user SET first_name = $2, last_name = $3 WHERE id = $1",
 		id,
 		firstname,
 		lastname,
-		email,
 	)
 	if err != nil {
 		return errors.NewInternalError(ctx, "An unexpected error has occurred while updating user account.", err)
@@ -78,7 +77,7 @@ func (s *UserService) DeleteUser(ctx context.Context, id string) error {
 func (s *UserService) GetAllUsers(ctx context.Context) ([]*model.User, error) {
 	users := []*model.User{}
 	// Get all users from table
-	rows, err := db.DB.Query("SELECT id, first_name, last_name, email, is_disabled, is_admin, force_password_change FROM public.user")
+	rows, err := db.DB.Query("SELECT id, first_name, last_name, username, is_disabled, is_admin, force_password_change FROM public.user")
 	if err != nil {
 		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving all users", err)
 	}
@@ -86,7 +85,7 @@ func (s *UserService) GetAllUsers(ctx context.Context) ([]*model.User, error) {
 	for rows.Next() {
 		user := s.NewUserModel()
 		// scan row data into user model
-		if err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.IsDisabled, &user.IsAdmin, &user.ShouldForcePasswordChange); err != nil {
+		if err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Username, &user.IsDisabled, &user.IsAdmin, &user.ShouldForcePasswordChange); err != nil {
 			return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving a user's information", err)
 		}
 		// add user to list
@@ -99,8 +98,8 @@ func (s *UserService) GetAllUsers(ctx context.Context) ([]*model.User, error) {
 func (s *UserService) GetUserById(ctx context.Context, id string) (*model.User, error) {
 	user := s.NewUserModel()
 
-	row := db.DB.QueryRow("SELECT id, first_name, last_name, email, is_disabled, is_admin, force_password_change FROM public.user WHERE id = $1;", id)
-	if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.IsDisabled, &user.IsAdmin, &user.ShouldForcePasswordChange); err != nil {
+	row := db.DB.QueryRow("SELECT id, first_name, last_name, username, is_disabled, is_admin, force_password_change FROM public.user WHERE id = $1;", id)
+	if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Username, &user.IsDisabled, &user.IsAdmin, &user.ShouldForcePasswordChange); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.NewNotFoundError(ctx, "This user does not exist.")
 		}
@@ -140,10 +139,10 @@ func (s *UserService) ChangeUserPassword(ctx context.Context, id string, newPass
 	return nil
 }
 
-// Verifies that the provided email and password combination is associated with a user. Returns the ID of the associated user if the login information is correct
-func (s *UserService) ValidateLogin(ctx context.Context, email string, password string) (*string, error) {
-	// Lookup the user by their email address
-	row := db.DB.QueryRow("SELECT id, password_hash, is_disabled FROM public.user WHERE email = $1;", email)
+// Verifies that the provided username and password combination is associated with a user. Returns the ID of the associated user if the login information is correct
+func (s *UserService) ValidateLogin(ctx context.Context, username string, password string) (*string, error) {
+	// Lookup the user by their username
+	row := db.DB.QueryRow("SELECT id, password_hash, is_disabled FROM public.user WHERE username = $1;", username)
 
 	var id string
 	var passwordHash string
@@ -151,7 +150,7 @@ func (s *UserService) ValidateLogin(ctx context.Context, email string, password 
 	if err := row.Scan(&id, &passwordHash, &isDisabled); err != nil {
 		if err == sql.ErrNoRows {
 			// The user does not exist
-			return nil, errors.NewUnauthorizedError(ctx, "Invalid email or password")
+			return nil, errors.NewUnauthorizedError(ctx, "Invalid username or password")
 		}
 		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while logging you in.", err)
 	}
@@ -160,7 +159,7 @@ func (s *UserService) ValidateLogin(ctx context.Context, email string, password 
 	err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password))
 	if err != nil {
 		// Password was invalid
-		return nil, errors.NewUnauthorizedError(ctx, "Incorrect email or password")
+		return nil, errors.NewUnauthorizedError(ctx, "Incorrect username or password")
 	}
 
 	// If the login info was correct, make sure the account is not disabled

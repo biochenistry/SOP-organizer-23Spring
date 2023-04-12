@@ -15,10 +15,10 @@ type UserService interface {
 	GetAllUsers(ctx context.Context) ([]*model.User, error)
 
 	// Create a new user account
-	CreateUser(ctx context.Context, firstname string, lastname string, email string, password string, admin bool) (*string, error)
+	CreateUser(ctx context.Context, firstname string, lastname string, username string, password string, admin bool) (*string, error)
 
 	// Updates an existing user account
-	UpdateUser(ctx context.Context, id string, firstname string, lastname string, email string) error
+	UpdateUser(ctx context.Context, id string, firstname string, lastname string) error
 
 	// Deletes an existing user account
 	DeleteUser(ctx context.Context, id string) error
@@ -29,8 +29,8 @@ type UserService interface {
 	// Change's an existing users password
 	ChangeUserPassword(ctx context.Context, id string, newPassword string) error
 
-	// Verifies that the provided email and password combination is associated with a user. Returns the ID of the associated user if the login information is correct
-	ValidateLogin(ctx context.Context, email string, password string) (*string, error)
+	// Verifies that the provided username and password combination is associated with a user. Returns the ID of the associated user if the login information is correct
+	ValidateLogin(ctx context.Context, username string, password string) (*string, error)
 
 	// Creates a new user session token
 	CreateUserSession(ctx context.Context, userId string, expires time.Time) (*string, error)

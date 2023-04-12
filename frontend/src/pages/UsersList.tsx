@@ -38,7 +38,7 @@ query getAllUsers {
         id
         firstName
         lastName
-        email
+        username
         isDisabled
         isAdmin
     }
@@ -51,7 +51,7 @@ mutation changeUserRole($userId: ID!, $admin: Boolean!){
         id
         firstName
         lastName
-        email
+        username
         isAdmin
     }
 }
@@ -90,7 +90,7 @@ type User = {
     id: string,
     firstName: string;
     lastName: string;
-    email: string;
+    username: string;
     isDisabled: boolean;
     isAdmin: boolean;
 }
@@ -161,7 +161,7 @@ const Page: React.FunctionComponent = () => {
             <tr>
                 <th style={{textAlign: 'left'}}>First Name</th>
                 <th style={{textAlign: 'left'}}>Last Name</th>
-                <th style={{textAlign: 'left'}}>Email</th>
+                <th style={{textAlign: 'left'}}>Username</th>
                 <th style={{textAlign: 'left'}}>Admin?</th>
             </tr>
             </thead>
@@ -171,7 +171,7 @@ const Page: React.FunctionComponent = () => {
                     <tr key={index}>
                         <td>{user.firstName}</td> 
                         <td>{user.lastName}</td> 
-                        <td>{user.email}</td> 
+                        <td>{user.username}</td> 
                         <td>{determineAdmin(user)} </td> 
                         <td>
                             <Button label='Remove' variant='secondary' onDark type='submit' style={{ width: '100%' }} onClick={()=>{handleRemoveUser({userId: user.id})}} isLoading = {isRemoveUserLoading}/>

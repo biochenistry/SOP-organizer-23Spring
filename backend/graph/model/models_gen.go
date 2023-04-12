@@ -42,8 +42,8 @@ type User struct {
 	FirstName string `json:"firstName"`
 	// The user's last name
 	LastName string `json:"lastName"`
-	// The user's email address
-	Email *string `json:"email"`
+	// The user's username
+	Username *string `json:"username"`
 	// Indicates whether the user's account has been disabled
 	IsDisabled *bool `json:"isDisabled"`
 	// Indicates whether the user is an admin
