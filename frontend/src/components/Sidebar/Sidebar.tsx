@@ -140,10 +140,12 @@ const Sidebar: React.FunctionComponent = () => {
     <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
       <View container gap='4px' flexDirection='column' padding='0 0 0 8px'>
         <Form handleSubmit={searchForm.handleSubmit}>
-          <View container padding='0 8px 8px 0' gap='4px'>
-            <TextField placeholder='Search...' name='search' type='text' value={searchForm.values.search} onChange={searchForm.handleChange} onValidate={searchForm.handleValidate} required/>
-            <Button variant='primary' type='submit' style={{width: '5%', marginTop: '4px'}} onClick={search}/>
-            <Button variant='primary' type='button' style={{width: '5%', marginTop: '4px'}} onClick={clearSearchBar}/>
+          <View padding='0 8px 8px 0' gap='4px'>
+            <TextField placeholder='Search...'  name='search' type='text' value={searchForm.values.search} onChange={searchForm.handleChange} onValidate={searchForm.handleValidate} required/>
+            <View container flexDirection='row' justifyContent='space-between'  gap='4px'> 
+              <Button label = 'search' variant='primary' type='submit' style={{width: '125%', marginTop: '4px'}} onClick={search}/>
+              <Button label = 'clear' variant='primary' type='button' style={{width: '125%', marginTop: '4px'}} onClick={clearSearchBar}/>
+            </View>
           </View>
         </Form>
         {(!searchState)? data?.folders.map((folder, index) => {
