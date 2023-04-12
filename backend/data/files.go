@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"sort"
 	"strings"
@@ -32,6 +34,16 @@ type DriveFolderItem struct {
 	LastModifiedBy string `json:"lastModifyingUserName"`
 }
 
+type DriveSearchQueryResponse struct {
+	Incomplete bool               `json:"incompleteSearch"`
+	Files      []*DriveSearchItem `json:"files"`
+}
+
+type DriveSearchItem struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
 // Creates a new folder struct
 func (s *FileService) NewFolderModel() *model.Folder {
 	folder := &model.Folder{}
@@ -42,6 +54,11 @@ func (s *FileService) NewFolderModel() *model.Folder {
 func (s *FileService) NewFileModel() *model.File {
 	file := &model.File{}
 	return file
+}
+
+func (s *FileService) NewSearchResultModel() *model.SearchResult {
+	result := &model.SearchResult{}
+	return result
 }
 
 // Gets a list of all folders in the root folder
@@ -211,4 +228,107 @@ func (s *FileService) GetFileById(ctx context.Context, id string) (*model.File, 
 	file.LastModifiedBy = data.LastModifiedBy
 
 	return file, nil
+}
+
+func (s *FileService) SearchFiles(ctx context.Context, query string) ([]*model.SearchResult, error) {
+	folders, err := s.GetAllFolders(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	folderIds := []string{}
+	// Append all root folder ids to slice
+	for _, folder := range folders {
+		folderIds = append(folderIds, folder.ID)
+	}
+
+	// Append all nested folder ids inside of each root folder to slice
+	for _, folder := range folders {
+		// Get all nested folders under this folder
+		err = s.GetNestedFoldersRec(ctx, folder.ID, &folderIds)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	results := []*model.SearchResult{}
+	for _, id := range folderIds {
+		result, err := s.SearchFolder(ctx, query, id)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, result...)
+	}
+
+	log.Println("Search finished")
+
+	return results, nil
+}
+
+// Recursive algorithm for extracting nested folders inside of a given folder
+func (s *FileService) GetNestedFoldersRec(ctx context.Context, folderId string, folderIds *[]string) error {
+	folderContents, err := s.GetFolderContents(ctx, folderId)
+	if err != nil {
+		return err
+	}
+
+	for _, item := range folderContents {
+		if folder, ok := item.(*model.Folder); ok {
+			// If this is a folder, then recurse and search it to find nested folders
+			err := s.GetNestedFoldersRec(ctx, folder.ID, folderIds)
+			if err != nil {
+				return err
+			}
+			*folderIds = append(*folderIds, folder.ID)
+		}
+	}
+
+	return nil
+}
+
+func (s *FileService) SearchFolder(ctx context.Context, query string, folderId string) ([]*model.SearchResult, error) {
+	// Google Search API: https://developers.google.com/drive/api/v3/reference/query-ref#examples
+	queryStr := fmt.Sprintf("fullText contains '\"%s\"' and trashed = false and '%s' in parents", query, folderId)
+	// Encode url query string
+	queryStr = url.QueryEscape(queryStr)
+	// Make a request to Google Drive API to get all items in the given folder
+	requestURL := fmt.Sprintf("https://www.googleapis.com/drive/v3/files?q=%s&key=%s", queryStr, os.Getenv("GOOGLE_DRIVE_API_KEY"))
+
+	log.Printf("Request url: %s\n", requestURL)
+
+	res, err := http.Get(requestURL)
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while searching files.", err)
+	}
+
+	// Read the response
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while searching files.", err)
+	}
+
+	// Parse the JSON string response into a struct
+	data := new(DriveSearchQueryResponse)
+	err = json.Unmarshal([]byte(resBody), &data)
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while searching files.", err)
+	}
+
+	// Check if the search was incomplete; if so, an error occurred with the search request string
+	if data.Incomplete {
+		return nil, errors.NewInternalError(ctx, "An incomplete search was conducted", err)
+	}
+
+	results := []*model.SearchResult{}
+	// Map result objects to model and append to list
+	for _, item := range data.Files {
+		result := s.NewSearchResultModel()
+
+		result.ID = item.Id
+		result.Name = item.Name
+
+		results = append(results, result)
+	}
+
+	return results, nil
 }
