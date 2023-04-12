@@ -141,8 +141,8 @@ const Sidebar: React.FunctionComponent = () => {
       <View container gap='4px' flexDirection='column' padding='0 0 0 8px'>
         <Form handleSubmit={searchForm.handleSubmit}>
           <View container padding='0 8px 8px 0' gap='4px'>
-            <Button variant='primary' type='submit' style={{width: '5%', marginTop: '4px'}} onClick={search}/>
             <TextField placeholder='Search...' name='search' type='text' value={searchForm.values.search} onChange={searchForm.handleChange} onValidate={searchForm.handleValidate} required/>
+            <Button variant='primary' type='submit' style={{width: '5%', marginTop: '4px'}} onClick={search}/>
             <Button variant='primary' type='button' style={{width: '5%', marginTop: '4px'}} onClick={clearSearchBar}/>
           </View>
         </Form>
