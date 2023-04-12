@@ -11,6 +11,7 @@ query getCurrentUser {
     lastName
     email
     isAdmin
+    shouldForcePasswordChange
   }
 }
 `;

@@ -33,13 +33,14 @@ func (s *UserService) CreateUser(ctx context.Context, firstname string, lastname
 		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while creating new user account.", err)
 	}
 	// Create new user account in db
-	_, err = db.DB.Exec("INSERT INTO public.user (id, first_name, last_name, email, password_hash, is_admin) VALUES ($1, $2, $3, $4, $5, $6)",
+	_, err = db.DB.Exec("INSERT INTO public.user (id, first_name, last_name, email, password_hash, is_admin, force_password_change) VALUES ($1, $2, $3, $4, $5, $6, $7)",
 		id,
 		firstname,
 		lastname,
 		email,
 		hash,
 		admin,
+		true,
 	)
 	if err != nil {
 		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while creating new user account.", err)
@@ -77,7 +78,7 @@ func (s *UserService) DeleteUser(ctx context.Context, id string) error {
 func (s *UserService) GetAllUsers(ctx context.Context) ([]*model.User, error) {
 	users := []*model.User{}
 	// Get all users from table
-	rows, err := db.DB.Query("SELECT id, first_name, last_name, email, is_disabled, is_admin FROM public.user")
+	rows, err := db.DB.Query("SELECT id, first_name, last_name, email, is_disabled, is_admin, force_password_change FROM public.user")
 	if err != nil {
 		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving all users", err)
 	}
@@ -85,7 +86,7 @@ func (s *UserService) GetAllUsers(ctx context.Context) ([]*model.User, error) {
 	for rows.Next() {
 		user := s.NewUserModel()
 		// scan row data into user model
-		if err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.IsDisabled, &user.IsAdmin); err != nil {
+		if err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.IsDisabled, &user.IsAdmin, &user.ShouldForcePasswordChange); err != nil {
 			return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving a user's information", err)
 		}
 		// add user to list
@@ -98,8 +99,8 @@ func (s *UserService) GetAllUsers(ctx context.Context) ([]*model.User, error) {
 func (s *UserService) GetUserById(ctx context.Context, id string) (*model.User, error) {
 	user := s.NewUserModel()
 
-	row := db.DB.QueryRow("SELECT id, first_name, last_name, email, is_disabled, is_admin FROM public.user WHERE id = $1;", id)
-	if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.IsDisabled, &user.IsAdmin); err != nil {
+	row := db.DB.QueryRow("SELECT id, first_name, last_name, email, is_disabled, is_admin, force_password_change FROM public.user WHERE id = $1;", id)
+	if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.IsDisabled, &user.IsAdmin, &user.ShouldForcePasswordChange); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.NewNotFoundError(ctx, "This user does not exist.")
 		}
@@ -131,7 +132,7 @@ func (s *UserService) ChangeUserPassword(ctx context.Context, id string, newPass
 	if err != nil {
 		return errors.NewInternalError(ctx, "An unexpected error occurred while changing a user's password.", err)
 	}
-	_, err = db.DB.Exec("UPDATE public.user SET password_hash = $2 WHERE id = $1;", id, hash)
+	_, err = db.DB.Exec("UPDATE public.user SET password_hash = $2, force_password_change = $3 WHERE id = $1;", id, hash, false)
 	if err != nil {
 		return errors.NewInternalError(ctx, "An unexpected error occurred while changing a user's password.", err)
 	}

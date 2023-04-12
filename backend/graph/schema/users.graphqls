@@ -61,4 +61,9 @@ type User {
     Indicates whether the user is an admin
     """
     isAdmin: Boolean
+
+    """
+    Indicates the user should be prompted to change their password when they log in
+    """
+    shouldForcePasswordChange: Boolean @goField(forceResolver: true)
 }

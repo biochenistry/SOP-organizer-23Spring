@@ -48,4 +48,6 @@ type User struct {
 	IsDisabled *bool `json:"isDisabled"`
 	// Indicates whether the user is an admin
 	IsAdmin *bool `json:"isAdmin"`
+	// Indicates the user should be prompted to change their password when they log in
+	ShouldForcePasswordChange *bool `json:"shouldForcePasswordChange"`
 }

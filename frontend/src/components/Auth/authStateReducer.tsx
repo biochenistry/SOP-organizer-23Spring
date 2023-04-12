@@ -6,6 +6,7 @@ export type User = {
   lastName: string;
   email: string;
   isAdmin: boolean;
+  shouldForcePasswordChange: boolean | null;
 }
 
 export type AuthState = {

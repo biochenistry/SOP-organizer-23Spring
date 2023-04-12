@@ -39,6 +39,7 @@ type ResolverRoot interface {
 	Folder() FolderResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
+	User() UserResolver
 }
 
 type DirectiveRoot struct {
@@ -79,12 +80,13 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Email      func(childComplexity int) int
-		FirstName  func(childComplexity int) int
-		ID         func(childComplexity int) int
-		IsAdmin    func(childComplexity int) int
-		IsDisabled func(childComplexity int) int
-		LastName   func(childComplexity int) int
+		Email                     func(childComplexity int) int
+		FirstName                 func(childComplexity int) int
+		ID                        func(childComplexity int) int
+		IsAdmin                   func(childComplexity int) int
+		IsDisabled                func(childComplexity int) int
+		LastName                  func(childComplexity int) int
+		ShouldForcePasswordChange func(childComplexity int) int
 	}
 }
 
@@ -107,6 +109,9 @@ type QueryResolver interface {
 	Me(ctx context.Context) (*model.User, error)
 	All(ctx context.Context) ([]*model.User, error)
 	User(ctx context.Context, userID string) (*model.User, error)
+}
+type UserResolver interface {
+	ShouldForcePasswordChange(ctx context.Context, obj *model.User) (*bool, error)
 }
 
 type executableSchema struct {
@@ -358,6 +363,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.LastName(childComplexity), true
 
+	case "User.shouldForcePasswordChange":
+		if e.complexity.User.ShouldForcePasswordChange == nil {
+			break
+		}
+
+		return e.complexity.User.ShouldForcePasswordChange(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -571,6 +583,11 @@ type User {
     Indicates whether the user is an admin
     """
     isAdmin: Boolean
+
+    """
+    Indicates the user should be prompted to change their password when they log in
+    """
+    shouldForcePasswordChange: Boolean @goField(forceResolver: true)
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -1353,6 +1370,8 @@ func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context
 				return ec.fieldContext_User_isDisabled(ctx, field)
 			case "isAdmin":
 				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "shouldForcePasswordChange":
+				return ec.fieldContext_User_shouldForcePasswordChange(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1418,6 +1437,8 @@ func (ec *executionContext) fieldContext_Mutation_changeUserRole(ctx context.Con
 				return ec.fieldContext_User_isDisabled(ctx, field)
 			case "isAdmin":
 				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "shouldForcePasswordChange":
+				return ec.fieldContext_User_shouldForcePasswordChange(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1483,6 +1504,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 				return ec.fieldContext_User_isDisabled(ctx, field)
 			case "isAdmin":
 				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "shouldForcePasswordChange":
+				return ec.fieldContext_User_shouldForcePasswordChange(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1829,6 +1852,8 @@ func (ec *executionContext) fieldContext_Query_me(ctx context.Context, field gra
 				return ec.fieldContext_User_isDisabled(ctx, field)
 			case "isAdmin":
 				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "shouldForcePasswordChange":
+				return ec.fieldContext_User_shouldForcePasswordChange(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1883,6 +1908,8 @@ func (ec *executionContext) fieldContext_Query_all(ctx context.Context, field gr
 				return ec.fieldContext_User_isDisabled(ctx, field)
 			case "isAdmin":
 				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "shouldForcePasswordChange":
+				return ec.fieldContext_User_shouldForcePasswordChange(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1937,6 +1964,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_isDisabled(ctx, field)
 			case "isAdmin":
 				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "shouldForcePasswordChange":
+				return ec.fieldContext_User_shouldForcePasswordChange(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -2330,6 +2359,47 @@ func (ec *executionContext) fieldContext_User_isAdmin(ctx context.Context, field
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_shouldForcePasswordChange(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_shouldForcePasswordChange(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().ShouldForcePasswordChange(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_shouldForcePasswordChange(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
 		},
@@ -4493,21 +4563,21 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._User_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "firstName":
 
 			out.Values[i] = ec._User_firstName(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "lastName":
 
 			out.Values[i] = ec._User_lastName(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "email":
 
@@ -4521,6 +4591,23 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 
 			out.Values[i] = ec._User_isAdmin(ctx, field, obj)
 
+		case "shouldForcePasswordChange":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_shouldForcePasswordChange(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

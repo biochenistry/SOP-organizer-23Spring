@@ -9,6 +9,7 @@ import (
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/auth"
 	errs "git.las.iastate.edu/SeniorDesignComS/2023spr/sop/errors"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/generated"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/model"
 )
 
@@ -151,3 +152,22 @@ func (r *queryResolver) User(ctx context.Context, userID string) (*model.User, e
 
 	return user, nil
 }
+
+// ShouldForcePasswordChange is the resolver for the shouldForcePasswordChange field.
+func (r *userResolver) ShouldForcePasswordChange(ctx context.Context, obj *model.User) (*bool, error) {
+	user := auth.GetUserFromContext(ctx)
+	if user == nil {
+		return nil, nil
+	}
+
+	if user.ID != obj.ID {
+		return nil, nil
+	}
+
+	return obj.ShouldForcePasswordChange, nil
+}
+
+// User returns generated.UserResolver implementation.
+func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
+
+type userResolver struct{ *Resolver }
