@@ -148,12 +148,12 @@ const UsersList: React.FunctionComponent = () => {
                     <td>{user.username}</td>
                     <td>{user.isAdmin ? 'Admin' : 'Standard User'} </td>
                     <td>
-                      <Button label={user.isAdmin ? 'Change to Standard User' : 'Change to Admin'} variant='tertiary' onClick={() => { handleChangeRole({ userId: user.id, admin: !user.isAdmin }) }} isLoading={isMakeAdminLoading && user.id === userEdited} />
+                      <Button label={user.isAdmin ? 'Change to Standard User' : 'Change to Admin'} variant='tertiary' onClick={() => { handleChangeRole({ userId: user.id, admin: !user.isAdmin }) }} isLoading={isMakeAdminLoading && user.id === userEdited} disabled={user.id === state.user?.id} />
                     </td>
                     <td>
                       <ModalLauncher modal={confirmDeleteUserModal}>
                         {({ openModal }) => (
-                          <Button label='Remove' variant='tertiary' type='submit' onClick={() => { openModal({ userId: user.id }) }} isLoading={isRemoveUserLoading && user.id === userEdited} />
+                          <Button label='Remove' variant='tertiary' type='submit' onClick={() => { openModal({ userId: user.id }) }} isLoading={isRemoveUserLoading && user.id === userEdited} disabled={user.id === state.user?.id} />
                         )}
                       </ModalLauncher>
                     </td>

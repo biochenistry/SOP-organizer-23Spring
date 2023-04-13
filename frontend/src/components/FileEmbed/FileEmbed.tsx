@@ -1,16 +1,17 @@
 import { css, StyleSheet } from 'aphrodite';
 import React from 'react';
+import View from '../View/View';
 
 interface FileEmbedProps {
   docId: string;
   isEditing: boolean;
-  isFullscreen?: boolean;
+  scale?: number;
 }
 
 const FileEmbed: React.FC<FileEmbedProps> = ({
   docId,
   isEditing,
-  isFullscreen,
+  scale
 }) => {
   const styles = StyleSheet.create({
     defaultFileEmbed: {
@@ -31,24 +32,15 @@ const FileEmbed: React.FC<FileEmbedProps> = ({
     );
   }
 
-  if (isFullscreen) {
-    // Has zooming by default, but has a dark black background
-    return (
-      <iframe
-        className={css(styles.defaultFileEmbed)}
-        src={'https://docs.google.com/viewer?srcid=' + docId + '&pid=explorer&efh=false&a=v&chrome=false&embedded=true'}
-        title={'Document ' + docId}
-      />
-    );
-  } else {
-    return (
+  return (
+    <View container style={{ height: '100%', maxHeight: '100%', overflowY: 'scroll', width: '100%', transform: `scale(${scale || 1})`, marginTop: `${(((scale || 1)-1) * 420)}px` }}>
       <iframe
         className={css(styles.defaultFileEmbed)}
         src={'https://docs.google.com/document/d/' + docId + '/preview'}
         title={'Document ' + docId}
       />
-    );
-  }
+    </View>
+  );
 }
 
 export default FileEmbed;

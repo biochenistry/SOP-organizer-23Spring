@@ -110,7 +110,7 @@ export default function AccountSettings() {
   }
 
   return (
-    <View container flexDirection='column' padding='24px' gap='32px'>
+    <View container flexDirection='column' padding='24px' gap='32px' maxWidth='600px'>
       <Heading text='Account Settings' renderAs='h1' />
       <View container flexDirection='column' gap='48px'>
 
