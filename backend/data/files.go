@@ -141,7 +141,7 @@ func (s *FileService) GetFolderContents(ctx context.Context, id string) ([]model
 			folder.Name = item.Name
 
 			contents = append(contents, folder)
-		} else if strings.Contains(item.Type, "document") || strings.Contains(item.Type, "pdf") {
+		} else if strings.Contains(item.Type, "document") {
 			file := s.NewFileModel()
 
 			file.ID = item.ID
