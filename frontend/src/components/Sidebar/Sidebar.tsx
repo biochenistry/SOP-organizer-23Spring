@@ -140,9 +140,9 @@ const Sidebar: React.FunctionComponent = () => {
 
   return (
     <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
-      <View container>
+      <View container padding='8px' >
         <Form handleSubmit={searchForm.handleSubmit}>
-          <View container flexDirection='row' padding='0 8px 8px 0' gap='4px'>
+          <View container flexDirection='row' gap='4px'>
             <TextField placeholder='Search...' name='search' type='text' value={searchForm.values.search} onChange={searchForm.handleChange} onValidate={searchForm.handleValidate} required />
             <Button label='S' variant='primary' type='submit' style={{ width: '20px', marginTop: '4px', padding: '0px' }} onClick={search} />
             <Button label='X' variant='primary' type='button' style={{ width: '20px', marginTop: '4px', padding: '0px' }} onClick={clearSearchBar} />
@@ -150,7 +150,7 @@ const Sidebar: React.FunctionComponent = () => {
         </Form>
       </View>
 
-      <View container flexDirection='column' gap='4px' height='100%' padding='8px' style={{ overflow: 'scroll' }}>
+      <View container flexDirection='column' gap='4px' height='100%' padding='8px 0 8px 8px' style={{ overflow: 'scroll' }}>
         {(!searchState) ? data?.folders.map((folder, index) => {
           return (
             <div key={index}>
