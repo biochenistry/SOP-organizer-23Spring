@@ -7,7 +7,6 @@ import FileView from './pages/FileView';
 import UsersList from './pages/UsersList';
 import AddUser from './pages/AddUser';
 import Home from './pages/Home';
-import FileViewFullscreen from './pages/FileViewFullscreen';
 import AccountSettings from './pages/AccountSettings';
 import { useAuthState } from './components/Auth';
 import AutoOpen from './components/modals/AutoOpen';
@@ -83,7 +82,6 @@ function App() {
         <Route path='/' element={<WithHeaderAndSidebar><Home /></WithHeaderAndSidebar>} />
         <Route path='/login' element={<WithHeaderAndSidebar><Login /></WithHeaderAndSidebar>} />
         <Route path='/file/:fileId' element={<WithHeaderAndSidebar><FileView /></WithHeaderAndSidebar>} />
-        <Route path='/file/:fileId/fullscreen' element={<FileViewFullscreen />} />
         <Route path='/users' element={<WithHeaderAndSidebar><UsersList /></WithHeaderAndSidebar>} />
         <Route path='/users/add' element={<WithHeaderAndSidebar><AddUser /></WithHeaderAndSidebar>} />
         <Route path='/account-settings' element={<WithHeaderAndSidebar><AccountSettings /></WithHeaderAndSidebar>} />

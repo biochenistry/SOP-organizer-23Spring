@@ -5,7 +5,7 @@ import Button from '../components/Button/Button';
 import { useAuthState } from "../components/Auth";
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { CSSProperties } from 'aphrodite';
+import { CSSProperties, StyleSheet, css } from 'aphrodite';
 import { Colors } from '../components/GlobalStyles';
 import Heading from '../components/Heading/Heading';
 import { gql, useQuery } from '@apollo/client';
@@ -14,6 +14,7 @@ import Paragraph from '../components/Paragraph/Paragraph';
 import ReactTimeAgo from 'react-time-ago';
 import ActionMenu from '../components/ActionMenu/ActionMenu';
 import ActionItem from '../components/ActionMenu/ActionItem';
+import { FaMinus, FaPen, FaPlus } from 'react-icons/fa';
 
 const GET_FILE_DETAILS = gql`
 query getFileDetails($id: ID!) {
@@ -41,18 +42,63 @@ type File = {
 
 const toolbarStyle: CSSProperties = {
   alignItems: 'center',
+  backgroundColor: '#ffffff',
   borderBottom: `1px solid ${Colors.harlineGrey}`,
   flexDirection: 'row',
   height: '48px',
   justifyContent: 'space-between',
   padding: '8px 16px',
   width: '100%',
+  zIndex: 1,
+  'user-select': 'none',
 };
+
+const styles = StyleSheet.create({
+
+});
+
+const zoomButtonStyle: CSSProperties = {
+  alignItems: 'center',
+  borderRadius: '4px',
+  color: Colors.isuRed,
+  cursor: 'pointer',
+  fill: Colors.isuRed,
+  justifyContent: 'center',
+  padding: '8px',
+  ':hover': {
+    border: `2px solid ${Colors.isuRed}`,
+    padding: '6px',
+  },
+  ':active': {
+    backgroundColor: Colors.isuRedLight,
+    border: `2px solid ${Colors.isuRedDark}`,
+    padding: '6px',
+  },
+}
+
+const zoomButtonDisabledStyle: CSSProperties = {
+  color: Colors.neutralActive,
+  cursor: 'default',
+  fill: Colors.neutralActive,
+  ':hover': {
+    border: 'none',
+    padding: '8px',
+  },
+  ':active': {
+    backgroundColor: 'none',
+    border: 'none',
+    padding: '8px',
+  },
+}
+
+const MAX_ZOOM = 1.7;
+const MIN_ZOOM = 1.0;
 
 export default function FileView() {
   const navigate = useNavigate();
   const { fileId } = useParams();
   const { state } = useAuthState();
+  const [zoom, setZoom] = useState<number>(1);
   const { data: fileData, loading: fileIsLoading, refetch: refetchFile } = useQuery<GetFileDetailsResponse>(GET_FILE_DETAILS, {
     variables: {
       id: fileId,
@@ -67,6 +113,18 @@ export default function FileView() {
 
   const downloadFile = (format: 'docx' | 'pdf') => {
     window.location.href = 'https://docs.google.com/feeds/download/documents/export/Export?id=' + fileId + '&exportFormat=' + format;
+  }
+
+  const handleZoomIn = () => {
+    if (zoom < MAX_ZOOM) {
+      setZoom(zoom + 0.1);
+    }
+  }
+
+  const handleZoomOut = () => {
+    if (zoom > MIN_ZOOM) {
+      setZoom(zoom - 0.1);
+    }
   }
 
   if (fileIsLoading && !fileData) {
@@ -96,23 +154,31 @@ export default function FileView() {
             {state.user && (' by ' + fileData?.file?.lastModifiedBy)}
           </Paragraph>
         </View>
-        <View container flexDirection='row' gap='24px' alignItems='center'>
+        <View container flexDirection='row' gap='48px' alignItems='center'>
+          <View container flexDirection='row' alignItems='center' gap='16px'>
+            <View container style={{...zoomButtonStyle, ...(zoom <= MIN_ZOOM ? zoomButtonDisabledStyle : {})}} onClick={handleZoomOut}>
+              <FaMinus />
+            </View>
+            <Paragraph style={{ color: Colors.textSecondary }}>{Math.floor(zoom * 100)}%</Paragraph>
+            <View container style={{...zoomButtonStyle, ...(zoom >= MAX_ZOOM ? zoomButtonDisabledStyle : {})}} onClick={handleZoomIn}>
+              <FaPlus />
+            </View>
+          </View>
           <ActionMenu label='Download'>
             <ActionItem label='PDF' onClick={() => { downloadFile('pdf'); }} />
             <ActionItem label='DOCX' onClick={() => { downloadFile('docx'); }} />
           </ActionMenu>
-          <Button label='Fullscreen' onClick={() => { navigate('/file/' + fileId + '/fullscreen'); }} variant='secondary' />
           {state.user &&
             (isEditing ?
-            <Button variant='primary' onClick={() => { setIsEditing(false); refetchFile(); }} label='Done' />
-            :
-            <Button variant='primary' onClick={() => { setIsEditing(true); }} label='Edit' />)
+              <Button variant='primary' onClick={() => { setIsEditing(false); refetchFile(); }} label='Done' />
+              :
+              <Button variant='primary' onClick={() => { setIsEditing(true); }} label='Edit' />)
           }
         </View>
       </View>
 
-      <View flexGrow={1} height='100%' container>
-        <FileEmbed docId={fileId} isEditing={isEditing} />
+      <View container flexGrow={1} height='100%' style={{ height: '100%', overflowY: 'scroll', overflowX: 'hidden', 'user-select': 'none' }}>
+        <FileEmbed docId={fileId} isEditing={isEditing} scale={zoom} />
       </View>
     </View>
   );
