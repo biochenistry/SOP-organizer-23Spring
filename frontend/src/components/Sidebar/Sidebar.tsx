@@ -11,6 +11,7 @@ import TextField from '../TextField/TextField';
 import Button from '../Button/Button';
 import Form from '../Form/Form';
 import useForm from '../Form/useForm';
+import { ROOT_FOLDER_ID } from '../..';
 
 const GET_ALL_FOLDERS = gql`
 query getAllFolders {
@@ -99,6 +100,7 @@ const sidebarContainerStyle: CSSProperties = {
   backgroundColor: '#ffffff',
   borderRight: `1px solid ${Colors.harlineGrey}`,
   height: '100%',
+  maxHeight: '100%',
   maxWidth: '250px',
   minWidth: '250px',
   paddingTop: '2px',
@@ -125,8 +127,8 @@ const Sidebar: React.FunctionComponent = () => {
   const { state } = useAuthState();
   const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
   const [searchState, setSearch] = useState(false);
-  
-  const search = () => {setSearch(!searchState)};
+
+  const search = () => { setSearch(!searchState) };
 
   const searchForm = useForm<SearchInput>({
     initialValues: {
@@ -134,35 +136,46 @@ const Sidebar: React.FunctionComponent = () => {
     },
     onSubmit: handleSearch,
   });
-  const clearSearchBar = () => {searchForm.handleChange('search', '')};
+  const clearSearchBar = () => { searchForm.handleChange('search', '') };
 
   return (
     <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
-      <View container gap='4px' flexDirection='column' padding='0 0 0 8px'>
+      <View container>
         <Form handleSubmit={searchForm.handleSubmit}>
           <View container flexDirection='row' padding='0 8px 8px 0' gap='4px'>
-            <TextField placeholder='Search...'  name='search' type='text' value={searchForm.values.search} onChange={searchForm.handleChange} onValidate={searchForm.handleValidate} required/>
-              <Button label = 'S' variant='primary' type='submit' style={{ width: '20px', marginTop: '4px', padding: '0px'}} onClick={search}/>
-              <Button label = 'X' variant='primary' type='button' style={{ width: '20px', marginTop: '4px', padding: '0px'}} onClick={clearSearchBar}/>
+            <TextField placeholder='Search...' name='search' type='text' value={searchForm.values.search} onChange={searchForm.handleChange} onValidate={searchForm.handleValidate} required />
+            <Button label='S' variant='primary' type='submit' style={{ width: '20px', marginTop: '4px', padding: '0px' }} onClick={search} />
+            <Button label='X' variant='primary' type='button' style={{ width: '20px', marginTop: '4px', padding: '0px' }} onClick={clearSearchBar} />
           </View>
         </Form>
-        {(!searchState)? data?.folders.map((folder, index) => {
+      </View>
+
+      <View container flexDirection='column' gap='4px' height='100%' padding='8px' style={{ overflow: 'scroll' }}>
+        {(!searchState) ? data?.folders.map((folder, index) => {
           return (
             <div key={index}>
               <SidebarFolder folder={folder}></SidebarFolder>
             </div>
           );
         })
-        : <View>
+          : <View>
             Results
           </View>
         }
       </View>
 
-
-      {(state.user?.isAdmin) &&
-        <View container flexDirection='column' style={{ ...adminLinksStyle, ...(location.pathname === '/users' ? adminLinkSelected : {}) }}>
-          <Link to='/users' style={{ textDecoration: 'none' }}><Paragraph>Manage Users</Paragraph></Link>
+      {(state.user !== null) &&
+        <View container flexDirection='column'>
+          <View container flexDirection='column' style={{ ...adminLinksStyle, cursor: 'pointer' }} onClick={() => { window.open('https://drive.google.com/drive/folders/' + ROOT_FOLDER_ID); }}>
+            <Paragraph>Open Drive Folder</Paragraph>
+          </View>
+          {(state.user?.isAdmin) &&
+            <Link to='/users' style={{ textDecoration: 'none' }}>
+              <View container flexDirection='column' style={{ ...adminLinksStyle, ...(location.pathname === '/users' ? adminLinkSelected : {}) }}>
+                <Paragraph>Manage Users</Paragraph>
+              </View>
+            </Link>
+          }
         </View>
       }
     </View>
