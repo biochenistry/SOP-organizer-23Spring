@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { CSSProperties } from 'aphrodite'
-import { gql, useQuery } from '@apollo/client'
+import { CSSProperties, css } from 'aphrodite'
+import { gql, useLazyQuery, useQuery } from '@apollo/client'
 import SidebarFolder from '../Folder/Folder';
 import { Colors } from '../GlobalStyles';
 import View from '../View/View';
@@ -11,6 +11,16 @@ import TextField from '../TextField/TextField';
 import Button from '../Button/Button';
 import Form from '../Form/Form';
 import useForm from '../Form/useForm';
+import { createStyle } from '../../util/createStyle';
+
+const SEARCH_FILE = gql`
+query searchFiles($query: String!) {
+  search(query: $query) {
+    id
+    name
+  }
+}
+`;
 
 const GET_ALL_FOLDERS = gql`
 query getAllFolders {
@@ -60,24 +70,29 @@ type SearchInput = {
   search: string;
 }
 
-function searchFiles(arg0: { variables: { search: string; }; }): { data: any; } | PromiseLike<{ data: any; }> {
-  throw new Error('Function not implemented.');
-}
-
-const handleSearch = async (values: SearchInput) => {
-  const { data } = await searchFiles({
-    variables: {
-      search: values.search,
-    },
-  });
-
-}
-
 type GetAllFoldersResponse = {
   folders: Folder[];
 }
 
+type SearchResult = {
+  search: File[];
+} | null;
+
 type FileContentItem = Folder | File;
+
+const fileLinkStyle: CSSProperties = {
+  borderRadius: '4px',
+  marginLeft: '24px',
+  marginRight: '16px',
+  padding: '4px 12px',
+  textDecoration: 'none',
+  ':hover': {
+    backgroundColor: Colors.neutralHover,
+  },
+  ':active': {
+    backgroundColor: Colors.neutralActive,
+  }
+}
 
 export type Folder = {
   id: string;
@@ -120,13 +135,27 @@ const adminLinkSelected: CSSProperties = {
   borderRight: `4px solid ${Colors.isuRed}`,
 }
 
+const fileLinkSelected: CSSProperties = {
+  borderRight: `4px solid ${Colors.isuRed}`,
+}
+
 const Sidebar: React.FunctionComponent = () => {
   const location = useLocation();
   const { state } = useAuthState();
   const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
+  var [searchFiles, { data : searchData }] = useLazyQuery<SearchResult>(SEARCH_FILE);
   const [searchState, setSearch] = useState(false);
+  const search = () => {setSearch(true)};
+
+  const clearSearchBar = () => {searchForm.handleChange('search', ''); setSearch(false)};
   
-  const search = () => {setSearch(!searchState)};
+  const handleSearch = async (values: SearchInput) => {
+    await searchFiles({
+      variables: {
+        query: values.search,
+      },
+    });
+  }
 
   const searchForm = useForm<SearchInput>({
     initialValues: {
@@ -134,7 +163,6 @@ const Sidebar: React.FunctionComponent = () => {
     },
     onSubmit: handleSearch,
   });
-  const clearSearchBar = () => {searchForm.handleChange('search', '')};
 
   return (
     <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
@@ -153,9 +181,18 @@ const Sidebar: React.FunctionComponent = () => {
             </div>
           );
         })
-        : <View>
-            Results
-          </View>
+        : 
+            searchData?.search.map((file, index) => {
+          return (
+            <div key={index}>
+              <View >
+                <Link to={'/file/' + file.id} className={css(createStyle({ textDecoration: 'none', userSelect: 'none', ...(location.pathname === `/file/${file.id}` ? fileLinkSelected : {}) }))} key={index}>
+                  <Paragraph style={{ ...fileLinkStyle, fontSize: '14px' }}>{file.name}</Paragraph>
+                </Link>
+              </View>
+            </div>
+          );
+        })
         }
       </View>
 
