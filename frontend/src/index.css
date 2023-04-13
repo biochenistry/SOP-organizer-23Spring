@@ -55,3 +55,19 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+table {
+  border-collapse: collapse;
+}
+
+td,
+th {
+  text-align: left;
+  padding: 8px;
+}
+
+tr {
+  border-bottom: 1px solid #D7DAD7;
+  box-sizing: border-box;
+  height: 48px;
+}

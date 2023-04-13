@@ -85,7 +85,7 @@ function App() {
         <Route path='/file/:fileId' element={<WithHeaderAndSidebar><FileView /></WithHeaderAndSidebar>} />
         <Route path='/file/:fileId/fullscreen' element={<FileViewFullscreen />} />
         <Route path='/users' element={<WithHeaderAndSidebar><UsersList /></WithHeaderAndSidebar>} />
-        <Route path='/adduser' element={<WithHeaderAndSidebar><AddUser /></WithHeaderAndSidebar>} />
+        <Route path='/users/add' element={<WithHeaderAndSidebar><AddUser /></WithHeaderAndSidebar>} />
         <Route path='/account-settings' element={<WithHeaderAndSidebar><AccountSettings /></WithHeaderAndSidebar>} />
       </Routes>
     </>
