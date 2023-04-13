@@ -12,6 +12,7 @@ import Button from '../Button/Button';
 import Form from '../Form/Form';
 import useForm from '../Form/useForm';
 import { createStyle } from '../../util/createStyle';
+import LoadingSpinner from '../LoadingSpinner';
 
 const SEARCH_FILE = gql`
 query searchFiles($query: String!) {
@@ -182,7 +183,11 @@ const Sidebar: React.FunctionComponent = () => {
           );
         })
         : 
-            searchData?.search.map((file, index) => {
+            (!searchData) ? 
+            <View container justifyContent='center'>
+                <LoadingSpinner size='small' />
+            </View>
+        :   searchData?.search.map((file, index) => {
           return (
             <div key={index}>
               <View >
