@@ -77,7 +77,7 @@ func (s *UserService) DeleteUser(ctx context.Context, id string) error {
 func (s *UserService) GetAllUsers(ctx context.Context) ([]*model.User, error) {
 	users := []*model.User{}
 	// Get all users from table
-	rows, err := db.DB.Query("SELECT id, first_name, last_name, username, is_disabled, is_admin, force_password_change FROM public.user")
+	rows, err := db.DB.Query("SELECT id, first_name, last_name, username, is_disabled, is_admin, force_password_change FROM public.user ORDER BY last_name;")
 	if err != nil {
 		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving all users", err)
 	}
