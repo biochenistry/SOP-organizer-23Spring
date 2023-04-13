@@ -35,6 +35,14 @@ type Folder struct {
 
 func (Folder) IsFolderItem() {}
 
+// Results returned when searching for files
+type SearchResult struct {
+	// The ID of the file (from Google Drive)
+	ID string `json:"id"`
+	// The name of the file
+	Name string `json:"name"`
+}
+
 type User struct {
 	// The ID of the user
 	ID string `json:"id"`

@@ -13,6 +13,11 @@ extend type Query {
     Gets a single file by ID
     """
     file(id: ID!): File
+
+    """
+    Searches all folders for files with titles or text content containing the given string
+    """
+    search(query: String!): [SearchResult]
 }
 
 """
@@ -68,4 +73,19 @@ type File {
     The name of the user that last modified the file
     """
     lastModifiedBy: String!
+}
+
+"""
+Results returned when searching for files
+"""
+type SearchResult {
+    """
+    The ID of the file (from Google Drive)
+    """
+    id: ID!
+
+    """
+    The name of the file
+    """
+    name: String!
 }
