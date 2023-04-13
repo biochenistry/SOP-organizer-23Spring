@@ -25,7 +25,7 @@ func (r *mutationResolver) Login(ctx context.Context, username string, password 
 		return false, err
 	}
 
-	expires := time.Now().Add(time.Hour)
+	expires := time.Now().Add(time.Hour * 24 * 30)
 
 	token, err := r.UserService.CreateUserSession(ctx, *userId, expires)
 	if err != nil {

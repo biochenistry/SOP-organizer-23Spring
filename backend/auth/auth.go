@@ -43,7 +43,7 @@ func (r *Request) SetAuthToken(token string, expires time.Time) {
 		HttpOnly: true,
 		Secure:   false,
 		Path:     "/",
-		Expires:  time.Now().Add(time.Hour),
+		Expires:  time.Now().Add(time.Hour * 24 * 30),
 	})
 }
 
