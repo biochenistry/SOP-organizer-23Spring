@@ -75,7 +75,7 @@ export default function Login() {
             <TextField label='Username' name='username' type='text' value={loginForm.values.username} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} required />
             <TextField label='Password' name='password' type='password' value={loginForm.values.password} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} required />
             {hasError && <Paragraph style={{ color: Colors.error }}>Invalid username or password</Paragraph>}
-            <Button label='Login' variant='primary' type='submit' />
+            <Button label='Login' variant='primary' type='submit' style={{ width: '100%' }} />
           </View>
         </Form>
       </View>
