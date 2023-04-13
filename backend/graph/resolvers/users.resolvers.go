@@ -77,7 +77,12 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (bool,
 		return false, errs.NewUnauthorizedError(ctx, "You must login to delete a user account.")
 	}
 
-	if authUser.ID != userID && !auth.IsAdmin(authUser) {
+	// User is attempting to delete themselves or Dr. Stone
+	if authUser.ID == userID || userID == "73128efa-63a4-4855-867d-8ff855176fd5" {
+		return false, errs.NewInputError(ctx, "Cannot delete user account.")
+	}
+
+	if !auth.IsAdmin(authUser) {
 		return false, errs.NewForbiddenError(ctx, "You do not have permission to delete other users' accounts.")
 	}
 
