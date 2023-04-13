@@ -155,15 +155,17 @@ export default function FileView() {
           </Paragraph>
         </View>
         <View container flexDirection='row' gap='48px' alignItems='center'>
-          <View container flexDirection='row' alignItems='center' gap='16px'>
-            <View container style={{...zoomButtonStyle, ...(zoom <= MIN_ZOOM ? zoomButtonDisabledStyle : {})}} onClick={handleZoomOut}>
-              <FaMinus />
+          {!isEditing &&
+            <View container flexDirection='row' alignItems='center' gap='16px'>
+              <View container style={{ ...zoomButtonStyle, ...(zoom <= MIN_ZOOM ? zoomButtonDisabledStyle : {}) }} onClick={handleZoomOut}>
+                <FaMinus />
+              </View>
+              <Paragraph style={{ color: Colors.textSecondary }}>{Math.floor(zoom * 100)}%</Paragraph>
+              <View container style={{ ...zoomButtonStyle, ...(zoom >= MAX_ZOOM ? zoomButtonDisabledStyle : {}) }} onClick={handleZoomIn}>
+                <FaPlus />
+              </View>
             </View>
-            <Paragraph style={{ color: Colors.textSecondary }}>{Math.floor(zoom * 100)}%</Paragraph>
-            <View container style={{...zoomButtonStyle, ...(zoom >= MAX_ZOOM ? zoomButtonDisabledStyle : {})}} onClick={handleZoomIn}>
-              <FaPlus />
-            </View>
-          </View>
+          }
           <ActionMenu label='Download'>
             <ActionItem label='PDF' onClick={() => { downloadFile('pdf'); }} />
             <ActionItem label='DOCX' onClick={() => { downloadFile('docx'); }} />
