@@ -4,7 +4,7 @@ import View from "../components/View/View";
 
 export default function Home() {
   return (
-    <View container alignItems='center' justifyContent='center' width='100%' >
+    <View container alignItems='center' justifyContent='center' height='100%' width='100%' >
       <Heading renderAs='h2' text='Select a file in the sidebar to view.' color={Colors.textSecondary} />
     </View>
   );

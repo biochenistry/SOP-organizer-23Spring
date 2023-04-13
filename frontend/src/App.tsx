@@ -100,9 +100,11 @@ function WithHeaderAndSidebar(props: WithHeaderAndSidebarProps) {
   return (
     <>
       <Header />
-      <View container flexDirection='row' height='calc(100vh - 76px)'>
+      <View container flexDirection='row' height='calc(100vh - 76px)' style={{ overflow: 'scroll' }}>
         <Sidebar />
-        {props.children}
+        <View style={{ height: '100%', overflow: 'scroll', width: '100%' }}>
+          {props.children}
+        </View>
       </View>
     </>
   )
