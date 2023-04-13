@@ -8,6 +8,8 @@ import en from 'javascript-time-ago/locale/en.json';
 import './index.css'
 import { BrowserRouter } from 'react-router-dom';
 
+export const ROOT_FOLDER_ID = '1TjRQ-ZVMcAFc7rCg8O2uG6tQOVmrFTbD';
+
 TimeAgo.addDefaultLocale(en)
 
 let url = '/api';

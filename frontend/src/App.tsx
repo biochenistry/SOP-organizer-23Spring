@@ -9,18 +9,86 @@ import AddUser from './pages/AddUser';
 import Home from './pages/Home';
 import FileViewFullscreen from './pages/FileViewFullscreen';
 import AccountSettings from './pages/AccountSettings';
+import { useAuthState } from './components/Auth';
+import AutoOpen from './components/modals/AutoOpen';
+import FormModal from './components/modals/FormModal';
+import { gql, useMutation } from '@apollo/client';
+import ModalLauncher from './components/modals/ModalLauncher';
+import TextField from './components/TextField/TextField';
+import { login } from './components/Auth/authStateReducer';
+
+const CHANGE_PASSWORD = gql`
+mutation changePassword($userId: ID!, $newPassword: String!) {
+  success: changePassword(userId: $userId, newPassword: $newPassword)
+}
+`;
+
+type ChangePasswordResponse = {
+  success: boolean;
+}
+
+type ChangePasswordInput = {
+  password: String;
+  confirmPassword: String;
+}
 
 function App() {
+  const { state, dispatch } = useAuthState();
+  const [changePassword] = useMutation<ChangePasswordResponse>(CHANGE_PASSWORD);
+
+  const handleChangePassword = async (values: ChangePasswordInput) => {
+    if (!state.user) {
+      return;
+    }
+
+    if (values.password !== values.confirmPassword) {
+      return;
+    }
+
+    const { data } = await changePassword({
+      variables: {
+        userId: state.user.id,
+        newPassword: values.password
+      },
+    });
+
+    if (data?.success) {
+      dispatch(login({
+        ...state.user,
+        shouldForcePasswordChange: false,
+      }));
+    }
+  }
+
+  const changePasswordModal = (
+    <FormModal<ChangePasswordInput> title='Change Password' onSubmit={handleChangePassword} submitLabel='Change Password' initialValues={{ password: '', confirmPassword: '' }} showCloseButton={false} showCancelButton={false} >
+      <View container gap='16px' flexDirection='column' >
+        <TextField label='Password' name='password' type='password' required />
+        <TextField label='Confirm Password' name='confirmPassword' type='password' required />
+      </View>
+    </FormModal>
+  );
+
   return (
-    <Routes>
-      <Route path='/' element={<WithHeaderAndSidebar><Home /></WithHeaderAndSidebar>} />
-      <Route path='/login' element={<WithHeaderAndSidebar><Login /></WithHeaderAndSidebar>} />
-      <Route path='/file/:fileId' element={<WithHeaderAndSidebar><FileView /></WithHeaderAndSidebar>} />
-      <Route path='/file/:fileId/fullscreen' element={<FileViewFullscreen />} />
-      <Route path='/users' element={<WithHeaderAndSidebar><UsersList /></WithHeaderAndSidebar>} />
-      <Route path='/adduser' element={<WithHeaderAndSidebar><AddUser /></WithHeaderAndSidebar>} />
-      <Route path='/account-settings' element={<WithHeaderAndSidebar><AccountSettings /></WithHeaderAndSidebar>} />
-    </Routes>
+    <>
+      {state.user?.shouldForcePasswordChange &&
+        <ModalLauncher modal={changePasswordModal}>
+          {({ openModal }) => (
+            <AutoOpen openModal={openModal} />
+          )}
+        </ModalLauncher >
+      }
+
+      <Routes>
+        <Route path='/' element={<WithHeaderAndSidebar><Home /></WithHeaderAndSidebar>} />
+        <Route path='/login' element={<WithHeaderAndSidebar><Login /></WithHeaderAndSidebar>} />
+        <Route path='/file/:fileId' element={<WithHeaderAndSidebar><FileView /></WithHeaderAndSidebar>} />
+        <Route path='/file/:fileId/fullscreen' element={<FileViewFullscreen />} />
+        <Route path='/users' element={<WithHeaderAndSidebar><UsersList /></WithHeaderAndSidebar>} />
+        <Route path='/users/add' element={<WithHeaderAndSidebar><AddUser /></WithHeaderAndSidebar>} />
+        <Route path='/account-settings' element={<WithHeaderAndSidebar><AccountSettings /></WithHeaderAndSidebar>} />
+      </Routes>
+    </>
   );
 }
 

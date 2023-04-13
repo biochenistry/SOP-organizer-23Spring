@@ -9,8 +9,9 @@ query getCurrentUser {
     id
     firstName
     lastName
-    email
+    username
     isAdmin
+    shouldForcePasswordChange
   }
 }
 `;

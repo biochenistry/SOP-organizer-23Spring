@@ -9,11 +9,12 @@ import (
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/auth"
 	errs "git.las.iastate.edu/SeniorDesignComS/2023spr/sop/errors"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/generated"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/model"
 )
 
 // CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, firstname string, lastname string, email string, password string, admin bool) (*model.User, error) {
+func (r *mutationResolver) CreateUser(ctx context.Context, firstname string, lastname string, username string, password string, admin bool) (*model.User, error) {
 	authUser := auth.GetUserFromContext(ctx)
 	if authUser == nil {
 		return nil, errs.NewUnauthorizedError(ctx, "You must be logged in to create user accounts.")
@@ -23,7 +24,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, firstname string, las
 		return nil, errs.NewForbiddenError(ctx, "You do not have permission to create new user accounts.")
 	}
 
-	id, err := r.UserService.CreateUser(ctx, firstname, lastname, email, password, admin)
+	id, err := r.UserService.CreateUser(ctx, firstname, lastname, username, password, admin)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +52,7 @@ func (r *mutationResolver) ChangeUserRole(ctx context.Context, userID string, ad
 }
 
 // UpdateUser is the resolver for the updateUser field.
-func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, firstname string, lastname string, email string) (*model.User, error) {
+func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, firstname string, lastname string) (*model.User, error) {
 	authUser := auth.GetUserFromContext(ctx)
 	if authUser == nil {
 		return nil, errs.NewUnauthorizedError(ctx, "You must be logged in to update user account's.")
@@ -61,7 +62,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, firstn
 		return nil, errs.NewForbiddenError(ctx, "You do not have permission to change other user account's.")
 	}
 
-	err := r.UserService.UpdateUser(ctx, userID, firstname, lastname, email)
+	err := r.UserService.UpdateUser(ctx, userID, firstname, lastname)
 	if err != nil {
 		return nil, err
 	}
@@ -151,3 +152,22 @@ func (r *queryResolver) User(ctx context.Context, userID string) (*model.User, e
 
 	return user, nil
 }
+
+// ShouldForcePasswordChange is the resolver for the shouldForcePasswordChange field.
+func (r *userResolver) ShouldForcePasswordChange(ctx context.Context, obj *model.User) (*bool, error) {
+	user := auth.GetUserFromContext(ctx)
+	if user == nil {
+		return nil, nil
+	}
+
+	if user.ID != obj.ID {
+		return nil, nil
+	}
+
+	return obj.ShouldForcePasswordChange, nil
+}
+
+// User returns generated.UserResolver implementation.
+func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
+
+type userResolver struct{ *Resolver }

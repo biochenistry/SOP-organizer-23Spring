@@ -12,8 +12,8 @@ import Button from "../components/Button/Button";
 import Heading from "../components/Heading/Heading";
 
 const LOGIN = gql`
-mutation login($email: String!, $password: String!) {
-  success: login(email: $email, password: $password)
+mutation login($username: String!, $password: String!) {
+  success: login(username: $username, password: $password)
 }
 `;
 
@@ -22,7 +22,7 @@ type LoginResponse = {
 }
 
 type LoginInput = {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -35,7 +35,7 @@ export default function Login() {
   const handleLogin = async (values: LoginInput) => {
     const { data } = await login({
       variables: {
-        email: values.email,
+        username: values.username,
         password: values.password,
       },
     });
@@ -49,7 +49,7 @@ export default function Login() {
 
   const loginForm = useForm<LoginInput>({
     initialValues: {
-      email: '',
+      username: '',
       password: ''
     },
     onSubmit: handleLogin,
@@ -72,9 +72,9 @@ export default function Login() {
         
         <Form handleSubmit={loginForm.handleSubmit}>
           <View container gap='16px' flexDirection='column'>
-            <TextField label='Email' name='email' type='text' value={loginForm.values.email} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} required />
+            <TextField label='Username' name='username' type='text' value={loginForm.values.username} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} required />
             <TextField label='Password' name='password' type='password' value={loginForm.values.password} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} required />
-            {hasError && <Paragraph style={{ color: Colors.error }}>Invalid email or password</Paragraph>}
+            {hasError && <Paragraph style={{ color: Colors.error }}>Invalid username or password</Paragraph>}
             <Button label='Login' variant='primary' type='submit' />
           </View>
         </Form>

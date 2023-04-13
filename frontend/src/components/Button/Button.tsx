@@ -11,7 +11,7 @@ interface ButtonProps {
   onClick?: (() => void) | (() => Promise<void>);
   href?: string;
   label?: string;
-  variant: 'primary' | 'secondary';
+  variant: 'primary' | 'secondary' | 'tertiary';
   onDark?: boolean;
   type?: 'button' | 'submit';
   style?: CSSProperties;
@@ -26,6 +26,7 @@ const styles = StyleSheet.create({
     border: 'none',
     borderRadius: '4px',
     boxSizing: 'border-box',
+    width: 'fit-content',
   },
   primary: {
     backgroundColor: Colors.isuRed,
@@ -83,6 +84,27 @@ const styles = StyleSheet.create({
       color: Colors.isuYellowDark,
     },
   },
+  tertiary: {
+    background: 'none',
+    color: Colors.isuRed,
+    fill: Colors.isuRed,
+    height: '40px',
+    paddingLeft: '0px',
+    paddingRight: '0px',
+    ':active': {
+      fill: Colors.isuRedDark,
+    },
+  },
+  tertiaryOnDark: {
+    background: 'none',
+    color: Colors.isuYellow,
+    fill: Colors.isuYellow,
+    paddingLeft: '0px',
+    paddingRight: '0px',
+    ':active': {
+      fill: Colors.isuYellowDark,
+    },
+  },
 });
 
 const Button: React.FC<ButtonProps> = ({
@@ -117,27 +139,95 @@ const Button: React.FC<ButtonProps> = ({
       hidden={hidden}
       disabled={disabled}
     >
-      <View container alignItems='center' justifyContent='center' style={{ position: 'relative', left: 0, top: 0, ...(isLoading ? { height: '100%' } : {}) }}>
+      <View container alignItems='center' justifyContent='center' width='100%' style={{ position: 'relative', left: 0, top: 0, ...(isLoading ? { height: '100%' } : {}) }}>
         {isLoading && <LoadingSpinner size='small' />}
       </View>
-      <Paragraph style={{ color: 'inherit', textAlign: 'center', ...(isLoading ? { visibility: 'hidden' } : {}) }}>{label}</Paragraph>
+      <Paragraph style={{ color: 'inherit', textAlign: 'center', margin: 'auto', position: 'relative', width: 'fit-content', ...(isLoading ? { visibility: 'hidden' } : {}), ...(variant === 'tertiary' ? getTertiaryInteractions(onDark || false) : {}) }}>{label}</Paragraph>
     </button>
   );
 }
 
-const getButtonStyle = (variant: 'primary' | 'secondary', onDark?: boolean) => {
+const getButtonStyle = (variant: 'primary' | 'secondary' | 'tertiary', onDark?: boolean) => {
   if (onDark) {
     if (variant === 'primary') {
       return styles.primaryOnDark;
-    } else {
+    } else if (variant === 'secondary') {
       return styles.secondaryOnDark;
+    } else {
+      return styles.tertiaryOnDark;
     }
   } else {
     if (variant === 'primary') {
       return styles.primary;
-    } else {
+    } else if (variant === 'secondary') {
       return styles.secondary;
+    } else {
+      return styles.tertiary;
     }
+  }
+}
+
+const getTertiaryInteractions = (onDark: boolean) => {
+  if (onDark) {
+    const tertiaryInteractionsOnDark: CSSProperties = {
+      ':hover': {
+        ':after': {
+          content: '\'\'',
+          position: 'absolute',
+          height: '2px',
+          width: 'calc(100% - 0px)',
+          right: '0px',
+          bottom: '0px',
+          background: Colors.isuYellow,
+          borderRadius: '2px',
+        },
+      },
+      ':active': {
+        ':after': {
+          content: '\'\'',
+          position: 'absolute',
+          height: '1px',
+          width: 'calc(100% - 0px)',
+          right: '0px',
+          bottom: '0px',
+          background: Colors.isuYellowDark,
+          borderRadius: '2px',
+        },
+        color: Colors.isuYellowDark,
+      },
+    }
+
+    return tertiaryInteractionsOnDark;
+  } else {
+    const tertiaryInteractions: CSSProperties = {
+      ':hover': {
+        ':after': {
+          content: '\'\'',
+          position: 'absolute',
+          height: '2px',
+          width: 'calc(100% - 0px)',
+          right: '0px',
+          bottom: '0px',
+          background: Colors.isuRed,
+          borderRadius: '2px',
+        },
+      },
+      ':active': {
+        ':after': {
+          content: '\'\'',
+          position: 'absolute',
+          height: '1px',
+          width: 'calc(100% - 0px)',
+          right: '0px',
+          bottom: '0px',
+          background: Colors.isuRedDark,
+          borderRadius: '2px',
+        },
+        color: Colors.isuRedDark,
+      },
+    }
+
+    return tertiaryInteractions;
   }
 }
 

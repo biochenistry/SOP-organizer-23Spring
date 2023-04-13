@@ -4,8 +4,9 @@ export type User = {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
+  username: string;
   isAdmin: boolean;
+  shouldForcePasswordChange: boolean | null;
 }
 
 export type AuthState = {

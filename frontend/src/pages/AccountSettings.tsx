@@ -13,12 +13,11 @@ import { login } from '../components/Auth/authStateReducer';
 import { useNavigate } from 'react-router';
 
 const UPDATE_USER = gql`
-mutation updateUser($userId: ID!, $firstname: String!, $lastname: String!, $email: String!) {
-  updateUser(userId: $userId, firstname: $firstname, lastname: $lastname, email: $email) {
+mutation updateUser($userId: ID!, $firstname: String!, $lastname: String!) {
+  updateUser(userId: $userId, firstname: $firstname, lastname: $lastname) {
     id
     firstName
     lastName
-    email
   }
 }
 `;
@@ -37,13 +36,11 @@ type User = {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
 }
 
 type UserInput = {
   firstname: string;
   lastname: string;
-  email: string;
 }
 
 type PasswordInput = {
@@ -63,7 +60,6 @@ export default function AccountSettings() {
         userId: state.user?.id,
         firstname: values.firstname,
         lastname: values.lastname,
-        email: values.email,
       },
     });
 
@@ -72,7 +68,6 @@ export default function AccountSettings() {
         ...state.user,
         firstName: values.firstname,
         lastName: values.lastname,
-        email: values.email,
       }));
     }
 
@@ -99,7 +94,6 @@ export default function AccountSettings() {
     initialValues: {
       firstname: state.user?.firstName != null ? state.user?.firstName : '',
       lastname: state.user?.lastName != null ? state.user?.lastName : '',
-      email: state.user?.email != null ? state.user?.email : ''
     },
     onSubmit: handleUserUpdate,
   });
@@ -128,7 +122,6 @@ export default function AccountSettings() {
                 <TextField name='firstname' type='text' label='First Name' value={userForm.values.firstname} error={userForm.errors.firstname} onChange={userForm.handleChange} onValidate={userForm.handleValidate} required />
                 <TextField name='lastname' type='text' label='Last Name' value={userForm.values.lastname} error={userForm.errors.lastname} onChange={userForm.handleChange} onValidate={userForm.handleValidate} required />
               </View>
-              <TextField name='email' type='text' label='Email' value={userForm.values.email} error={userForm.errors.email} onChange={userForm.handleChange} onValidate={userForm.handleValidate} required />
               <View container alignItems='center' flexDirection='row' gap='16px'>
                 <Button variant='primary' type='submit' label='Save Changes' style={{ maxWidth: 'fit-content' }} isLoading={updateUserIsLoading} disabled={userForm.hasError} />
                 {(!updateUserIsLoading && updateUserData) && <Paragraph style={{ color: Colors.textSecondary }}>Changes saved!</Paragraph>}

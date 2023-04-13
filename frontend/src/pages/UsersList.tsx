@@ -3,42 +3,19 @@ import View from "../components/View/View";
 import { gql, useQuery, useMutation } from '@apollo/client'
 import { useAuthState } from "../components/Auth";
 import Button from "../components/Button/Button";
-import { StyleSheet, css } from 'aphrodite';
-import { Colors } from '../components/GlobalStyles';
-import { createStyle } from '../util/createStyle';
+import Heading from "../components/Heading/Heading";
+import ConfirmModal from "../components/modals/ConfirmModal";
+import Paragraph from "../components/Paragraph/Paragraph";
+import ModalLauncher from "../components/modals/ModalLauncher";
+import { useState } from "react";
 
-
-const styles = StyleSheet.create({
-    usertable: {
-        padding: '16px',
-        'user-select': 'none',
-        ':hover': {
-          backgroundColor: Colors.neutralHover,
-          cursor: 'pointer',
-        },
-        ':active': {
-          backgroundColor: Colors.neutralActive,
-        
-        },
-    },
-    table: {
-        backgroundColor: Colors.isuRed,
-        borderBottom: `4px solid ${Colors.isuYellow}`,
-        color: '#ffffff',
-        width: '100%',
-        padding: '15px',
-    }
-});
-
-
-//query defined in backend
 const GET_ALL_USERS = gql`
 query getAllUsers {
     all{
         id
         firstName
         lastName
-        email
+        username
         isDisabled
         isAdmin
     }
@@ -51,7 +28,7 @@ mutation changeUserRole($userId: ID!, $admin: Boolean!){
         id
         firstName
         lastName
-        email
+        username
         isAdmin
     }
 }
@@ -64,127 +41,130 @@ mutation deleteUser($userId: ID!){
 `
 
 type RemoveUserResponse = {
-    success: boolean;
+  success: boolean;
 }
 
 type RemoveUserInput = {
-    userId: string;
+  userId: string;
 }
 
 type MakeAdminResponse = {
-    user: User;
+  user: User;
 }
 
 type MakeAdminInput = {
-    userId: string;
-    admin: boolean;
+  userId: string;
+  admin: boolean;
 }
 
 
 type GetAllUsersResponse = {
-    all: User[] | null;
+  all: User[] | null;
 }
 
 
 type User = {
-    id: string,
-    firstName: string;
-    lastName: string;
-    email: string;
-    isDisabled: boolean;
-    isAdmin: boolean;
+  id: string,
+  firstName: string;
+  lastName: string;
+  username: string;
+  isDisabled: boolean;
+  isAdmin: boolean;
 }
 
-function determineAdmin(person: User){
-    if (person.isAdmin){
-        return "Admin";
-    }
-    else{
-        return "Not Admin";
-    }
-}
+const UsersList: React.FunctionComponent = () => {
+  const navigate = useNavigate();
+  const { state } = useAuthState();
+  const [userEdited, setUserEdited] = useState<string | null>(null);
+  const { data, refetch: refetchUsers } = useQuery<GetAllUsersResponse>(GET_ALL_USERS, {
+    fetchPolicy: "network-only"
+  });
+  const [makeAdmin, { loading: isMakeAdminLoading }] = useMutation<MakeAdminResponse>(MAKE_ADMIN);
+  const [removeUser, { loading: isRemoveUserLoading }] = useMutation<RemoveUserResponse>(REMOVE_USER);
 
-function adminButtonLabel(person: User){
-    if(person.isAdmin){
-        return "Make User";
-    }
-    else{
-        return "Make Admin";
-    }
-}
+  const handleChangeRole = async (values: MakeAdminInput) => {
+    setUserEdited(values.userId);
 
-
-
-//allows admin users to access user information
-const Page: React.FunctionComponent = () => {
-    const navigate = useNavigate();
-    const { state } = useAuthState();
-    const { data, refetch: refetchUsers } = useQuery<GetAllUsersResponse>(GET_ALL_USERS, {
-        fetchPolicy: "network-only"
+    await makeAdmin({
+      variables: {
+        userId: values.userId,
+        admin: values.admin,
+      },
     });
-    const [makeAdmin, {loading: isMakeAdminLoading}] = useMutation<MakeAdminResponse>(MAKE_ADMIN);
-    const [removeUser, {loading: isRemoveUserLoading}] = useMutation<RemoveUserResponse>(REMOVE_USER);
+
+    setUserEdited(null);
+  }
+
+  const handleRemoveUser = async (values: RemoveUserInput) => {
+    setUserEdited(values.userId);
+
+    await removeUser({
+      variables: {
+        userId: values.userId,
+      },
+    });
+
+    setUserEdited(null);
+
+    await refetchUsers();
+  }
+
+  const confirmDeleteUserModal = (
+    <ConfirmModal title='Delete User?' onConfirm={handleRemoveUser} confirmLabel='Delete'>
+      <Paragraph>Are you sure you want to delete this user? The user's account will be permanently deleted.</Paragraph>
+    </ConfirmModal>
+  );
 
 
-    
-    const handleChangeRole = async (values: MakeAdminInput) => {
-        const { data } = await makeAdmin({
-          variables: {
-            userId: values.userId,
-            admin: values.admin,
-          },
-        });  
-    }
+  if (!state.user?.isAdmin) {
+    navigate('/');
+  }
 
-    const handleRemoveUser = async (values: RemoveUserInput) => {
-        const { data } = await removeUser({
-          variables: {
-            userId: values.userId,
-          },
-        });
-
-        await refetchUsers();
-    }
-    
-
-    if (!state.user?.isAdmin) {
-        navigate('/');
-    }
-
-    //Returns a table with each user's information
-    return (      
-        <View container alignItems='center' justifyContent='center' width='100%' flexDirection="column">
-        <Button label='Add User' href='/adduser' variant='secondary' onDark type='submit' style={{ width: '20%' }} />
-
-        <table style={{ borderBottom: `4px solid ${Colors.isuYellow}`, width: '80%', padding: '15px', }} >
+  return (
+    <>
+      <View container flexDirection='column' padding='24px' gap='32px' maxWidth='1400px' width='100%'>
+        <View container flexDirection='row' justifyContent='space-between'>
+          <Heading text='Users' renderAs='h1' />
+          <Button label='Add User' href='/users/add' variant='primary' />
+        </View>
+        <View container flexDirection='column' gap='48px'>
+          <table>
             <thead>
-            <tr>
-                <th style={{textAlign: 'left'}}>First Name</th>
-                <th style={{textAlign: 'left'}}>Last Name</th>
-                <th style={{textAlign: 'left'}}>Email</th>
-                <th style={{textAlign: 'left'}}>Admin?</th>
-            </tr>
+              <tr>
+                <th style={{ width: '200px' }}>First Name</th>
+                <th style={{ width: '200px' }}>Last Name</th>
+                <th style={{ width: '250px' }}>Username</th>
+                <th style={{ width: '200px' }}>Role</th>
+                <th></th>
+                <th></th>
+              </tr>
             </thead>
             <tbody>
-            {data?.all?.map((user, index) => {
-                    return(
-                    <tr key={index}>
-                        <td>{user.firstName}</td> 
-                        <td>{user.lastName}</td> 
-                        <td>{user.email}</td> 
-                        <td>{determineAdmin(user)} </td> 
-                        <td>
-                            <Button label='Remove' variant='secondary' onDark type='submit' style={{ width: '100%' }} onClick={()=>{handleRemoveUser({userId: user.id})}} isLoading = {isRemoveUserLoading}/>
-                        </td>
-                        <td>
-                            <Button label={adminButtonLabel(user)} variant='secondary' onDark style={{ width: '100%' }} onClick={()=>{handleChangeRole({userId: user.id, admin: !user.isAdmin })}} isLoading= {isMakeAdminLoading}/>
-                        </td>
-                    </tr>
-                    );
-                })}
-        </tbody>
-        </table>
-        </View> 
-    );
-}  
-export default Page
+              {data?.all?.map((user, index) => {
+                return (
+                  <tr key={index}>
+                    <td>{user.firstName}</td>
+                    <td>{user.lastName}</td>
+                    <td>{user.username}</td>
+                    <td>{user.isAdmin ? 'Admin' : 'Standard User'} </td>
+                    <td>
+                      <Button label={user.isAdmin ? 'Change to Standard User' : 'Change to Admin'} variant='tertiary' onClick={() => { handleChangeRole({ userId: user.id, admin: !user.isAdmin }) }} isLoading={isMakeAdminLoading && user.id === userEdited} />
+                    </td>
+                    <td>
+                      <ModalLauncher modal={confirmDeleteUserModal}>
+                        {({ openModal }) => (
+                          <Button label='Remove' variant='tertiary' type='submit' onClick={() => { openModal({ userId: user.id }) }} isLoading={isRemoveUserLoading && user.id === userEdited} />
+                        )}
+                      </ModalLauncher>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </View>
+      </View>
+    </>
+  );
+}
+export default UsersList;

@@ -22,7 +22,7 @@ type AuthUser struct {
 	ID         string
 	FirstName  string
 	LastName   string
-	Email      string
+	Username   string
 	IsInactive bool
 	IsAdmin    bool
 }
@@ -71,8 +71,8 @@ func Middleware() func(http.Handler) http.Handler {
 				// Don't set the user for unauthenticated users
 				user = nil
 			} else {
-				row := db.DB.QueryRow("SELECT u.id, u.first_name, u.last_name, u.email, u.is_disabled, u.is_admin FROM user_session s INNER JOIN public.user u ON u.id = s.user_id WHERE s.session_token = $1 AND s.expires >= $2 AND u.is_disabled = false;", authToken.Value, time.Now().UTC())
-				if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.IsInactive, &user.IsAdmin); err != nil {
+				row := db.DB.QueryRow("SELECT u.id, u.first_name, u.last_name, u.username, u.is_disabled, u.is_admin FROM user_session s INNER JOIN public.user u ON u.id = s.user_id WHERE s.session_token = $1 AND s.expires >= $2 AND u.is_disabled = false;", authToken.Value, time.Now().UTC())
+				if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Username, &user.IsInactive, &user.IsAdmin); err != nil {
 					if err == sql.ErrNoRows {
 						// The auth token was invalid or expired
 						user = nil

@@ -8,7 +8,7 @@ extend type Mutation {
     """
     Creates a new user account with the given information. Available to admin users only.
     """
-    createUser(firstname: String!, lastname: String!, email: String!, password: String!, admin: Boolean!): User
+    createUser(firstname: String!, lastname: String!, username: String!, password: String!, admin: Boolean!): User
 
     """
     Changes a user's role for the user with the given ID.
@@ -18,7 +18,7 @@ extend type Mutation {
     """
     Updates an existing user account
     """
-    updateUser(userId: ID!, firstname: String!, lastname: String!, email: String!): User
+    updateUser(userId: ID!, firstname: String!, lastname: String!): User
 
     """
     Deletes an existing user account
@@ -48,9 +48,9 @@ type User {
     lastName: String!
 
     """
-    The user's email address
+    The user's username
     """
-    email: String
+    username: String
 
     """
     Indicates whether the user's account has been disabled
@@ -61,4 +61,9 @@ type User {
     Indicates whether the user is an admin
     """
     isAdmin: Boolean
+
+    """
+    Indicates the user should be prompted to change their password when they log in
+    """
+    shouldForcePasswordChange: Boolean @goField(forceResolver: true)
 }
