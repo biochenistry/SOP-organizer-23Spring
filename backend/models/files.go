@@ -20,5 +20,5 @@ type FileService interface {
 	GetFileById(ctx context.Context, id string) (*model.File, error)
 
 	// Searches all files with titles or text content containing the given query string
-	SearchFiles(ctx context.Context, query string) ([]*model.SearchResult, error)
+	SearchFiles(ctx context.Context, query string) ([]*model.File, error)
 }

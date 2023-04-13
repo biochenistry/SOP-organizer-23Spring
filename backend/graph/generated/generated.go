@@ -112,7 +112,7 @@ type QueryResolver interface {
 	Folders(ctx context.Context) ([]*model.Folder, error)
 	Folder(ctx context.Context, id string) (*model.Folder, error)
 	File(ctx context.Context, id string) (*model.File, error)
-	Search(ctx context.Context, query string) ([]*model.SearchResult, error)
+	Search(ctx context.Context, query string) ([]*model.File, error)
 	Me(ctx context.Context) (*model.User, error)
 	All(ctx context.Context) ([]*model.User, error)
 	User(ctx context.Context, userID string) (*model.User, error)
@@ -501,7 +501,7 @@ var sources = []*ast.Source{
     """
     Searches all folders for files with titles or text content containing the given string
     """
-    search(query: String!): [SearchResult]
+    search(query: String!): [File]
 }
 
 """
@@ -1886,9 +1886,9 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.SearchResult)
+	res := resTmp.([]*model.File)
 	fc.Result = res
-	return ec.marshalOSearchResult2ᚕᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐSearchResult(ctx, field.Selections, res)
+	return ec.marshalOFile2ᚕᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐFile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_search(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1900,11 +1900,17 @@ func (ec *executionContext) fieldContext_Query_search(ctx context.Context, field
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_SearchResult_id(ctx, field)
+				return ec.fieldContext_File_id(ctx, field)
 			case "name":
-				return ec.fieldContext_SearchResult_name(ctx, field)
+				return ec.fieldContext_File_name(ctx, field)
+			case "created":
+				return ec.fieldContext_File_created(ctx, field)
+			case "lastUpdated":
+				return ec.fieldContext_File_lastUpdated(ctx, field)
+			case "lastModifiedBy":
+				return ec.fieldContext_File_lastModifiedBy(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type SearchResult", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
 	}
 	defer func() {
@@ -5638,21 +5644,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOFile2ᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐFile(ctx context.Context, sel ast.SelectionSet, v *model.File) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._File(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOFolder2ᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐFolder(ctx context.Context, sel ast.SelectionSet, v *model.Folder) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Folder(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOSearchResult2ᚕᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐSearchResult(ctx context.Context, sel ast.SelectionSet, v []*model.SearchResult) graphql.Marshaler {
+func (ec *executionContext) marshalOFile2ᚕᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐFile(ctx context.Context, sel ast.SelectionSet, v []*model.File) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -5679,7 +5671,7 @@ func (ec *executionContext) marshalOSearchResult2ᚕᚖgitᚗlasᚗiastateᚗedu
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOSearchResult2ᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐSearchResult(ctx, sel, v[i])
+			ret[i] = ec.marshalOFile2ᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐFile(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5693,11 +5685,18 @@ func (ec *executionContext) marshalOSearchResult2ᚕᚖgitᚗlasᚗiastateᚗedu
 	return ret
 }
 
-func (ec *executionContext) marshalOSearchResult2ᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐSearchResult(ctx context.Context, sel ast.SelectionSet, v *model.SearchResult) graphql.Marshaler {
+func (ec *executionContext) marshalOFile2ᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐFile(ctx context.Context, sel ast.SelectionSet, v *model.File) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._SearchResult(ctx, sel, v)
+	return ec._File(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOFolder2ᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐFolder(ctx context.Context, sel ast.SelectionSet, v *model.Folder) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Folder(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
