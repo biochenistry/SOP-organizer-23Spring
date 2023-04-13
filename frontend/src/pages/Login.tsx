@@ -62,7 +62,7 @@ export default function Login() {
   }, [state, navigate]);
 
   return (
-    <View container alignItems='center' justifyContent='center' width='100%'>
+    <View container alignItems='center' justifyContent='center' height='100%' width='100%'>
       <View container flexDirection='column' gap='32px' style={{ minWidth: '400px', maxWidth: '600px' }} >
         
         <View container flexDirection='column' gap='8px'>
