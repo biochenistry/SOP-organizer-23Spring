@@ -65,7 +65,6 @@ export default function FileView() {
     return null;
   }
 
-  /* Todo: Add option to select file format */
   const downloadFile = (format: 'docx' | 'pdf') => {
     window.location.href = 'https://docs.google.com/feeds/download/documents/export/Export?id=' + fileId + '&exportFormat=' + format;
   }
