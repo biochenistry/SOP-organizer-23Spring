@@ -5,16 +5,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"sort"
 	"strings"
+	"time"
 
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/db"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/errors"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/graph/model"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/models"
+	strip "github.com/grokify/html-strip-tags-go"
 )
 
 type FileService struct {
@@ -230,105 +231,214 @@ func (s *FileService) GetFileById(ctx context.Context, id string) (*model.File, 
 	return file, nil
 }
 
-func (s *FileService) SearchFiles(ctx context.Context, query string) ([]*model.SearchResult, error) {
-	folders, err := s.GetAllFolders(ctx)
+func (s *FileService) SearchFiles(ctx context.Context, query string) ([]*model.File, error) {
+	files, err := s.getAllFiles(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	folderIds := []string{}
-	// Append all root folder ids to slice
-	for _, folder := range folders {
-		folderIds = append(folderIds, folder.ID)
+	cachedFiles, err := s.getCachedFiles(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	// Append all nested folder ids inside of each root folder to slice
-	for _, folder := range folders {
-		// Get all nested folders under this folder
-		err = s.GetNestedFoldersRec(ctx, folder.ID, &folderIds)
+	// Make sure every file in the drive root folder has an updated cache
+	for _, file := range files {
+		fileLastUpdatedUTC, err := time.Parse("2006-01-02T15:04:05.000Z", file.LastUpdated)
 		if err != nil {
 			return nil, err
 		}
-	}
 
-	results := []*model.SearchResult{}
-	for _, id := range folderIds {
-		result, err := s.SearchFolder(ctx, query, id)
-		if err != nil {
-			return nil, err
+		if cachedFiles[file.ID] == nil {
+			contents, err := s.getFileContents(ctx, file.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			strippedContent := strip.StripTags(*contents)
+			strippedContent = strings.ReplaceAll(strippedContent, "&nbsp;", "")
+
+			s.saveFileCache(ctx, file.ID, file.Name, &strippedContent)
+		} else {
+			cacheLastUpdatedUTC, err := time.Parse(time.RFC3339Nano, cachedFiles[file.ID].LastUpdated)
+			if err != nil {
+				return nil, err
+			}
+
+			if fileLastUpdatedUTC.After(cacheLastUpdatedUTC) {
+				contents, err := s.getFileContents(ctx, file.ID)
+				if err != nil {
+					return nil, err
+				}
+
+				strippedContent := strip.StripTags(*contents)
+				strippedContent = strings.ReplaceAll(strippedContent, "&nbsp;", "")
+
+				s.saveFileCache(ctx, file.ID, file.Name, &strippedContent)
+			}
 		}
-		results = append(results, result...)
 	}
 
-	log.Println("Search finished")
+	// Search the cache for the query
+	foundFileIDs, err := s.searchFileCache(ctx, query)
+	if err != nil {
+		return nil, err
+	}
 
-	return results, nil
+	// Map the found file IDs to the actual file objects
+	foundFiles := []*model.File{}
+	for _, foundFileID := range foundFileIDs {
+		for _, file := range files {
+			if file.ID == *foundFileID {
+				foundFiles = append(foundFiles, file)
+			}
+		}
+	}
+
+	return foundFiles, nil
 }
 
-// Recursive algorithm for extracting nested folders inside of a given folder
-func (s *FileService) GetNestedFoldersRec(ctx context.Context, folderId string, folderIds *[]string) error {
-	folderContents, err := s.GetFolderContents(ctx, folderId)
+// Gets all files in a Drive folder, including files in nested folders
+func (s *FileService) getAllFiles(ctx context.Context) ([]*model.File, error) {
+	rootFolders, err := s.GetAllFolders(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	for _, item := range folderContents {
-		if folder, ok := item.(*model.Folder); ok {
-			// If this is a folder, then recurse and search it to find nested folders
-			err := s.GetNestedFoldersRec(ctx, folder.ID, folderIds)
-			if err != nil {
-				return err
-			}
-			*folderIds = append(*folderIds, folder.ID)
+	files := []*model.File{}
+
+	for _, folder := range rootFolders {
+		nestedFiles, err := s.getFilesInFolderRec(ctx, folder.ID)
+		if err != nil {
+			return nil, err
 		}
+
+		files = append(files, nestedFiles...)
+	}
+
+	return files, nil
+}
+
+// Gets all files in a Drive folder, including files in nested folders. You should call getAllFiles instead of this function.
+func (s *FileService) getFilesInFolderRec(ctx context.Context, folderId string) ([]*model.File, error) {
+	files := []*model.File{}
+
+	// Get all files in this folder
+	folderItems, err := s.GetFolderContents(ctx, folderId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Append all files in this folder to the slice. If the item is a folder, recursively call this function
+	for _, item := range folderItems {
+		if file, ok := item.(*model.File); ok {
+			files = append(files, file)
+		} else if folder, ok := item.(*model.Folder); ok {
+			nestedFiles, err := s.getFilesInFolderRec(ctx, folder.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			files = append(files, nestedFiles...)
+		}
+	}
+
+	return files, nil
+}
+
+// Gets all files that are cached in the database
+func (s *FileService) getCachedFiles(ctx context.Context) (map[string]*model.File, error) {
+	rows, err := db.DB.Query("SELECT id, title, snapshot_timestamp FROM file;")
+	if err != nil {
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving cached files.", err)
+	}
+
+	files := map[string]*model.File{}
+
+	for rows.Next() {
+		file := &model.File{}
+		if err := rows.Scan(&file.ID, &file.Name, &file.LastUpdated); err != nil {
+			return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving cached files.", err)
+		}
+
+		files[file.ID] = file
+	}
+
+	return files, nil
+}
+
+// Saves the text content of a file to the database
+func (s *FileService) saveFileCache(ctx context.Context, id string, title string, contents *string) error {
+	if contents == nil {
+		return errors.NewInputError(ctx, "File contents cannot be nil.")
+	}
+
+	tx, err := db.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return errors.NewInternalError(ctx, "An unexpected error occurred while saving a file.", err)
+	}
+
+	// Delete the existing file cache, if there is one
+	_, err = tx.Exec("DELETE FROM file WHERE id = $1;", id)
+	if err != nil {
+		tx.Rollback()
+		return errors.NewInternalError(ctx, "An unexpected error occurred while saving a file.", err)
+	}
+
+	// Insert the new file cache
+	_, err = tx.Exec("INSERT INTO file (id, title, contents, snapshot_timestamp) VALUES ($1, $2, $3, $4);", id, title, *contents, time.Now().UTC())
+	if err != nil {
+		tx.Rollback()
+		return errors.NewInternalError(ctx, "An unexpected error occurred while saving a file.", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return errors.NewInternalError(ctx, "An unexpected error occurred while saving a file.", err)
 	}
 
 	return nil
 }
 
-func (s *FileService) SearchFolder(ctx context.Context, query string, folderId string) ([]*model.SearchResult, error) {
-	// Google Search API: https://developers.google.com/drive/api/v3/reference/query-ref#examples
-	queryStr := fmt.Sprintf("fullText contains '\"%s\"' and trashed = false and '%s' in parents", query, folderId)
-	// Encode url query string
-	queryStr = url.QueryEscape(queryStr)
-	// Make a request to Google Drive API to get all items in the given folder
-	requestURL := fmt.Sprintf("https://www.googleapis.com/drive/v3/files?q=%s&key=%s", queryStr, os.Getenv("GOOGLE_DRIVE_API_KEY"))
-
-	log.Printf("Request url: %s\n", requestURL)
-
+// Gets the text content of a file
+func (s *FileService) getFileContents(ctx context.Context, id string) (*string, error) {
+	// Make a request to Google Drive API to get all items in the root folder
+	requestURL := fmt.Sprintf("https://docs.google.com/document/d/%s/export", id)
 	res, err := http.Get(requestURL)
 	if err != nil {
-		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while searching files.", err)
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving a file.", err)
 	}
 
 	// Read the response
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while searching files.", err)
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while retrieving a file.", err)
 	}
 
 	// Parse the JSON string response into a struct
-	data := new(DriveSearchQueryResponse)
-	err = json.Unmarshal([]byte(resBody), &data)
+	contents := string(resBody)
+
+	return &contents, nil
+}
+
+// Searches all files in the cache for files that have a matching title or contents. Returns an array with the IDs of every file that matches the query.
+func (s *FileService) searchFileCache(ctx context.Context, query string) ([]*string, error) {
+	rows, err := db.DB.Query("SELECT id FROM file WHERE title ILIKE $1 OR contents ILIKE $1;", "%"+query+"%")
 	if err != nil {
-		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while searching files.", err)
+		return nil, errors.NewInternalError(ctx, "An unexpected error occurred while searching for files.", err)
 	}
 
-	// Check if the search was incomplete; if so, an error occurred with the search request string
-	if data.Incomplete {
-		return nil, errors.NewInternalError(ctx, "An incomplete search was conducted", err)
+	fileIDs := []*string{}
+
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, errors.NewInternalError(ctx, "An unexpected error occurred while searching for files.", err)
+		}
+
+		fileIDs = append(fileIDs, &id)
 	}
 
-	results := []*model.SearchResult{}
-	// Map result objects to model and append to list
-	for _, item := range data.Files {
-		result := s.NewSearchResultModel()
-
-		result.ID = item.Id
-		result.Name = item.Name
-
-		results = append(results, result)
-	}
-
-	return results, nil
+	return fileIDs, nil
 }

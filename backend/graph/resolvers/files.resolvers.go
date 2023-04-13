@@ -52,7 +52,7 @@ func (r *queryResolver) File(ctx context.Context, id string) (*model.File, error
 }
 
 // Search is the resolver for the search field.
-func (r *queryResolver) Search(ctx context.Context, query string) ([]*model.SearchResult, error) {
+func (r *queryResolver) Search(ctx context.Context, query string) ([]*model.File, error) {
 	results, err := r.FileService.SearchFiles(ctx, query)
 	if err != nil {
 		return nil, err

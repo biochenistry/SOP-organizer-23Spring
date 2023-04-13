@@ -17,7 +17,7 @@ extend type Query {
     """
     Searches all folders for files with titles or text content containing the given string
     """
-    search(query: String!): [SearchResult]
+    search(query: String!): [File]
 }
 
 """
