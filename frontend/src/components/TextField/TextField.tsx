@@ -4,6 +4,7 @@ import View from '../View/View';
 import { StyleSheet, css } from 'aphrodite';
 import Paragraph from '../Paragraph/Paragraph';
 import { Colors } from '../GlobalStyles';
+import { FaRegTimesCircle } from 'react-icons/fa';
 
 
 export type TextFieldProps = {
@@ -14,6 +15,7 @@ export type TextFieldProps = {
   description?: string;
   placeholder?: string;
   required?: boolean | string;
+  showClear?: boolean;
   onChange?: (name: string, value: string) => void;
   validate?: (name: string, value: string) => string | null;
   onValidate?: (name: string, error: string | null) => void;
@@ -80,6 +82,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FBFBFB',
     color: '#919991',
   },
+  clearButton: {
+    backgroundColor: '#ffffff',
+    color: Colors.textSecondary,
+    cursor: 'pointer',
+    fill: Colors.textSecondary,
+  },
 });
 
 /**
@@ -98,7 +106,7 @@ const styles = StyleSheet.create({
 
 export default function TextField(props: TextFieldProps) {
   const { required, value, name, onValidate } = props;
-  
+
   useEffect(() => {
     if (required !== undefined && (value === '' || value === null || value === undefined)) {
       onValidate && onValidate(name, '');
@@ -130,6 +138,30 @@ export default function TextField(props: TextFieldProps) {
     props.onChange && props.onChange(props.name, e.target.value);
   }
 
+  const handleClear = () => {
+    if (props.required) {
+      let error = null;
+
+      if (props.validate) {
+        error = props.validate(props.name, '');
+      }
+
+      if (error !== null) {
+        props.onValidate && props.onValidate(props.name, error);
+      }
+      else {
+        if (props.required !== undefined) {
+          props.onValidate && props.onValidate(props.name, 'This field is required');
+        }
+        else {
+          props.onValidate && props.onValidate(props.name, null);
+        }
+      }
+    }
+
+    props.onChange && props.onChange(props.name, '');
+  }
+
   // Prevents the input value from changing when the user scrolls while the mouse is over the field (only for type=number inputs)
   const handleScroll = (e: React.WheelEvent) => {
     if (props.type === 'number') {
@@ -140,18 +172,20 @@ export default function TextField(props: TextFieldProps) {
 
   return (
     <View container flexDirection='column' flexGrow={1}>
-      <div className={css(styles.infoContainer)}>
-        {props.label && (
-          <div className={css(styles.labelContainer)}>
-            <label htmlFor={props.id || props.name + '-field'}><Paragraph>{props.label}{props.required !== undefined && <span className={css(styles.required)}>*</span>}</Paragraph></label>
-          </div>
-        )}
+      {(props.label || props.description) &&
+        <div className={css(styles.infoContainer)}>
+          {props.label && (
+            <div className={css(styles.labelContainer)}>
+              <label htmlFor={props.id || props.name + '-field'}><Paragraph>{props.label}{props.required !== undefined && <span className={css(styles.required)}>*</span>}</Paragraph></label>
+            </div>
+          )}
 
-        {props.description && (
-          <p className={css(styles.description)}>{props.description}</p>
-        )}
-      </div>
-      
+          {props.description && (
+            <p className={css(styles.description)}>{props.description}</p>
+          )}
+        </div>
+      }
+
       <div className={css(styles.inputContainer)}>
         <input
           type={props.type || 'text'}
@@ -165,6 +199,12 @@ export default function TextField(props: TextFieldProps) {
           disabled={props.disabled}
           onWheel={handleScroll}
         />
+        {(props.showClear && props.value) &&
+          <View container style={{ position: 'absolute', right: '2px', top: '2px', height: 'calc(100% - 4px)', alignItems: 'center', paddingRight: '4px', justifyContent: 'flex-end' }}>
+            <View style={{ backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,1))', height: '100%', width: '16px' }}></View>
+            <FaRegTimesCircle className={css(styles.clearButton)} onClick={handleClear} />
+          </View>
+        }
       </div>
 
       {props.error && (

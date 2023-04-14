@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { CSSProperties, css } from 'aphrodite'
 import { gql, useLazyQuery, useQuery } from '@apollo/client'
 import SidebarFolder from '../Folder/Folder';
@@ -8,12 +8,12 @@ import { Link, useLocation } from 'react-router-dom';
 import Paragraph from '../Paragraph/Paragraph';
 import { useAuthState } from '../Auth';
 import TextField from '../TextField/TextField';
-import Button from '../Button/Button';
 import Form from '../Form/Form';
 import useForm from '../Form/useForm';
 import { ROOT_FOLDER_ID } from '../..';
 import { createStyle } from '../../util/createStyle';
 import LoadingSpinner from '../LoadingSpinner';
+import { FaSearch } from 'react-icons/fa';
 
 const SEARCH_FILE = gql`
 query searchFiles($query: String!) {
@@ -146,13 +146,11 @@ const Sidebar: React.FunctionComponent = () => {
   const location = useLocation();
   const { state } = useAuthState();
   const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
-  var [searchFiles, { data : searchData }] = useLazyQuery<SearchResult>(SEARCH_FILE);
-  const [searchState, setSearch] = useState(false);
-  const search = () => {setSearch(true)};
+  var [searchFiles, { data: searchData, loading: searchIsLoading, variables: searchVariables  }] = useLazyQuery<SearchResult>(SEARCH_FILE);
 
-  const clearSearchBar = () => {searchForm.handleChange('search', ''); setSearch(false)};
-  
   const handleSearch = async (values: SearchInput) => {
+    if (values.search === '' || values.search === undefined) return;
+
     await searchFiles({
       variables: {
         query: values.search,
@@ -167,42 +165,82 @@ const Sidebar: React.FunctionComponent = () => {
     onSubmit: handleSearch,
   });
 
+  const searchButtonStyle: CSSProperties = {
+    alignItems: 'center',
+    borderRadius: '4px',
+    color: Colors.isuRed,
+    cursor: 'pointer',
+    fill: Colors.isuRed,
+    height: 'fit-content',
+    justifyContent: 'center',
+    padding: '8px',
+    ':hover': {
+      border: `2px solid ${Colors.isuRed}`,
+      padding: '6px',
+    },
+    ':active': {
+      backgroundColor: Colors.isuRedLight,
+      border: `2px solid ${Colors.isuRedDark}`,
+      padding: '6px',
+    },
+  }
+
+  const searchButtonDisabledStyle: CSSProperties = {
+    color: Colors.neutralActive,
+    cursor: 'default',
+    fill: Colors.neutralActive,
+    ':hover': {
+      border: 'none',
+      padding: '8px',
+    },
+    ':active': {
+      backgroundColor: 'none',
+      border: 'none',
+      padding: '8px',
+    },
+  }
+
   return (
     <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
       <View container padding='8px' >
         <Form handleSubmit={searchForm.handleSubmit}>
-          <View container flexDirection='row' gap='4px'>
-            <TextField placeholder='Search...' name='search' type='text' value={searchForm.values.search} onChange={searchForm.handleChange} onValidate={searchForm.handleValidate} required />
-            <Button label='S' variant='primary' type='submit' style={{ width: '20px', marginTop: '4px', padding: '0px' }} onClick={search} />
-            <Button label='X' variant='primary' type='button' style={{ width: '20px', marginTop: '4px', padding: '0px' }} onClick={clearSearchBar} />
+          <View container flexDirection='row' gap='4px' alignItems='center'>
+            <TextField placeholder='Search...' name='search' type='text' value={searchForm.values.search} onChange={searchForm.handleChange} onValidate={searchForm.handleValidate} required showClear />
+            <View container style={{ ...searchButtonStyle, ...(searchForm.hasError ? searchButtonDisabledStyle : {}) }} onClick={() => { handleSearch(searchForm.values) }}>
+              <FaSearch />
+            </View>
           </View>
         </Form>
       </View>
 
       <View container flexDirection='column' gap='4px' height='100%' padding='8px 0 8px 8px' style={{ overflow: 'scroll' }}>
-        {(!searchState) ? data?.folders.map((folder, index) => {
+        {((!searchData && !searchIsLoading) || searchForm.values.search !== searchVariables?.query) ? data?.folders.map((folder, index) => {
           return (
             <div key={index}>
               <SidebarFolder folder={folder}></SidebarFolder>
             </div>
           );
         })
-        : 
-            (!searchData) ? 
+          :
+          (searchIsLoading) ?
             <View container justifyContent='center'>
-                <LoadingSpinner size='small' />
+              <LoadingSpinner size='small' />
             </View>
-        :   searchData?.search.map((file, index) => {
-          return (
-            <div key={index}>
-              <View >
-                <Link to={'/file/' + file.id} className={css(createStyle({ textDecoration: 'none', userSelect: 'none', ...(location.pathname === `/file/${file.id}` ? fileLinkSelected : {}) }))} key={index}>
-                  <Paragraph style={{ ...fileLinkStyle, fontSize: '14px' }}>{file.name}</Paragraph>
-                </Link>
-              </View>
-            </div>
-          );
-        })
+            :
+            <View container flexDirection='column' gap='4px' margin='0 0 0 -12px'>
+              {searchData?.search.map((file, index) => {
+                return (
+                  <Link to={'/file/' + file.id} className={css(createStyle({ textDecoration: 'none', userSelect: 'none', ...(location.pathname === `/file/${file.id}` ? fileLinkSelected : {}) }))} key={index}>
+                    <Paragraph style={{ ...fileLinkStyle, fontSize: '14px' }}>{file.name}</Paragraph>
+                  </Link>
+                );
+              })}
+              {searchData?.search.length === 0 &&
+                <View container padding='0 16px'>
+                  <Paragraph>No results found.</Paragraph>
+                </View>
+              }
+            </View>
         }
       </View>
 
