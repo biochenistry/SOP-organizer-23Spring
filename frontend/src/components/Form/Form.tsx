@@ -1,4 +1,6 @@
+import { CSSProperties, css } from 'aphrodite';
 import React from 'react';
+import { createStyle } from '../../util/createStyle';
 
 
 export type FormProps = {
@@ -6,6 +8,7 @@ export type FormProps = {
   handleSubmit: React.FormEventHandler<HTMLFormElement>;
   id?: string;
   testId?: string;
+  style?: CSSProperties;
 }
 
 /**
@@ -40,7 +43,7 @@ export type FormProps = {
 
 export default function Form(props: FormProps) {
   return (
-    <form onSubmit={props.handleSubmit} id={props.id} data-testid={props.testId}>
+    <form onSubmit={props.handleSubmit} id={props.id} data-testid={props.testId} className={css(createStyle(props.style))}>
         {props.children}
     </form>
   );

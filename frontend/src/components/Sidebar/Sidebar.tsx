@@ -1,5 +1,5 @@
-import React from 'react'
-import { CSSProperties, css } from 'aphrodite'
+import React, { MouseEvent, useState } from 'react'
+import { CSSProperties, StyleSheet, css } from 'aphrodite'
 import { gql, useLazyQuery, useQuery } from '@apollo/client'
 import SidebarFolder from '../Folder/Folder';
 import { Colors } from '../GlobalStyles';
@@ -112,15 +112,29 @@ export type File = {
   __typename: "File";
 }
 
+const styles = StyleSheet.create({
+  sidebarDragStyle: {
+    cursor: 'ew-resize',
+    height: '100%',
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    width: '1px',
+    zIndex: 1,
+    ':hover': {
+      right: '-50px',
+      width: '100px',
+    },
+  },
+});
+
 const sidebarContainerStyle: CSSProperties = {
   backgroundColor: '#ffffff',
   borderRight: `1px solid ${Colors.harlineGrey}`,
   height: '100%',
   maxHeight: '100%',
-  maxWidth: '250px',
-  minWidth: '250px',
   paddingTop: '2px',
-  width: '250px',
+  position: 'relative',
 }
 
 const adminLinksStyle: CSSProperties = {
@@ -146,7 +160,8 @@ const Sidebar: React.FunctionComponent = () => {
   const location = useLocation();
   const { state } = useAuthState();
   const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
-  var [searchFiles, { data: searchData, loading: searchIsLoading, variables: searchVariables  }] = useLazyQuery<SearchResult>(SEARCH_FILE);
+  const [sidebarWidth, setSidebarWidth] = useState<number>(250);
+  var [searchFiles, { data: searchData, loading: searchIsLoading, variables: searchVariables }] = useLazyQuery<SearchResult>(SEARCH_FILE);
 
   const handleSearch = async (values: SearchInput) => {
     if (values.search === '' || values.search === undefined) return;
@@ -200,11 +215,35 @@ const Sidebar: React.FunctionComponent = () => {
     },
   }
 
+  const dragHandler = (e: MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+
+    const startSize = sidebarWidth;
+    const startPosition = { x: e.pageX, y: e.pageY };
+
+    function onMouseMove(this: HTMLElement, ev: globalThis.MouseEvent) {
+      const newWidth = startSize - startPosition.x + ev.pageX;
+
+      if (newWidth >= 250) {
+        setSidebarWidth(newWidth);
+      }
+    }
+    function onMouseUp() {
+      document.body.removeEventListener("mousemove", onMouseMove);
+    }
+
+    document.body.addEventListener("mousemove", onMouseMove);
+    document.body.addEventListener("mouseup", onMouseUp, { once: true });
+  }
+
   return (
-    <View container flexDirection='column' justifyContent='space-between' style={sidebarContainerStyle}>
-      <View container padding='8px' >
-        <Form handleSubmit={searchForm.handleSubmit}>
-          <View container flexDirection='row' gap='4px' alignItems='center'>
+    <View container flexDirection='column' justifyContent='space-between' style={{ ...sidebarContainerStyle, width: `${sidebarWidth}px`, maxWidth: `${sidebarWidth}px`, minWidth: `${sidebarWidth}px` }}>
+
+      <div className={css(styles.sidebarDragStyle)} onMouseDown={dragHandler}></div>
+
+      <View container padding='8px' width='100%' >
+        <Form handleSubmit={searchForm.handleSubmit} style={{ width: '100%' }}>
+          <View container flexDirection='row' gap='4px' alignItems='center' width='100%'>
             <TextField placeholder='Search...' name='search' type='text' value={searchForm.values.search} onChange={searchForm.handleChange} onValidate={searchForm.handleValidate} required showClear />
             <View container style={{ ...searchButtonStyle, ...(searchForm.hasError ? searchButtonDisabledStyle : {}) }} onClick={() => { handleSearch(searchForm.values) }}>
               <FaSearch />
