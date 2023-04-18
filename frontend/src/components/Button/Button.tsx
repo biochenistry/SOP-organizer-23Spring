@@ -28,12 +28,6 @@ const styles = StyleSheet.create({
     boxSizing: 'border-box',
     width: 'fit-content',
   },
-  disabled: {
-    backgroundColor: '#cccccc',
-    color: '#666666',
-    height: '40px',
-    padding: '0 24px',
-  },
   primary: {
     backgroundColor: Colors.isuRed,
     color: '#ffffff',
@@ -45,6 +39,19 @@ const styles = StyleSheet.create({
     ':active': {
       backgroundColor: Colors.isuRedDark,
       boxShadow: `0 0 0 1px #fff,0 0 0 3px ${Colors.isuRedDark}`,
+    },
+  },
+  primaryDisabled: {
+    backgroundColor: '#cccccc',
+    color: '#666666',
+    cursor: 'default',
+    ':hover': {
+      cursor: 'default',
+      boxShadow: 'none',
+    },
+    ':active': {
+      backgroundColor: '#cccccc',
+      boxShadow: 'none',
     },
   },
   secondary: {
@@ -61,6 +68,22 @@ const styles = StyleSheet.create({
       borderWidth: '3px',
       color: Colors.isuRedDark,
       padding: '0 23px',
+    },
+  },
+  secondaryDisabled: {
+    backgroundColor: '#eeeeee',
+    borderColor: '#cccccc',
+    color: '#666666',
+    cursor: 'default',
+    ':hover': {
+      backgroundColor: '#eeeeee',
+    },
+    ':active': {
+      borderColor: '#cccccc',
+      borderWidth: '2px',
+      color: '#666666',
+      backgroundColor: '#eeeeee',
+      padding: '0 24px',
     },
   },
   primaryOnDark: {
@@ -99,6 +122,14 @@ const styles = StyleSheet.create({
     paddingRight: '0px',
     ':active': {
       fill: Colors.isuRedDark,
+    },
+  },
+  tertiaryDisabled: {
+    color: '#cccccc',
+    cursor: 'default',
+    fill: '#cccccc',
+    ':active': {
+      fill: '#cccccc',
     },
   },
   tertiaryOnDark: {
@@ -148,14 +179,20 @@ const Button: React.FC<ButtonProps> = ({
       <View container alignItems='center' justifyContent='center' width='100%' style={{ position: 'relative', left: 0, top: 0, ...(isLoading ? { height: '100%' } : {}) }}>
         {isLoading && <LoadingSpinner size='small' />}
       </View>
-      <Paragraph style={{ color: 'inherit', textAlign: 'center', margin: 'auto', position: 'relative', width: 'fit-content', ...(isLoading ? { visibility: 'hidden' } : {}), ...(variant === 'tertiary' ? getTertiaryInteractions(onDark || false) : {}) }}>{label}</Paragraph>
+      <Paragraph style={{ color: 'inherit', textAlign: 'center', margin: 'auto', position: 'relative', width: 'fit-content', ...(isLoading ? { visibility: 'hidden' } : {}), ...(variant === 'tertiary' ? getTertiaryInteractions(onDark || false, disabled || false) : {}) }}>{label}</Paragraph>
     </button>
   );
 }
 
 const getButtonStyle = (variant: 'primary' | 'secondary' | 'tertiary', onDark?: boolean, disabled?: boolean) => {
   if (disabled) {
-    return styles.disabled;
+    if (variant === 'primary') {
+      return [styles.primary, styles.primaryDisabled];
+    } else if (variant === 'secondary') {
+      return [styles.secondary, styles.secondaryDisabled];
+    } else {
+      return [styles.tertiary, styles.tertiaryDisabled];
+    }
   } else {
     if (onDark) {
       if (variant === 'primary') {
@@ -177,7 +214,11 @@ const getButtonStyle = (variant: 'primary' | 'secondary' | 'tertiary', onDark?: 
   }
 }
 
-const getTertiaryInteractions = (onDark: boolean) => {
+const getTertiaryInteractions = (onDark: boolean, disabled: boolean) => {
+  if (disabled) {
+    return null;
+  }
+
   if (onDark) {
     const tertiaryInteractionsOnDark: CSSProperties = {
       ':hover': {
