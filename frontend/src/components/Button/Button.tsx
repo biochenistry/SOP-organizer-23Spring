@@ -28,6 +28,12 @@ const styles = StyleSheet.create({
     boxSizing: 'border-box',
     width: 'fit-content',
   },
+  disabled: {
+    backgroundColor: '#cccccc',
+    color: '#666666',
+    height: '40px',
+    padding: '0 24px',
+  },
   primary: {
     backgroundColor: Colors.isuRed,
     color: '#ffffff',
@@ -134,7 +140,7 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <button
       onClick={handleClick}
-      className={css(styles.default, getButtonStyle(variant, onDark), createStyle(style))}
+      className={css(styles.default, getButtonStyle(variant, onDark, disabled), createStyle(style))}
       type={type}
       hidden={hidden}
       disabled={disabled}
@@ -147,22 +153,26 @@ const Button: React.FC<ButtonProps> = ({
   );
 }
 
-const getButtonStyle = (variant: 'primary' | 'secondary' | 'tertiary', onDark?: boolean) => {
-  if (onDark) {
-    if (variant === 'primary') {
-      return styles.primaryOnDark;
-    } else if (variant === 'secondary') {
-      return styles.secondaryOnDark;
-    } else {
-      return styles.tertiaryOnDark;
-    }
+const getButtonStyle = (variant: 'primary' | 'secondary' | 'tertiary', onDark?: boolean, disabled?: boolean) => {
+  if (disabled) {
+    return styles.disabled;
   } else {
-    if (variant === 'primary') {
-      return styles.primary;
-    } else if (variant === 'secondary') {
-      return styles.secondary;
+    if (onDark) {
+      if (variant === 'primary') {
+        return styles.primaryOnDark;
+      } else if (variant === 'secondary') {
+        return styles.secondaryOnDark;
+      } else {
+        return styles.tertiaryOnDark;
+      }
     } else {
-      return styles.tertiary;
+      if (variant === 'primary') {
+        return styles.primary;
+      } else if (variant === 'secondary') {
+        return styles.secondary;
+      } else {
+        return styles.tertiary;
+      }
     }
   }
 }
