@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"os"
 	"time"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/sop/db"
@@ -37,27 +38,49 @@ type Request struct {
 }
 
 func (r *Request) SetAuthToken(token string, expires time.Time) {
-	http.SetCookie(r.ResponseWriter, &http.Cookie{
-		Name:     "sop_auth",
-		Value:    token,
-		HttpOnly: true,
-		Secure:   false,
-		Path:     "/",
-		Expires:  time.Now().Add(time.Hour * 24 * 30),
-	})
+	if os.Getenv("MODE") == "dev" {
+		http.SetCookie(r.ResponseWriter, &http.Cookie{
+			Name:     "sop_auth",
+			Value:    token,
+			HttpOnly: true,
+			Secure:   false,
+			Path:     "/",
+			Expires:  time.Now().Add(time.Hour * 24 * 30),
+		})
+	} else {
+		http.SetCookie(r.ResponseWriter, &http.Cookie{
+			Name:     "sop_auth",
+			Value:    token,
+			HttpOnly: true,
+			Secure:   true,
+			Path:     "/",
+			Expires:  time.Now().Add(time.Hour * 24 * 30),
+		})
+	}
 }
 
 func (r *Request) ClearAuthToken() {
 	expires, _ := time.Parse("Jan 2, 2006", "Jan 1, 1970")
 
-	http.SetCookie(r.ResponseWriter, &http.Cookie{
-		Name:     "sop_auth",
-		Value:    "",
-		HttpOnly: true,
-		Secure:   false,
-		Path:     "/",
-		Expires:  expires,
-	})
+	if os.Getenv("MODE") == "dev" {
+		http.SetCookie(r.ResponseWriter, &http.Cookie{
+			Name:     "sop_auth",
+			Value:    "",
+			HttpOnly: true,
+			Secure:   false,
+			Path:     "/",
+			Expires:  expires,
+		})
+	} else {
+		http.SetCookie(r.ResponseWriter, &http.Cookie{
+			Name:     "sop_auth",
+			Value:    "",
+			HttpOnly: true,
+			Secure:   true,
+			Path:     "/",
+			Expires:  expires,
+		})
+	}
 }
 
 func Middleware() func(http.Handler) http.Handler {
