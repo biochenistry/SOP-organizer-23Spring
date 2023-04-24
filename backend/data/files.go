@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"sort"
@@ -229,6 +230,30 @@ func (s *FileService) GetFileById(ctx context.Context, id string) (*model.File, 
 	file.LastModifiedBy = data.LastModifiedBy
 
 	return file, nil
+}
+
+func (s *FileService) ListFilesByDate(ctx context.Context) ([]*model.File, error) {
+	files, err := s.getAllFiles(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Sort files by last updated timestamp
+	sort.SliceStable(files, func(i, j int) bool {
+		t1, err := time.Parse(time.RFC3339, files[i].LastUpdated)
+		if err != nil {
+			log.Printf("Error parsing time: %s for file: %s", err, files[i].Name)
+			return false
+		}
+		t2, err := time.Parse(time.RFC3339, files[j].LastUpdated)
+		if err != nil {
+			log.Printf("Error parsing time: %s for file: %s", err, files[j].Name)
+			return true
+		}
+		return t1.After(t2)
+	})
+
+	return files, nil
 }
 
 func (s *FileService) SearchFiles(ctx context.Context, query string) ([]*model.File, error) {
