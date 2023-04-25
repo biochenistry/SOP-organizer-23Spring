@@ -313,7 +313,7 @@ const Sidebar: React.FunctionComponent = () => {
         </Form>
       </View>
 
-      <View container flexDirection='column' gap='4px' height='100%' padding='8px 0 8px 8px' style={{ overflow: 'scroll' }}>
+      <View container flexDirection='column' gap='4px' height='100%' padding='8px 0 8px 8px' style={{ overflow: 'auto' }}>
         {((!searchData && !searchIsLoading) || searchForm.values.search !== searchVariables?.query) ? data?.folders.map((folder, index) => {
           return (
             <div key={index}>
