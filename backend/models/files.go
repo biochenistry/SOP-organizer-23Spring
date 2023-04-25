@@ -19,6 +19,9 @@ type FileService interface {
 	// Gets a single file by ID
 	GetFileById(ctx context.Context, id string) (*model.File, error)
 
+	// Lists all files sorted by modified date
+	ListFilesByDate(ctx context.Context) ([]*model.File, error)
+
 	// Searches all files with titles or text content containing the given query string
 	SearchFiles(ctx context.Context, query string) ([]*model.File, error)
 }

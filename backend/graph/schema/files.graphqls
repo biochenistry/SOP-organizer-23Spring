@@ -18,6 +18,11 @@ extend type Query {
     Searches all folders for files with titles or text content containing the given string
     """
     search(query: String!): [File]
+
+    """
+    Lists all files sorted by most recently modified to least recent 
+    """
+    listFilesByDate: [File]
 }
 
 """
