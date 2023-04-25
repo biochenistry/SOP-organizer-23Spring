@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChangeEvent, useEffect } from "react";
 import View from '../View/View';
-import { StyleSheet, css } from 'aphrodite';
+import { CSSProperties, StyleSheet, css } from 'aphrodite';
 import Paragraph from '../Paragraph/Paragraph';
 import { Colors } from '../GlobalStyles';
 import { FaRegTimesCircle } from 'react-icons/fa';
@@ -23,6 +23,7 @@ export type TextFieldProps = {
   type?: 'text' | 'email' | 'password' | 'number' | 'url';
   disabled?: boolean;
   testId?: string;
+  style?: CSSProperties;
 }
 
 const styles = StyleSheet.create({
@@ -171,7 +172,7 @@ export default function TextField(props: TextFieldProps) {
   }
 
   return (
-    <View container flexDirection='column' flexGrow={1}>
+    <View container flexDirection='column' flexGrow={1} style={props.style}>
       {(props.label || props.description) &&
         <div className={css(styles.infoContainer)}>
           {props.label && (

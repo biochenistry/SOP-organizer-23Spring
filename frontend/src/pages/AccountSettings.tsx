@@ -23,8 +23,8 @@ mutation updateUser($userId: ID!, $firstname: String!, $lastname: String!) {
 `;
 
 const UPDATE_PASS = gql`
-mutation changePassword($userId: ID!, $newPassword: String!) {
-  success: changePassword(userId: $userId, newPassword: $newPassword)
+mutation changePassword($currentPassword: String!, $newPassword: String!) {
+  success: changePassword(currentPassword: $currentPassword, newPassword: $newPassword)
 }
 `;
 
@@ -44,7 +44,9 @@ type UserInput = {
 }
 
 type PasswordInput = {
-  password: string;
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
 }
 
 export default function AccountSettings() {
@@ -77,11 +79,15 @@ export default function AccountSettings() {
   }
 
   /* Runs when the user submits a password change */
-  const handlePassUpdate = async (values: PasswordInput) => {
+  const handleChangePassword = async (values: PasswordInput) => {
+    if (values.newPassword !== values.confirmNewPassword) {
+      return;
+    }
+    
     await changePassword({
       variables: {
-        userId: state.user?.id,
-        newPassword: values.password,
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
       },
     });
 
@@ -100,9 +106,11 @@ export default function AccountSettings() {
 
   const passwordForm = useForm<PasswordInput>({
     initialValues: {
-      password: ''
+      currentPassword: '',
+      newPassword: '',
+      confirmNewPassword: '',
     },
-    onSubmit: handlePassUpdate,
+    onSubmit: handleChangePassword,
   });
 
   if (!state.user) {
@@ -133,12 +141,15 @@ export default function AccountSettings() {
         <View container flexDirection='column' gap='16px'>
           <Heading text='Change Password' renderAs='h2' />
           <Form handleSubmit={passwordForm.handleSubmit}>
-            <View container flexDirection='column' gap='16px'>
-              <View container flexDirection='row' alignItems='center' gap='16px'>
-                <TextField name='password' type='password' label='New Password' value={passwordForm.values.password} error={passwordForm.errors.password} onChange={passwordForm.handleChange} onValidate={passwordForm.handleValidate} required />
+            <View container flexDirection='column' gap='16px' maxWidth='400px'>
+              <View container flexDirection='column' alignItems='flex-start' gap='16px'>
+                <TextField name='currentPassword' type='password' label='Current Password' value={passwordForm.values.currentPassword} error={passwordForm.errors.currentPassword} onChange={passwordForm.handleChange} onValidate={passwordForm.handleValidate} required style={{ width: '100%' }} />
+                <TextField name='newPassword' type='password' label='New Password' value={passwordForm.values.newPassword} error={passwordForm.errors.newPassword} onChange={passwordForm.handleChange} onValidate={passwordForm.handleValidate} required style={{ width: '100%' }} />
+                <TextField name='confirmNewPassword' type='password' label='Confirm New Password' value={passwordForm.values.confirmNewPassword} error={passwordForm.errors.confirmNewPassword} onChange={passwordForm.handleChange} onValidate={passwordForm.handleValidate} required style={{ width: '100%' }} />
+                {(passwordForm.values.newPassword !== passwordForm.values.confirmNewPassword) && <Paragraph style={{ color: Colors.error }}>Passwords do not match</Paragraph>}
               </View>
               <View container alignItems='center' flexDirection='row' gap='16px'>
-                <Button variant='primary' type='submit' label='Change Password' style={{ maxWidth: 'fit-content' }} isLoading={changePasswordIsLoading} disabled={passwordForm.hasError} />
+                <Button variant='primary' type='submit' label='Change Password' style={{ maxWidth: 'fit-content' }} isLoading={changePasswordIsLoading} disabled={passwordForm.hasError || (passwordForm.values.newPassword !== passwordForm.values.confirmNewPassword)} />
                 {(!changePasswordIsLoading && changePasswordData) && <Paragraph style={{ color: Colors.textSecondary }}>Password changed!</Paragraph>}
               </View>
             </View>

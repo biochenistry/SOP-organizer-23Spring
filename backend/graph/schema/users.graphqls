@@ -26,9 +26,19 @@ extend type Mutation {
     deleteUser(userId: ID!): Boolean!
 
     """
-    Changes the password for the user with the given ID. Admin users can use this to change any user's password. Regular users can only change their own password.
+    Resets the current user's password. This can only be used if the user was just created or an admin has given them a temporary password.
     """
-    changePassword(userId: ID!, newPassword: String!): Boolean!
+    resetPassword(newPassword: String!): Boolean!
+
+    """
+    Changes the password for the current user
+    """
+    changePassword(currentPassword: String!, newPassword: String!): Boolean!
+
+    """
+    Changes the password for the user with the given ID. Available to admin users only.
+    """
+    adminChangePassword(userId: ID!, newPassword: String!): Boolean!
 }
 
 type User {

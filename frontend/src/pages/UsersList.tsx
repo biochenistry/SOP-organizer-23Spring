@@ -8,7 +8,10 @@ import ConfirmModal from "../components/modals/ConfirmModal";
 import Paragraph from "../components/Paragraph/Paragraph";
 import ModalLauncher from "../components/modals/ModalLauncher";
 import { useState } from "react";
+import FormModal from "../components/modals/FormModal";
+import TextField from "../components/TextField/TextField";
 
+/* Get Users Query */
 const GET_ALL_USERS = gql`
 query getAllUsers {
     all{
@@ -22,6 +25,20 @@ query getAllUsers {
 }
 `;
 
+type GetAllUsersResponse = {
+  all: User[] | null;
+}
+
+type User = {
+  id: string,
+  firstName: string;
+  lastName: string;
+  username: string;
+  isDisabled: boolean;
+  isAdmin: boolean;
+}
+
+/* Change Role Mutation */
 const MAKE_ADMIN = gql`
 mutation changeUserRole($userId: ID!, $admin: Boolean!){
     user: changeUserRole(userId: $userId, admin: $admin){
@@ -32,21 +49,7 @@ mutation changeUserRole($userId: ID!, $admin: Boolean!){
         isAdmin
     }
 }
-`
-
-const REMOVE_USER = gql`
-mutation deleteUser($userId: ID!){
-    success: deleteUser(userId: $userId)
-}
-`
-
-type RemoveUserResponse = {
-  success: boolean;
-}
-
-type RemoveUserInput = {
-  userId: string;
-}
+`;
 
 type MakeAdminResponse = {
   user: User;
@@ -57,19 +60,34 @@ type MakeAdminInput = {
   admin: boolean;
 }
 
-
-type GetAllUsersResponse = {
-  all: User[] | null;
+/* Delete User Mutation */
+const REMOVE_USER = gql`
+mutation deleteUser($userId: ID!){
+    success: deleteUser(userId: $userId)
+}
+`;
+type RemoveUserResponse = {
+  success: boolean;
 }
 
+type RemoveUserInput = {
+  userId: string;
+}
 
-type User = {
-  id: string,
-  firstName: string;
-  lastName: string;
-  username: string;
-  isDisabled: boolean;
-  isAdmin: boolean;
+/* Change Password Mutation */
+const CHANGE_PASSWORD = gql`
+mutation changeUserPasswordForAdmins($userId: ID!, $newPassword: String!) {
+    success: adminChangePassword(userId: $userId, newPassword: $newPassword)
+}
+`;
+
+type ChangePasswordInput = {
+  userId: string;
+  newPassword: string;
+}
+
+type ChangePasswordResponse = {
+  success: boolean;
 }
 
 const UsersList: React.FunctionComponent = () => {
@@ -81,6 +99,7 @@ const UsersList: React.FunctionComponent = () => {
   });
   const [makeAdmin, { loading: isMakeAdminLoading }] = useMutation<MakeAdminResponse>(MAKE_ADMIN);
   const [removeUser, { loading: isRemoveUserLoading }] = useMutation<RemoveUserResponse>(REMOVE_USER);
+  const [changePassword] = useMutation<ChangePasswordResponse>(CHANGE_PASSWORD);
 
   const handleChangeRole = async (values: MakeAdminInput) => {
     setUserEdited(values.userId);
@@ -109,10 +128,27 @@ const UsersList: React.FunctionComponent = () => {
     await refetchUsers();
   }
 
+  const handleChangePassword = async (values: ChangePasswordInput) => {
+    await changePassword({
+      variables: {
+        userId: values.userId,
+        newPassword: values.newPassword,
+      },
+    });
+  }
+
   const confirmDeleteUserModal = (
     <ConfirmModal title='Delete User?' onConfirm={handleRemoveUser} confirmLabel='Delete'>
       <Paragraph>Are you sure you want to delete this user? The user's account will be permanently deleted.</Paragraph>
     </ConfirmModal>
+  );
+
+  const changePasswordModal = (
+    <FormModal<ChangePasswordInput> title='Change Password' initialValues={{ userId: '', newPassword: '' }} onSubmit={handleChangePassword} submitLabel='Change Password' >
+      <View container flexDirection='column' >
+        <TextField name='newPassword' label='Temporary Password' description='Create a one-time password for the user to use to log in' />
+      </View>
+    </FormModal>
   );
 
 
@@ -122,7 +158,7 @@ const UsersList: React.FunctionComponent = () => {
 
   return (
     <>
-      <View container flexDirection='column' padding='24px' gap='32px' maxWidth='1400px' width='100%'>
+      <View container flexDirection='column' padding='24px' gap='32px' width='100%'>
         <View container flexDirection='row' justifyContent='space-between'>
           <Heading text='Users' renderAs='h1' />
           <Button label='Add User' href='/users/add' variant='primary' />
@@ -137,6 +173,7 @@ const UsersList: React.FunctionComponent = () => {
                 <th style={{ width: '200px' }}>Role</th>
                 <th></th>
                 <th></th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -149,6 +186,13 @@ const UsersList: React.FunctionComponent = () => {
                     <td>{user.isAdmin ? 'Admin' : 'Standard User'} </td>
                     <td>
                       <Button label={user.isAdmin ? 'Change to Standard User' : 'Change to Admin'} variant='tertiary' onClick={() => { handleChangeRole({ userId: user.id, admin: !user.isAdmin }) }} isLoading={isMakeAdminLoading && user.id === userEdited} disabled={user.id === state.user?.id} />
+                    </td>
+                    <td>
+                      <ModalLauncher modal={changePasswordModal}>
+                        {({ openModal }) => (
+                          <Button label='Change Password' variant='tertiary' onClick={() => { openModal({ userId: user.id, newPassword: '' }); }} />
+                        )}
+                      </ModalLauncher>
                     </td>
                     <td>
                       <ModalLauncher modal={confirmDeleteUserModal}>

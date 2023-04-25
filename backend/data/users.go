@@ -110,7 +110,7 @@ func (s *UserService) GetUserById(ctx context.Context, id string) (*model.User, 
 	return user, nil
 }
 
-// Changes a users role
+// Changes an existing user's role
 func (s *UserService) ChangeUserRole(ctx context.Context, id string, admin bool) error {
 	_, err := s.GetUserById(ctx, id)
 	if err != nil {
@@ -125,13 +125,14 @@ func (s *UserService) ChangeUserRole(ctx context.Context, id string, admin bool)
 	return nil
 }
 
-func (s *UserService) ChangeUserPassword(ctx context.Context, id string, newPassword string) error {
+// Changes an existing user's password
+func (s *UserService) ChangeUserPassword(ctx context.Context, id string, newPassword string, requireChangeOnLogin bool) error {
 	// Create a new password hash
 	hash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return errors.NewInternalError(ctx, "An unexpected error occurred while changing a user's password.", err)
 	}
-	_, err = db.DB.Exec("UPDATE public.user SET password_hash = $2, force_password_change = $3 WHERE id = $1;", id, hash, false)
+	_, err = db.DB.Exec("UPDATE public.user SET password_hash = $2, force_password_change = $3 WHERE id = $1;", id, hash, requireChangeOnLogin)
 	if err != nil {
 		return errors.NewInternalError(ctx, "An unexpected error occurred while changing a user's password.", err)
 	}

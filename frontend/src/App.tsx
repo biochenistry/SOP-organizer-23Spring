@@ -16,9 +16,9 @@ import ModalLauncher from './components/modals/ModalLauncher';
 import TextField from './components/TextField/TextField';
 import { login } from './components/Auth/authStateReducer';
 
-const CHANGE_PASSWORD = gql`
-mutation changePassword($userId: ID!, $newPassword: String!) {
-  success: changePassword(userId: $userId, newPassword: $newPassword)
+const RESET_PASSWORD = gql`
+mutation resetPassword($newPassword: String!) {
+  success: resetPassword(newPassword: $newPassword)
 }
 `;
 
@@ -33,7 +33,7 @@ type ChangePasswordInput = {
 
 function App() {
   const { state, dispatch } = useAuthState();
-  const [changePassword] = useMutation<ChangePasswordResponse>(CHANGE_PASSWORD);
+  const [changePassword] = useMutation<ChangePasswordResponse>(RESET_PASSWORD);
 
   const handleChangePassword = async (values: ChangePasswordInput) => {
     if (!state.user) {
@@ -46,7 +46,6 @@ function App() {
 
     const { data } = await changePassword({
       variables: {
-        userId: state.user.id,
         newPassword: values.password
       },
     });

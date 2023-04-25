@@ -29,7 +29,7 @@ type LoginInput = {
 export default function Login() {
   const navigate = useNavigate();
   const { state } = useAuthState();
-  const [login] = useMutation<LoginResponse>(LOGIN, { errorPolicy: 'all' });
+  const [login, { loading }] = useMutation<LoginResponse>(LOGIN, { errorPolicy: 'all' });
   const [hasError, setHasError] = useState<boolean>(false);
 
   const handleLogin = async (values: LoginInput) => {
@@ -75,7 +75,7 @@ export default function Login() {
             <TextField label='Username' name='username' type='text' value={loginForm.values.username} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} required />
             <TextField label='Password' name='password' type='password' value={loginForm.values.password} error={loginForm.errors.firstName} onChange={loginForm.handleChange} onValidate={loginForm.handleValidate} required />
             {hasError && <Paragraph style={{ color: Colors.error }}>Invalid username or password</Paragraph>}
-            <Button label='Login' variant='primary' type='submit' style={{ width: '100%' }} />
+            <Button label='Login' variant='primary' type='submit' style={{ width: '100%' }} isLoading={loading} />
           </View>
         </Form>
       </View>
