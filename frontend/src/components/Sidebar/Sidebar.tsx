@@ -13,7 +13,7 @@ import useForm from '../Form/useForm';
 import { ROOT_FOLDER_ID } from '../..';
 import { createStyle } from '../../util/createStyle';
 import LoadingSpinner from '../LoadingSpinner';
-import { FaSearch, FaSortNumericDown, FaSortAmountDownAlt, FaSortAlphaDown } from 'react-icons/fa';
+import { FaSearch, FaSortNumericDown, FaSortAmountDownAlt, FaSortAlphaDown, FaCheck } from 'react-icons/fa';
 import { useFloating, offset } from '@floating-ui/react';
 
 const SEARCH_FILE = gql`
@@ -69,6 +69,18 @@ query getAllFolders {
 }
 `;
 
+const GET_FILES_BY_DATE = gql`
+query getRecentlyModifiedFiles {
+  listFilesByDate {
+    id
+    name
+    created
+    lastUpdated
+    lastModifiedBy
+  }
+}
+`;
+
 type SearchInput = {
   search: string;
 }
@@ -83,18 +95,8 @@ type SearchResult = {
 
 type FileContentItem = Folder | File;
 
-const fileLinkStyle: CSSProperties = {
-  borderRadius: '4px',
-  marginLeft: '24px',
-  marginRight: '16px',
-  padding: '4px 12px',
-  textDecoration: 'none',
-  ':hover': {
-    backgroundColor: Colors.neutralHover,
-  },
-  ':active': {
-    backgroundColor: Colors.neutralActive,
-  }
+type GetFilesByDateResponse = {
+  listFilesByDate: File[];
 }
 
 export type Folder = {
@@ -115,11 +117,11 @@ export type File = {
 
 const styles = StyleSheet.create({
   sidebarDragStyle: {
+    bottom: 0,
     cursor: 'ew-resize',
-    height: '100%',
+    height: 'calc(100% - 50px)',
     position: 'absolute',
     right: 0,
-    top: 0,
     width: '1px',
     zIndex: 1,
     ':hover': {
@@ -128,7 +130,7 @@ const styles = StyleSheet.create({
     },
   },
   popupAction: {
-    padding: '4px',
+    padding: '8px',
     ':hover': {
       backgroundColor: Colors.neutralHover,
       cursor: 'pointer',
@@ -150,6 +152,20 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
 });
+
+const fileLinkStyle: CSSProperties = {
+  borderRadius: '4px',
+  marginLeft: '24px',
+  marginRight: '16px',
+  padding: '4px 12px',
+  textDecoration: 'none',
+  ':hover': {
+    backgroundColor: Colors.neutralHover,
+  },
+  ':active': {
+    backgroundColor: Colors.neutralActive,
+  }
+}
 
 const sidebarContainerStyle: CSSProperties = {
   backgroundColor: '#ffffff',
@@ -179,13 +195,54 @@ const fileLinkSelected: CSSProperties = {
   borderRight: `4px solid ${Colors.isuRed}`,
 }
 
+const searchButtonStyle: CSSProperties = {
+  alignItems: 'center',
+  borderRadius: '4px',
+  color: Colors.isuRed,
+  cursor: 'pointer',
+  fill: Colors.isuRed,
+  height: 'fit-content',
+  justifyContent: 'center',
+  padding: '8px',
+  ':hover': {
+    border: `2px solid ${Colors.isuRed}`,
+    padding: '6px',
+  },
+  ':active': {
+    backgroundColor: Colors.isuRedLight,
+    border: `2px solid ${Colors.isuRedDark}`,
+    padding: '6px',
+  },
+}
+
+const searchButtonDisabledStyle: CSSProperties = {
+  color: Colors.neutralActive,
+  cursor: 'default',
+  fill: Colors.neutralActive,
+  ':hover': {
+    border: 'none',
+    padding: '8px',
+  },
+  ':active': {
+    backgroundColor: 'none',
+    border: 'none',
+    padding: '8px',
+  },
+}
+
+type SortMethod = 'RECENT' | 'NAME';
+
 const Sidebar: React.FunctionComponent = () => {
   const location = useLocation();
   const { state } = useAuthState();
-  const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
+  const { data, loading: foldersAreLoading } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [sortMethod, setSortMethod] = useState<SortMethod>('NAME');
   const [sidebarWidth, setSidebarWidth] = useState<number>(250);
-  var [searchFiles, { data: searchData, loading: searchIsLoading, variables: searchVariables }] = useLazyQuery<SearchResult>(SEARCH_FILE);
+  const [searchFiles, { data: searchData, loading: searchIsLoading, variables: searchVariables }] = useLazyQuery<SearchResult>(SEARCH_FILE);
+  const [getFilesByDate, { data: recentFilesData, loading: recentFilesAreLoading }] = useLazyQuery<GetFilesByDateResponse>(GET_FILES_BY_DATE, {
+    fetchPolicy: 'network-only',
+  });
 
   const { x, y, strategy, refs } = useFloating({
     placement: 'bottom-end',
@@ -209,41 +266,6 @@ const Sidebar: React.FunctionComponent = () => {
     onSubmit: handleSearch,
   });
 
-  const searchButtonStyle: CSSProperties = {
-    alignItems: 'center',
-    borderRadius: '4px',
-    color: Colors.isuRed,
-    cursor: 'pointer',
-    fill: Colors.isuRed,
-    height: 'fit-content',
-    justifyContent: 'center',
-    padding: '8px',
-    ':hover': {
-      border: `2px solid ${Colors.isuRed}`,
-      padding: '6px',
-    },
-    ':active': {
-      backgroundColor: Colors.isuRedLight,
-      border: `2px solid ${Colors.isuRedDark}`,
-      padding: '6px',
-    },
-  }
-
-  const searchButtonDisabledStyle: CSSProperties = {
-    color: Colors.neutralActive,
-    cursor: 'default',
-    fill: Colors.neutralActive,
-    ':hover': {
-      border: 'none',
-      padding: '8px',
-    },
-    ':active': {
-      backgroundColor: 'none',
-      border: 'none',
-      padding: '8px',
-    },
-  }
-
   const dragHandler = (e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
 
@@ -265,16 +287,57 @@ const Sidebar: React.FunctionComponent = () => {
     document.body.addEventListener("mouseup", onMouseUp, { once: true });
   }
 
-  const handleAlphabeticSort = async () => {
+  const handleAlphabeticSort = () => {
     setIsOpen(false);
-
-    // add alphabetical sort stuff here
+    setSortMethod('NAME');
   }
 
-  const handleNumericSort = async () => {
+  const handleNumericSort = () => {
     setIsOpen(false);
+    setSortMethod('RECENT');
+    getFilesByDate();
+  }
 
-    // add numeric sort stuff here
+  const getFoldersAndFiles = () => {
+    if (sortMethod === 'NAME') {
+      if (foldersAreLoading) {
+        return (
+          <View container justifyContent='center'>
+            <LoadingSpinner size='small' />
+          </View>
+        );
+      }
+
+      return (
+        data?.folders.map((folder, index) => {
+          return (
+            <div key={index}>
+              <SidebarFolder folder={folder}></SidebarFolder>
+            </div>
+          );
+        })
+      );
+    } else if (sortMethod === 'RECENT') {
+      if (recentFilesAreLoading) {
+        return (
+          <View container justifyContent='center'>
+            <LoadingSpinner size='small' />
+          </View>
+        );
+      }
+
+      return (
+        recentFilesData?.listFilesByDate.map((file, index) => {
+          return (
+            <Link to={'/file/' + file.id} className={css(createStyle({ textDecoration: 'none', userSelect: 'none', ...(location.pathname === `/file/${file.id}` ? fileLinkSelected : {}) }))} key={index}>
+              <Paragraph style={{ ...fileLinkStyle, fontSize: '14px', marginLeft: '0' }}>{file.name}</Paragraph>
+            </Link>
+          );
+        })
+      );
+    }
+
+    return null;
   }
 
   return (
@@ -297,15 +360,15 @@ const Sidebar: React.FunctionComponent = () => {
             isOpen &&
             <div ref={refs.setFloating} className={css(styles.sortPopupContainer, createStyle({ position: strategy, top: y ?? 0, left: x ?? 0, width: 'max-content' }))}>
               <div className={css(styles.popupAction)} onClick={handleAlphabeticSort}>
-                <View container flexDirection='row' gap='4px'>
+                <View container flexDirection='row' alignItems='center' gap='8px'>
+                  {sortMethod === 'NAME' ? <FaCheck style={{ width: '12px' }} /> : <span style={{ width: '12px' }}></span>}
                   <Paragraph>Alphabetical</Paragraph>
-                  <FaSortAlphaDown />
                 </View>
               </div>
               <div className={css(styles.popupAction)} onClick={handleNumericSort}>
-                <View container flexDirection='row' gap='4px'>
+                <View container flexDirection='row' alignItems='center' gap='8px'>
+                  {sortMethod === 'RECENT' ? <FaCheck style={{ width: '12px' }} /> : <span style={{ width: '12px' }}></span>}
                   <Paragraph>Recently Updated</Paragraph>
-                  <FaSortNumericDown />
                 </View>
               </div>
             </div>
@@ -314,13 +377,8 @@ const Sidebar: React.FunctionComponent = () => {
       </View>
 
       <View container flexDirection='column' gap='4px' height='100%' padding='8px 0 8px 8px' style={{ overflow: 'auto' }}>
-        {((!searchData && !searchIsLoading) || searchForm.values.search !== searchVariables?.query) ? data?.folders.map((folder, index) => {
-          return (
-            <div key={index}>
-              <SidebarFolder folder={folder}></SidebarFolder>
-            </div>
-          );
-        })
+        {((!searchData && !searchIsLoading) || searchForm.values.search !== searchVariables?.query) ?
+          getFoldersAndFiles()
           :
           (searchIsLoading) ?
             <View container justifyContent='center'>
