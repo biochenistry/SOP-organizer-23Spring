@@ -179,7 +179,7 @@ export default function FileView() {
         </View>
       </View>
 
-      <View container flexGrow={1} height='100%' style={{ height: '100%', overflowY: 'scroll', overflowX: 'hidden', 'user-select': 'none' }}>
+      <View container flexGrow={1} height='100%' style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden', 'user-select': 'none' }}>
         <FileEmbed docId={fileId} isEditing={isEditing} scale={zoom} />
       </View>
     </View>

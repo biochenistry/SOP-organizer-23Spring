@@ -61,6 +61,16 @@ func (r *queryResolver) Search(ctx context.Context, query string) ([]*model.File
 	return results, nil
 }
 
+// ListFilesByDate is the resolver for the listFilesByDate field.
+func (r *queryResolver) ListFilesByDate(ctx context.Context) ([]*model.File, error) {
+	files, err := r.FileService.ListFilesByDate(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
+}
+
 // Folder returns generated.FolderResolver implementation.
 func (r *Resolver) Folder() generated.FolderResolver { return &folderResolver{r} }
 

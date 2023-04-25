@@ -73,13 +73,14 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		All     func(childComplexity int) int
-		File    func(childComplexity int, id string) int
-		Folder  func(childComplexity int, id string) int
-		Folders func(childComplexity int) int
-		Me      func(childComplexity int) int
-		Search  func(childComplexity int, query string) int
-		User    func(childComplexity int, userID string) int
+		All             func(childComplexity int) int
+		File            func(childComplexity int, id string) int
+		Folder          func(childComplexity int, id string) int
+		Folders         func(childComplexity int) int
+		ListFilesByDate func(childComplexity int) int
+		Me              func(childComplexity int) int
+		Search          func(childComplexity int, query string) int
+		User            func(childComplexity int, userID string) int
 	}
 
 	SearchResult struct {
@@ -117,6 +118,7 @@ type QueryResolver interface {
 	Folder(ctx context.Context, id string) (*model.Folder, error)
 	File(ctx context.Context, id string) (*model.File, error)
 	Search(ctx context.Context, query string) ([]*model.File, error)
+	ListFilesByDate(ctx context.Context) ([]*model.File, error)
 	Me(ctx context.Context) (*model.User, error)
 	All(ctx context.Context) ([]*model.User, error)
 	User(ctx context.Context, userID string) (*model.User, error)
@@ -337,6 +339,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Folders(childComplexity), true
 
+	case "Query.listFilesByDate":
+		if e.complexity.Query.ListFilesByDate == nil {
+			break
+		}
+
+		return e.complexity.Query.ListFilesByDate(childComplexity), true
+
 	case "Query.me":
 		if e.complexity.Query.Me == nil {
 			break
@@ -530,6 +539,11 @@ var sources = []*ast.Source{
     Searches all folders for files with titles or text content containing the given string
     """
     search(query: String!): [File]
+
+    """
+    Lists all files sorted by most recently modified to least recent 
+    """
+    listFilesByDate: [File]
 }
 
 """
@@ -2108,6 +2122,58 @@ func (ec *executionContext) fieldContext_Query_search(ctx context.Context, field
 	if fc.Args, err = ec.field_Query_search_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_listFilesByDate(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_listFilesByDate(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ListFilesByDate(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.File)
+	fc.Result = res
+	return ec.marshalOFile2ᚕᚖgitᚗlasᚗiastateᚗeduᚋSeniorDesignComSᚋ2023sprᚋsopᚋgraphᚋmodelᚐFile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_listFilesByDate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "created":
+				return ec.fieldContext_File_created(ctx, field)
+			case "lastUpdated":
+				return ec.fieldContext_File_lastUpdated(ctx, field)
+			case "lastModifiedBy":
+				return ec.fieldContext_File_lastModifiedBy(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -4885,6 +4951,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_search(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "listFilesByDate":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_listFilesByDate(ctx, field)
 				return res
 			}
 

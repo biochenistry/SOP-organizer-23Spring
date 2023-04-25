@@ -13,7 +13,8 @@ import useForm from '../Form/useForm';
 import { ROOT_FOLDER_ID } from '../..';
 import { createStyle } from '../../util/createStyle';
 import LoadingSpinner from '../LoadingSpinner';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaSortNumericDown, FaSortAmountDownAlt, FaSortAlphaDown } from 'react-icons/fa';
+import { useFloating, offset } from '@floating-ui/react';
 
 const SEARCH_FILE = gql`
 query searchFiles($query: String!) {
@@ -126,6 +127,28 @@ const styles = StyleSheet.create({
       width: '100px',
     },
   },
+  popupAction: {
+    padding: '4px',
+    ':hover': {
+      backgroundColor: Colors.neutralHover,
+      cursor: 'pointer',
+    },
+    ':active': {
+      backgroundColor: Colors.neutralActive,
+    },
+  },
+  sortPopupContainer: {
+    backgroundColor: '#ffffff',
+    borderColor: Colors.harlineGrey,
+    borderRadius: '4px',
+    borderStyle: 'solid',
+    borderWidth: '1px',
+    color: Colors.textPrimary,
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '4px 0',
+    zIndex: 10,
+  },
 });
 
 const sidebarContainerStyle: CSSProperties = {
@@ -160,8 +183,14 @@ const Sidebar: React.FunctionComponent = () => {
   const location = useLocation();
   const { state } = useAuthState();
   const { data } = useQuery<GetAllFoldersResponse>(GET_ALL_FOLDERS);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [sidebarWidth, setSidebarWidth] = useState<number>(250);
   var [searchFiles, { data: searchData, loading: searchIsLoading, variables: searchVariables }] = useLazyQuery<SearchResult>(SEARCH_FILE);
+
+  const { x, y, strategy, refs } = useFloating({
+    placement: 'bottom-end',
+    middleware: [offset(4)],
+  });
 
   const handleSearch = async (values: SearchInput) => {
     if (values.search === '' || values.search === undefined) return;
@@ -236,6 +265,18 @@ const Sidebar: React.FunctionComponent = () => {
     document.body.addEventListener("mouseup", onMouseUp, { once: true });
   }
 
+  const handleAlphabeticSort = async () => {
+    setIsOpen(false);
+
+    // add alphabetical sort stuff here
+  }
+
+  const handleNumericSort = async () => {
+    setIsOpen(false);
+
+    // add numeric sort stuff here
+  }
+
   return (
     <View container flexDirection='column' justifyContent='space-between' style={{ ...sidebarContainerStyle, width: `${sidebarWidth}px`, maxWidth: `${sidebarWidth}px`, minWidth: `${sidebarWidth}px` }}>
 
@@ -248,11 +289,31 @@ const Sidebar: React.FunctionComponent = () => {
             <View container style={{ ...searchButtonStyle, ...(searchForm.hasError ? searchButtonDisabledStyle : {}) }} onClick={() => { handleSearch(searchForm.values) }}>
               <FaSearch />
             </View>
+            <div onClick={() => { setIsOpen(!isOpen) }} ref={refs.setReference}>
+              <FaSortAmountDownAlt style={{ cursor: 'pointer' }} />
+            </div>
           </View>
+          {
+            isOpen &&
+            <div ref={refs.setFloating} className={css(styles.sortPopupContainer, createStyle({ position: strategy, top: y ?? 0, left: x ?? 0, width: 'max-content' }))}>
+              <div className={css(styles.popupAction)} onClick={handleAlphabeticSort}>
+                <View container flexDirection='row' gap='4px'>
+                  <Paragraph>Alphabetical</Paragraph>
+                  <FaSortAlphaDown />
+                </View>
+              </div>
+              <div className={css(styles.popupAction)} onClick={handleNumericSort}>
+                <View container flexDirection='row' gap='4px'>
+                  <Paragraph>Recently Updated</Paragraph>
+                  <FaSortNumericDown />
+                </View>
+              </div>
+            </div>
+          }
         </Form>
       </View>
 
-      <View container flexDirection='column' gap='4px' height='100%' padding='8px 0 8px 8px' style={{ overflow: 'scroll' }}>
+      <View container flexDirection='column' gap='4px' height='100%' padding='8px 0 8px 8px' style={{ overflow: 'auto' }}>
         {((!searchData && !searchIsLoading) || searchForm.values.search !== searchVariables?.query) ? data?.folders.map((folder, index) => {
           return (
             <div key={index}>
@@ -301,5 +362,3 @@ const Sidebar: React.FunctionComponent = () => {
   )
 }
 export default Sidebar;
-
-
