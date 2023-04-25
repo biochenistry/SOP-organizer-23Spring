@@ -52,6 +52,9 @@ const styles = StyleSheet.create({
     padding: '4px 0',
     zIndex: 10,
   },
+  pointer: {
+    cursor: 'pointer'
+  }
 });
 
 function Header() {
@@ -103,7 +106,9 @@ function Header() {
         style={{ backgroundColor: Colors.isuRed, borderBottom: `4px solid ${Colors.isuYellow}`, color: '#ffffff' }}
       >
 
-        <Heading text='SOP Organizer' renderAs='h2' />
+        <a className={css(styles.pointer)} onClick={() =>  window.location.reload()}>
+          <Heading text='SOP Organizer' renderAs='h2' />
+        </a>
 
 
         <View container alignItems='center' gap='16px'>
@@ -111,7 +116,7 @@ function Header() {
             <>
               <Paragraph style={{ color: '#ffffff' }}>Welcome, {state.user.firstName}</Paragraph>
               <div onClick={() => { setIsOpen(!isOpen) }} ref={refs.setReference}>
-                <FaUserCircle style={{ cursor: 'pointer' }} size={32} />
+                <FaUserCircle className={css(styles.pointer)} size={32} />
               </div>
             </>
             :
