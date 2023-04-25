@@ -295,7 +295,9 @@ const Sidebar: React.FunctionComponent = () => {
   const handleNumericSort = () => {
     setIsOpen(false);
     setSortMethod('RECENT');
-    getFilesByDate();
+    getFilesByDate({
+      fetchPolicy: 'network-only',
+    });
   }
 
   const getFoldersAndFiles = () => {
