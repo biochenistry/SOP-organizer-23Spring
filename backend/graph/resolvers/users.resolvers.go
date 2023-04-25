@@ -95,14 +95,30 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (bool,
 }
 
 // ChangePassword is the resolver for the changePassword field.
-func (r *mutationResolver) ChangePassword(ctx context.Context, userID string, newPassword string) (bool, error) {
+func (r *mutationResolver) ChangePassword(ctx context.Context, currentPassword string, newPassword string) (bool, error) {
 	authUser := auth.GetUserFromContext(ctx)
 	if authUser == nil {
 		return false, errs.NewUnauthorizedError(ctx, "You must login to change your password.")
 	}
 
-	if authUser.ID != userID && !auth.IsAdmin(authUser) {
-		return false, errs.NewForbiddenError(ctx, "You do not have permission to change other users' passwords.")
+	_, err := r.UserService.ValidateLogin(ctx, authUser.Username, currentPassword)
+	if err != nil {
+		return false, errs.NewInputError(ctx, "Current password is incorrect.")
+	}
+
+	err = r.UserService.ChangeUserPassword(ctx, authUser.ID, newPassword)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+// AdminChangePassword is the resolver for the adminChangePassword field.
+func (r *mutationResolver) AdminChangePassword(ctx context.Context, userID string, newPassword string) (bool, error) {
+	authUser := auth.GetUserFromContext(ctx)
+	if authUser == nil || !auth.IsAdmin(authUser) {
+		return false, errs.NewUnauthorizedError(ctx, "You do not have permission to change other users' passwords.")
 	}
 
 	err := r.UserService.ChangeUserPassword(ctx, userID, newPassword)

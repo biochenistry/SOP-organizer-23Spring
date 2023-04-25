@@ -61,13 +61,14 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		ChangePassword func(childComplexity int, userID string, newPassword string) int
-		ChangeUserRole func(childComplexity int, userID string, admin bool) int
-		CreateUser     func(childComplexity int, firstname string, lastname string, username string, password string, admin bool) int
-		DeleteUser     func(childComplexity int, userID string) int
-		Login          func(childComplexity int, username string, password string) int
-		Logout         func(childComplexity int) int
-		UpdateUser     func(childComplexity int, userID string, firstname string, lastname string) int
+		AdminChangePassword func(childComplexity int, userID string, newPassword string) int
+		ChangePassword      func(childComplexity int, currentPassword string, newPassword string) int
+		ChangeUserRole      func(childComplexity int, userID string, admin bool) int
+		CreateUser          func(childComplexity int, firstname string, lastname string, username string, password string, admin bool) int
+		DeleteUser          func(childComplexity int, userID string) int
+		Login               func(childComplexity int, username string, password string) int
+		Logout              func(childComplexity int) int
+		UpdateUser          func(childComplexity int, userID string, firstname string, lastname string) int
 	}
 
 	Query struct {
@@ -106,7 +107,8 @@ type MutationResolver interface {
 	ChangeUserRole(ctx context.Context, userID string, admin bool) (*model.User, error)
 	UpdateUser(ctx context.Context, userID string, firstname string, lastname string) (*model.User, error)
 	DeleteUser(ctx context.Context, userID string) (bool, error)
-	ChangePassword(ctx context.Context, userID string, newPassword string) (bool, error)
+	ChangePassword(ctx context.Context, currentPassword string, newPassword string) (bool, error)
+	AdminChangePassword(ctx context.Context, userID string, newPassword string) (bool, error)
 }
 type QueryResolver interface {
 	Folders(ctx context.Context) ([]*model.Folder, error)
@@ -192,6 +194,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Folder.Name(childComplexity), true
 
+	case "Mutation.adminChangePassword":
+		if e.complexity.Mutation.AdminChangePassword == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_adminChangePassword_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AdminChangePassword(childComplexity, args["userId"].(string), args["newPassword"].(string)), true
+
 	case "Mutation.changePassword":
 		if e.complexity.Mutation.ChangePassword == nil {
 			break
@@ -202,7 +216,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ChangePassword(childComplexity, args["userId"].(string), args["newPassword"].(string)), true
+		return e.complexity.Mutation.ChangePassword(childComplexity, args["currentPassword"].(string), args["newPassword"].(string)), true
 
 	case "Mutation.changeUserRole":
 		if e.complexity.Mutation.ChangeUserRole == nil {
@@ -601,9 +615,14 @@ extend type Mutation {
     deleteUser(userId: ID!): Boolean!
 
     """
-    Changes the password for the user with the given ID. Admin users can use this to change any user's password. Regular users can only change their own password.
+    Changes the password for the current user
     """
-    changePassword(userId: ID!, newPassword: String!): Boolean!
+    changePassword(currentPassword: String!, newPassword: String!): Boolean!
+
+    """
+    Changes the password for the user with the given ID. Available to admin users only.
+    """
+    adminChangePassword(userId: ID!, newPassword: String!): Boolean!
 }
 
 type User {
@@ -649,7 +668,7 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_changePassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_adminChangePassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -661,6 +680,30 @@ func (ec *executionContext) field_Mutation_changePassword_args(ctx context.Conte
 		}
 	}
 	args["userId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["newPassword"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newPassword"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["newPassword"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_changePassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["currentPassword"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currentPassword"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["currentPassword"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["newPassword"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newPassword"))
@@ -1651,7 +1694,7 @@ func (ec *executionContext) _Mutation_changePassword(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ChangePassword(rctx, fc.Args["userId"].(string), fc.Args["newPassword"].(string))
+		return ec.resolvers.Mutation().ChangePassword(rctx, fc.Args["currentPassword"].(string), fc.Args["newPassword"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1685,6 +1728,60 @@ func (ec *executionContext) fieldContext_Mutation_changePassword(ctx context.Con
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_changePassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_adminChangePassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_adminChangePassword(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AdminChangePassword(rctx, fc.Args["userId"].(string), fc.Args["newPassword"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_adminChangePassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_adminChangePassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -4590,6 +4687,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_changePassword(ctx, field)
+			})
+
+		case "adminChangePassword":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_adminChangePassword(ctx, field)
 			})
 
 		default:
