@@ -149,7 +149,7 @@ export default function AccountSettings() {
                 {(passwordForm.values.newPassword !== passwordForm.values.confirmNewPassword) && <Paragraph style={{ color: Colors.error }}>Passwords do not match</Paragraph>}
               </View>
               <View container alignItems='center' flexDirection='row' gap='16px'>
-                <Button variant='primary' type='submit' label='Change Password' style={{ maxWidth: 'fit-content' }} isLoading={changePasswordIsLoading} disabled={passwordForm.hasError} />
+                <Button variant='primary' type='submit' label='Change Password' style={{ maxWidth: 'fit-content' }} isLoading={changePasswordIsLoading} disabled={passwordForm.hasError || (passwordForm.values.newPassword !== passwordForm.values.confirmNewPassword)} />
                 {(!changePasswordIsLoading && changePasswordData) && <Paragraph style={{ color: Colors.textSecondary }}>Password changed!</Paragraph>}
               </View>
             </View>

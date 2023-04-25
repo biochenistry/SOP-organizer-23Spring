@@ -94,6 +94,30 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (bool,
 	return true, nil
 }
 
+// ResetPassword is the resolver for the resetPassword field.
+func (r *mutationResolver) ResetPassword(ctx context.Context, newPassword string) (bool, error) {
+	authUser := auth.GetUserFromContext(ctx)
+	if authUser == nil {
+		return false, errs.NewUnauthorizedError(ctx, "You must login to reset your password.")
+	}
+
+	user, err := r.UserService.GetUserById(ctx, authUser.ID)
+	if err != nil {
+		return false, err
+	}
+
+	if user.ShouldForcePasswordChange == nil || !*user.ShouldForcePasswordChange {
+		return false, errs.NewInputError(ctx, "You do not have a pending password reset.")
+	}
+
+	err = r.UserService.ChangeUserPassword(ctx, authUser.ID, newPassword, false)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 // ChangePassword is the resolver for the changePassword field.
 func (r *mutationResolver) ChangePassword(ctx context.Context, currentPassword string, newPassword string) (bool, error) {
 	authUser := auth.GetUserFromContext(ctx)
@@ -106,7 +130,7 @@ func (r *mutationResolver) ChangePassword(ctx context.Context, currentPassword s
 		return false, errs.NewInputError(ctx, "Current password is incorrect.")
 	}
 
-	err = r.UserService.ChangeUserPassword(ctx, authUser.ID, newPassword)
+	err = r.UserService.ChangeUserPassword(ctx, authUser.ID, newPassword, false)
 	if err != nil {
 		return false, err
 	}
@@ -121,7 +145,7 @@ func (r *mutationResolver) AdminChangePassword(ctx context.Context, userID strin
 		return false, errs.NewUnauthorizedError(ctx, "You do not have permission to change other users' passwords.")
 	}
 
-	err := r.UserService.ChangeUserPassword(ctx, userID, newPassword)
+	err := r.UserService.ChangeUserPassword(ctx, userID, newPassword, true)
 	if err != nil {
 		return false, err
 	}

@@ -23,11 +23,11 @@ type UserService interface {
 	// Deletes an existing user account
 	DeleteUser(ctx context.Context, id string) error
 
-	// Change's amn existing users role
+	// Changes an existing user's role
 	ChangeUserRole(ctx context.Context, id string, admin bool) error
 
-	// Change's an existing users password
-	ChangeUserPassword(ctx context.Context, id string, newPassword string) error
+	// Changes an existing user's password
+	ChangeUserPassword(ctx context.Context, id string, newPassword string, requireChangeOnLogin bool) error
 
 	// Verifies that the provided username and password combination is associated with a user. Returns the ID of the associated user if the login information is correct
 	ValidateLogin(ctx context.Context, username string, password string) (*string, error)

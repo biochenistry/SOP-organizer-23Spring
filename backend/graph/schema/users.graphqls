@@ -26,6 +26,11 @@ extend type Mutation {
     deleteUser(userId: ID!): Boolean!
 
     """
+    Resets the current user's password. This can only be used if the user was just created or an admin has given them a temporary password.
+    """
+    resetPassword(newPassword: String!): Boolean!
+
+    """
     Changes the password for the current user
     """
     changePassword(currentPassword: String!, newPassword: String!): Boolean!
