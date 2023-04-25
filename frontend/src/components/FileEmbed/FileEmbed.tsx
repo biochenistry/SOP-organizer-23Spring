@@ -33,7 +33,7 @@ const FileEmbed: React.FC<FileEmbedProps> = ({
   }
 
   return (
-    <View container style={{ height: '100%', maxHeight: '100%', overflowY: 'scroll', width: '100%', transform: `scale(${scale || 1})`, marginTop: `${(((scale || 1)-1) * 420)}px` }}>
+    <View container style={{ height: '100%', maxHeight: '100%', overflowY: 'auto', width: '100%', transform: `scale(${scale || 1})`, marginTop: `${(((scale || 1)-1) * 420)}px` }}>
       <iframe
         className={css(styles.defaultFileEmbed)}
         src={'https://docs.google.com/document/d/' + docId + '/preview'}
