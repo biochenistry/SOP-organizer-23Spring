@@ -95,6 +95,12 @@ function Header() {
     navigate('/');
   }
 
+  const reloadAndGoHome = () => {
+    // navigate user to root page
+    navigate('/')
+    window.location.reload();
+  }
+
   return (
     <div id='header'>
       <View
@@ -106,7 +112,7 @@ function Header() {
         style={{ backgroundColor: Colors.isuRed, borderBottom: `4px solid ${Colors.isuYellow}`, color: '#ffffff' }}
       >
 
-        <a className={css(styles.pointer)} onClick={() =>  window.location.reload()}>
+        <a className={css(styles.pointer)} onClick={reloadAndGoHome}>
           <Heading text='SOP Organizer' renderAs='h2' />
         </a>
 
