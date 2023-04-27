@@ -42,10 +42,11 @@ export default function FileEmbed(props: FileEmbedProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const docId = props.docId;
+  const isEditing = props.isEditing;
 
   useEffect(() => {
     setIsLoading(true);
-  }, [docId]);
+  }, [docId, isEditing]);
 
   const onDocumentLoadSuccess = (data: { numPages: number; }) => {
     setNumPages(data.numPages);
