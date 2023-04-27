@@ -417,7 +417,10 @@ const Sidebar: React.FunctionComponent = () => {
             </Link>
           }
         </View>
-      }
+      } 
+      <View container style={{ width: '100%', justifyContent: 'center'}} padding='4px'>
+        <Paragraph style={{fontSize: '12px', color: Colors.textSecondary}}>About this site...</Paragraph>
+      </View>
     </View>
   )
 }
