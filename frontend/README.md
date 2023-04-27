@@ -53,11 +53,11 @@ Transfer the build directory to the remote server using FileZilla. Make sure it 
 
 ### Run app
 
-Navigate in terminal to frontend folder
+Navigate in terminal to frontend folder.
 
-'npm install' command installs all dependencies
+'npm install' command installs all dependencies.
 
-'npm start' will run the app on the frontend
+'npm start' will run the app on the frontend.
 
 ### Organization
 
