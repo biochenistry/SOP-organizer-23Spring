@@ -1,7 +1,8 @@
 import { css, StyleSheet } from 'aphrodite';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import View from '../View/View';
 import { Document, Page } from 'react-pdf/dist/esm/entry.webpack5.js';
+import "react-pdf/dist/esm/Page/TextLayer.css";
 import LoadingSpinner from '../LoadingSpinner';
 import { Colors } from '../GlobalStyles';
 
@@ -35,6 +36,7 @@ type FileEmbedProps = {
   docId: string;
   isEditing: boolean;
   scale?: number;
+  searchText?: string;
 }
 
 export default function FileEmbed(props: FileEmbedProps) {
@@ -52,6 +54,11 @@ export default function FileEmbed(props: FileEmbedProps) {
     setNumPages(data.numPages);
     setIsLoading(false);
   }
+
+  const textRenderer = useCallback(
+    (textItem: any) => highlightPattern(textItem.str, props.searchText || ''),
+    [props.searchText]
+  );
 
   // auto append either /edit or /preview depending on whether user has privilege or not
   if (props.isEditing) {
@@ -80,8 +87,9 @@ export default function FileEmbed(props: FileEmbedProps) {
               key={`page_${index + 1}`}
               pageNumber={index + 1}
               scale={props.scale ? (props.scale + 0) : 2}
-              renderTextLayer={false}
+              renderTextLayer={true}
               renderAnnotationLayer={false}
+              customTextRenderer={textRenderer}
               className={css(styles.page)}
             />
           ),
@@ -89,4 +97,8 @@ export default function FileEmbed(props: FileEmbedProps) {
       </Document>
     </View>
   );
+}
+
+function highlightPattern(text: string, pattern: string) {
+  return text.replace(pattern, (value) => `<mark>${value}</mark>`);
 }
