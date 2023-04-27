@@ -72,7 +72,7 @@ export default function FileEmbed(props: FileEmbedProps) {
   }
 
   return (
-    <View container style={{ height: '100%', justifyContent: 'center', maxHeight: '100%', overflowY: 'auto', width: '100%' }}>
+    <View container style={{ backgroundColor: '#f7f7f7', height: '100%', justifyContent: 'center', maxHeight: '100%', overflowY: 'auto', width: '100%' }}>
       {isLoading &&
         <View container style={{ alignItems: 'center', height: '100%', justifyContent: 'center', width: '100%' }}>
           <LoadingSpinner size='large' />
