@@ -1,4 +1,4 @@
-import { css, StyleSheet } from 'aphrodite';
+import { css, CSSProperties, StyleSheet } from 'aphrodite';
 import React, { ReactElement, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import ActionItem from './ActionItem';
@@ -11,6 +11,8 @@ export type ActionMenuProps = {
   label?: string;
   children?: React.ReactNode;
   alignment?: 'left' | 'right';
+  hideIcon?: boolean;
+  popupStyle?: CSSProperties;
   id?: string;
   testId?: string;
 }
@@ -103,6 +105,9 @@ const customStyles = StyleSheet.create({
       fill: Colors.isuRed,
     },
   },
+  hidden: {
+    display: 'none',
+  }
 });
 
 /**
@@ -180,7 +185,7 @@ export default function ActionMenu(props: ActionMenuProps) {
     <>
       <button id={props.id} onClick={handleClick} className={css(customStyles.shared, customStyles.buttonInteractions)} ref={refs.setReference}>
         {props.label ?
-          (<><span className={css(customStyles.sharedLabel, customStyles.interactions, createStyle({ fontSize: '16px', textAlign: 'left' }))}>{props.label}</span><FaChevronDown /></>)
+          (<><span className={css(customStyles.sharedLabel, customStyles.interactions, createStyle({ fontSize: '16px', textAlign: 'left' }))}>{props.label}</span><FaChevronDown className={css(props.hideIcon === true && customStyles.hidden)} /></>)
           :
           <FaEllipsisV />
         }
@@ -189,7 +194,7 @@ export default function ActionMenu(props: ActionMenuProps) {
       {isOpen && (
         ReactDOM.createPortal(
           <div ref={refs.setFloating} className={css(createStyle({ position: strategy, top: y ?? 0, left: x ?? 0, width: 'max-content' }))}>
-            <div className={css(customStyles.view, customStyles.popup, createStyle({ boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.1)' }))}>
+            <div className={css(customStyles.view, customStyles.popup, createStyle({ boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.1)' }), createStyle(props.popupStyle))}>
               {mapChildren(props.children)}
             </div>
           </div>, host)
