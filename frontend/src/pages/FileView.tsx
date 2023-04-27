@@ -91,14 +91,15 @@ const zoomButtonDisabledStyle: CSSProperties = {
   },
 }
 
-const MAX_ZOOM = 1.7;
-const MIN_ZOOM = 1.0;
+const MAX_ZOOM = 2.5;
+const MIN_ZOOM = 1.0; 
+const DEFAULT_ZOOM = 1.5;
 
 export default function FileView() {
   const navigate = useNavigate();
   const { fileId } = useParams();
   const { state } = useAuthState();
-  const [zoom, setZoom] = useState<number>(1);
+  const [zoom, setZoom] = useState<number>(DEFAULT_ZOOM);
   const { data: fileData, loading: fileIsLoading, refetch: refetchFile } = useQuery<GetFileDetailsResponse>(GET_FILE_DETAILS, {
     variables: {
       id: fileId,
@@ -143,6 +144,16 @@ export default function FileView() {
     );
   }
 
+  const getZoomLabel = () => {
+    if (zoom == DEFAULT_ZOOM) {
+      return 100;
+    } else if (zoom > DEFAULT_ZOOM)  {
+      return Math.round((1 + Math.abs(DEFAULT_ZOOM - zoom)) * 100);
+    } else {
+      return Math.round((1 - Math.abs(DEFAULT_ZOOM - zoom)) * 100);
+    }
+  }
+
   return (
     <View container width='100%' flexDirection='column' height='100%' >
 
@@ -160,7 +171,7 @@ export default function FileView() {
               <View container style={{ ...zoomButtonStyle, ...(zoom <= MIN_ZOOM ? zoomButtonDisabledStyle : {}) }} onClick={handleZoomOut}>
                 <FaMinus />
               </View>
-              <Paragraph style={{ color: Colors.textSecondary }}>{Math.floor(zoom * 100)}%</Paragraph>
+              <Paragraph style={{ color: Colors.textSecondary }}>{getZoomLabel()}%</Paragraph>
               <View container style={{ ...zoomButtonStyle, ...(zoom >= MAX_ZOOM ? zoomButtonDisabledStyle : {}) }} onClick={handleZoomIn}>
                 <FaPlus />
               </View>
