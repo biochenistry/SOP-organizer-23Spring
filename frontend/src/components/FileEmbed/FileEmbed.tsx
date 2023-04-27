@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import View from '../View/View';
 import { Document, Page } from 'react-pdf/dist/esm/entry.webpack5.js';
 import "react-pdf/dist/esm/Page/TextLayer.css";
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import LoadingSpinner from '../LoadingSpinner';
 import { Colors } from '../GlobalStyles';
 
@@ -79,7 +80,7 @@ export default function FileEmbed(props: FileEmbedProps) {
         </View>
       }
 
-      <Document onLoadSuccess={onDocumentLoadSuccess} file={'https://docs.google.com/document/d/' + props.docId + '/export?format=pdf'} className={css(isLoading && styles.hidden)}>
+      <Document onLoadSuccess={onDocumentLoadSuccess} file={'https://docs.google.com/document/d/' + props.docId + '/export?format=pdf'} className={css(isLoading && styles.hidden)} externalLinkTarget='_blank' >
         {Array.from(
           new Array(numPages),
           (_, index) => (
@@ -88,7 +89,7 @@ export default function FileEmbed(props: FileEmbedProps) {
               pageNumber={index + 1}
               scale={props.scale ? (props.scale + 0) : 2}
               renderTextLayer={true}
-              renderAnnotationLayer={false}
+              renderAnnotationLayer={true}
               customTextRenderer={textRenderer}
               className={css(styles.page)}
             />
