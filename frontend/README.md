@@ -51,13 +51,16 @@ Build the application using `npm run build`
 
 Transfer the build directory to the remote server using FileZilla. Make sure it is in the same directory as the Go executable.
 
-### Run app
+### Run frontend
+
+Note: The backend has to be running in order to start the frontend.  
+See how to run the backend in the backend README.
 
 Navigate in terminal to frontend folder.
 
-'npm install' command installs all dependencies.
+`npm install` command installs all dependencies.
 
-'npm start' will run the app on the frontend.
+`npm start` will run the app on the frontend.
 
 ### Organization
 
