@@ -50,3 +50,23 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 Build the application using `npm run build`
 
 Transfer the build directory to the remote server using FileZilla. Make sure it is in the same directory as the Go executable.
+
+### Run app
+
+Navigate in terminal to frontend folder
+
+'npm install' command installs all dependencies
+
+'npm start' will run the app on the frontend
+
+### Organization
+
+All code files are in 'src' folder, contains folders 'components', 'pages', 'util', and 'App.tsx'.  
+
+All react components, re-used pieces of code, are located in 'components' folder.
+
+The different web page components are located in the 'pages' folder.
+
+The 'util' folder contains a styling script.
+
+'App.tsx' is where are App function is located.
