@@ -1,5 +1,5 @@
 import { css, StyleSheet } from 'aphrodite';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import View from '../View/View';
 import { Document, Page } from 'react-pdf/dist/esm/entry.webpack5.js';
 import "react-pdf/dist/esm/Page/TextLayer.css";
@@ -46,10 +46,44 @@ export default function FileEmbed(props: FileEmbedProps) {
 
   const docId = props.docId;
   const isEditing = props.isEditing;
+  const scale = props.scale
 
   useEffect(() => {
     setIsLoading(true);
   }, [docId, isEditing]);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const hidePageCanvas = useCallback(() => {
+    const canvases = containerRef.current?.querySelectorAll('canvas');
+
+    if (canvases) {
+      for (let i = 0; i < canvases.length; i++) {
+        canvases[i].style.visibility = 'hidden';
+      }
+    }
+  }, [containerRef]);
+  const showPageCanvas = useCallback((index: number) => {
+    const canvases = containerRef.current?.querySelectorAll('canvas');
+    
+    if (canvases) {
+      canvases[index].style.visibility = 'visible';
+    }
+  }, [containerRef]);
+
+  const onChangeZoom = useCallback(() => {
+    hidePageCanvas();
+  }, [hidePageCanvas]);
+  const onPageRenderSuccess = useCallback((index: number) => {
+    showPageCanvas(index);
+  }, [showPageCanvas]);
+  const onPageRenderError = useCallback((index: number) => {
+    showPageCanvas(index);
+  }, [showPageCanvas]);
+
+  useEffect(() => {
+    onChangeZoom();
+  }, [scale, onChangeZoom]);
 
   const onDocumentLoadSuccess = (data: { numPages: number; }) => {
     setNumPages(data.numPages);
@@ -73,7 +107,7 @@ export default function FileEmbed(props: FileEmbedProps) {
   }
 
   return (
-    <View container style={{ backgroundColor: '#f7f7f7', height: '100%', justifyContent: 'center', maxHeight: '100%', overflowY: 'auto', width: '100%' }}>
+    <View container style={{ backgroundColor: '#f7f7f7', height: '100%', justifyContent: 'center', maxHeight: '100%', overflowY: 'auto', width: '100%' }} innerRef={containerRef}>
       {isLoading &&
         <View container style={{ alignItems: 'center', height: '100%', justifyContent: 'center', width: '100%' }}>
           <LoadingSpinner size='large' />
@@ -92,6 +126,8 @@ export default function FileEmbed(props: FileEmbedProps) {
               renderAnnotationLayer={true}
               customTextRenderer={textRenderer}
               className={css(styles.page)}
+              onRenderSuccess={() => { onPageRenderSuccess(index) }}
+              onRenderError={() => { onPageRenderError(index) }}
             />
           ),
         )}
