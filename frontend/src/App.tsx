@@ -15,6 +15,7 @@ import { gql, useMutation } from '@apollo/client';
 import ModalLauncher from './components/modals/ModalLauncher';
 import TextField from './components/TextField/TextField';
 import { login } from './components/Auth/authStateReducer';
+import DevCredit from './pages/DevCredit';
 
 const RESET_PASSWORD = gql`
 mutation resetPassword($newPassword: String!) {
@@ -84,6 +85,7 @@ function App() {
         <Route path='/users' element={<WithHeaderAndSidebar><UsersList /></WithHeaderAndSidebar>} />
         <Route path='/users/add' element={<WithHeaderAndSidebar><AddUser /></WithHeaderAndSidebar>} />
         <Route path='/account-settings' element={<WithHeaderAndSidebar><AccountSettings /></WithHeaderAndSidebar>} />
+        <Route path='/developer' element={<WithHeaderAndSidebar><DevCredit /></WithHeaderAndSidebar>} />
       </Routes>
     </>
   );
