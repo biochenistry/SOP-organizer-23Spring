@@ -65,9 +65,9 @@ export default function Login() {
     <View container alignItems='center' justifyContent='center' height='100%' width='100%'>
       <View container flexDirection='column' gap='32px' style={{ minWidth: '400px', maxWidth: '600px' }} >
         
-        <View container flexDirection='column' gap='8px'>
-          <Heading text='Welcome Back!' renderAs='h1' />
-          <Paragraph style={{ color: Colors.textSecondary }}>Please login to your account to continue.</Paragraph>
+        <View container flexDirection='column' gap='12px' maxWidth='400px' >
+          <Heading text='You can access all SOPs without logging in.' renderAs='h1' />
+          <Paragraph>Login is restricted to Chen Lab members for editing SOPs.</Paragraph>
         </View>
         
         <Form handleSubmit={loginForm.handleSubmit}>
