@@ -5,6 +5,7 @@ interface ViewProps {
   children?: any,
   container?: boolean,
   style?: CSSProperties;
+  innerRef?: React.LegacyRef<HTMLDivElement> | undefined;
   /****** Container Props ********/
   flexDirection?: 'row' | 'column',
   justifyContent?: | 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'initial' | 'inherit',
@@ -50,6 +51,7 @@ function View({ ...props }: ViewProps) {
     <div
       className={css(styles.default, createStyle(props.style))}
       onClick={props.onClick}
+      ref={props.innerRef}
     >
       {props.children}
     </div>
