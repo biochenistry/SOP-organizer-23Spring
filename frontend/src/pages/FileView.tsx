@@ -90,12 +90,13 @@ const zoomButtonDisabledStyle: CSSProperties = {
 const MAX_ZOOM = 2.5;
 const MIN_ZOOM = 1.0;
 const DEFAULT_ZOOM = 1.5;
+const INITIAL_ZOOM = 2.0;
 
 export default function FileView() {
   const navigate = useNavigate();
   const { fileId } = useParams();
   const { state } = useAuthState();
-  const [zoom, setZoom] = useState<number>(DEFAULT_ZOOM);
+  const [zoom, setZoom] = useState<number>(INITIAL_ZOOM);
   const { data: fileData, loading: fileIsLoading, refetch: refetchFile } = useQuery<GetFileDetailsResponse>(GET_FILE_DETAILS, {
     variables: {
       id: fileId,
