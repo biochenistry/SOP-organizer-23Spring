@@ -55,22 +55,30 @@ export default function FileEmbed(props: FileEmbedProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const hidePageCanvas = useCallback(() => {
-    const canvas = containerRef.current?.querySelector('canvas');
-    if (canvas) canvas.style.visibility = 'hidden';
+    const canvases = containerRef.current?.querySelectorAll('canvas');
+
+    if (canvases) {
+      for (let i = 0; i < canvases.length; i++) {
+        canvases[i].style.visibility = 'hidden';
+      }
+    }
   }, [containerRef]);
-  const showPageCanvas = useCallback(() => {
-    const canvas = containerRef.current?.querySelector('canvas');
-    if (canvas) canvas.style.visibility = 'visible';
+  const showPageCanvas = useCallback((index: number) => {
+    const canvases = containerRef.current?.querySelectorAll('canvas');
+    
+    if (canvases) {
+      canvases[index].style.visibility = 'visible';
+    }
   }, [containerRef]);
 
   const onChangeZoom = useCallback(() => {
     hidePageCanvas();
   }, [hidePageCanvas]);
-  const onPageRenderSuccess = useCallback(() => {
-    showPageCanvas();
+  const onPageRenderSuccess = useCallback((index: number) => {
+    showPageCanvas(index);
   }, [showPageCanvas]);
-  const onPageRenderError = useCallback(() => {
-    showPageCanvas();
+  const onPageRenderError = useCallback((index: number) => {
+    showPageCanvas(index);
   }, [showPageCanvas]);
 
   useEffect(() => {
@@ -118,8 +126,8 @@ export default function FileEmbed(props: FileEmbedProps) {
               renderAnnotationLayer={true}
               customTextRenderer={textRenderer}
               className={css(styles.page)}
-              onRenderSuccess={onPageRenderSuccess}
-              onRenderError={onPageRenderError}
+              onRenderSuccess={() => { onPageRenderSuccess(index) }}
+              onRenderError={() => { onPageRenderError(index) }}
             />
           ),
         )}
