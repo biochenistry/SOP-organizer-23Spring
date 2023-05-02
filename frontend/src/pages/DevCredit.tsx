@@ -2,6 +2,7 @@ import React from 'react';
 import View from '../components/View/View';
 import Heading from '../components/Heading/Heading';
 import Paragraph from '../components/Paragraph/Paragraph';
+import { Link, useLocation } from 'react-router-dom';
 
 export default function DevCredit() {
     return (
@@ -14,6 +15,9 @@ export default function DevCredit() {
                 <Paragraph> Molly Carrick</Paragraph>
                 <Paragraph> Tyler Evans</Paragraph>
                 <Paragraph> Grant Bielecki</Paragraph>
+                <Link to={'https://seniord.cs.iastate.edu/2023-Jan-11/'}>
+                    <Paragraph> Senior Design Website</Paragraph>
+                </Link>
             </View>
         </View>
     );
