@@ -137,6 +137,7 @@ function Header() {
         <div ref={refs.setFloating} className={css(styles.userPopupContainer, createStyle({ position: strategy, top: y ?? 0, left: x ?? 0, width: 'max-content' }))}>
           <div><Link to='/account-settings' className={css(styles.popupActionLink)} onClick={() => { setIsOpen(false); }}><div className={css(styles.popupAction)}><Paragraph>Account Settings</Paragraph></div></Link></div>
           <div className={css(styles.popupAction)} onClick={handleLogout}><Paragraph>Logout</Paragraph></div>
+          <div><Link to='/developer' className={css(styles.popupActionLink)} onClick={() => { setIsOpen(false); }}><div className={css(styles.popupAction)}><Paragraph>About the Website</Paragraph></div></Link></div>
         </div>
       }
     </div>

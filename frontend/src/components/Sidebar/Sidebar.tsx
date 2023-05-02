@@ -417,7 +417,7 @@ const Sidebar: React.FunctionComponent = () => {
             </Link>
           }
         </View>
-      }
+      } 
     </View>
   )
 }
